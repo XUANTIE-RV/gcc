@@ -13276,6 +13276,10 @@ vect_analyze_stmt (vec_info *vinfo,
 			 || relevance == vect_used_only_live));
          break;
 
+      case vect_double_reduction_def:
+	gcc_assert (!bb_vinfo && node);
+	break;
+
       case vect_induction_def:
       case vect_first_order_recurrence:
 	gcc_assert (!bb_vinfo);
