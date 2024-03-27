@@ -2885,6 +2885,23 @@ dot_slp_tree (const char *fname, slp_tree node)
   fclose (f);
 }
 
+DEBUG_FUNCTION void
+dot_slp_tree (const char *fname, const vec<slp_instance> &slp_instances)
+{
+  FILE *f = fopen (fname, "w");
+  fprintf (f, "digraph {\n");
+  fflush (f);
+    {
+      debug_dump_context ctx (f);
+      hash_set<slp_tree> visited;
+      for (auto inst : slp_instances)
+	dot_slp_tree (f, SLP_INSTANCE_TREE (inst), visited);
+    }
+  fflush (f);
+  fprintf (f, "}\n");
+  fclose (f);
+}
+
 /* Dump a slp tree NODE using flags specified in DUMP_KIND.  */
 
 static void
