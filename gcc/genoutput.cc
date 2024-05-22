@@ -112,6 +112,8 @@ static int next_operand_number = 1;
 struct operand_data
 {
   struct operand_data *next;
+  /* Point to the next member with the same hash value in the hash table.  */
+  struct operand_data *eq_next;
   int index;
   const char *predicate;
   const char *constraint;
@@ -127,11 +129,12 @@ struct operand_data
 
 static struct operand_data null_operand =
 {
-  0, 0, "", "", E_VOIDmode, 0, 0, 0, 0, 0
+  0, 0, 0, "", "", E_VOIDmode, 0, 0, 0, 0, 0
 };
 
 static struct operand_data *odata = &null_operand;
 static struct operand_data **odata_end = &null_operand.next;
+static htab_t operand_data_table;
 
 /* Must match the constants in recog.h.  */
 
@@ -180,6 +183,11 @@ static void place_operands (class data *);
 static void process_template (class data *, const char *);
 static void validate_insn_alternatives (class data *);
 static void validate_insn_operands (class data *);
+static hashval_t hash_struct_operand_data (const void *);
+static int eq_struct_operand_data (const void *, const void *);
+static void insert_operand_data (struct operand_data *);
+static struct operand_data *lookup_operand_data (struct operand_data *);
+static void init_operand_data_table (void);
 
 class constraint_data
 {
@@ -532,6 +540,13 @@ compare_operands (struct operand_data *d0, struct operand_data *d1)
 {
   const char *p0, *p1;
 
+  /* On one hand, comparing strings for predicate and constraint
+     is time-consuming, and on the other hand, the probability of
+     different modes is relatively high. Therefore, checking the mode
+     first can speed up the execution of the program.  */
+  if (d0->mode != d1->mode)
+    return 0;
+
   p0 = d0->predicate;
   if (!p0)
     p0 = "";
@@ -548,9 +563,6 @@ compare_operands (struct operand_data *d0, struct operand_data *d1)
   if (!p1)
     p1 = "";
   if (strcmp (p0, p1) != 0)
-    return 0;
-
-  if (d0->mode != d1->mode)
     return 0;
 
   if (d0->strict_low != d1->strict_low)
@@ -577,9 +589,9 @@ place_operands (class data *d)
       return;
     }
 
+  od = lookup_operand_data (&d->operand[0]);
   /* Brute force substring search.  */
-  for (od = odata, i = 0; od; od = od->next, i = 0)
-    if (compare_operands (od, &d->operand[0]))
+  for (i = 0; od; od = od->eq_next, i = 0)
       {
 	od2 = od->next;
 	i = 1;
@@ -605,6 +617,7 @@ place_operands (class data *d)
       *odata_end = od2;
       odata_end = &od2->next;
       od2->index = next_operand_number++;
+      insert_operand_data (od2);
     }
   *odata_end = NULL;
   return;
@@ -1049,6 +1062,7 @@ main (int argc, const char **argv)
   progname = "genoutput";
 
   init_insn_for_nothing ();
+  init_operand_data_table ();
 
   if (!init_rtx_reader_args (argc, argv))
     return (FATAL_EXIT_CODE);
@@ -1223,4 +1237,79 @@ mdep_constraint_len (const char *s, file_location loc, int opno)
 	    "at this point: \"%s\"", s);
   message_at (loc, "note:  in operand %d", opno);
   return 1; /* safe */
+}
+
+/* Helper to Hash a struct operand_data.  */
+
+static hashval_t
+hash_struct_operand_data (const void *ptr)
+{
+  const struct operand_data *d = (const struct operand_data *) ptr;
+  const char *pred, *cons;
+  hashval_t hash;
+
+  pred = d->predicate;
+  if (!pred)
+    pred = "";
+  hash = htab_hash_string (pred);
+
+  cons = d->constraint;
+  if (!cons)
+    cons = "";
+  hash = iterative_hash (cons, strlen (cons), hash);
+
+  hash = iterative_hash_object (d->mode, hash);
+  hash = iterative_hash_object (d->strict_low, hash);
+  hash = iterative_hash_object (d->eliminable, hash);
+  return hash;
+}
+
+/* Equality function of the operand_data hash table.  */
+
+static int
+eq_struct_operand_data (const void *p1, const void *p2)
+{
+  const struct operand_data *d1 = (const struct operand_data *) p1;
+  const struct operand_data *d2 = (const struct operand_data *) p2;
+
+  return compare_operands (const_cast<operand_data *>(d1),
+			   const_cast<operand_data *>(d2));
+}
+
+/* Insert the operand_data variable D into the hash table.
+   If an variable with the same hash value already exists in the hash table,
+   insert the element at the end of the linked list connected
+   through the eq_next member.  */
+
+static void
+insert_operand_data (struct operand_data *d)
+{
+  void **slot = htab_find_slot (operand_data_table, d, INSERT);
+  if (*slot)
+    {
+      struct operand_data *last = (struct operand_data *) *slot;
+      while (last->eq_next)
+	last = last->eq_next;
+      last->eq_next = d;
+    }
+  else
+    *slot = d;
+}
+
+/* Look up the operand_data D in the hash table.  */
+
+static struct operand_data *
+lookup_operand_data (struct operand_data *d)
+{
+  return (struct operand_data *) htab_find (operand_data_table, d);
+}
+
+/* Initializes the operand_data hash table.  */
+
+static void
+init_operand_data_table (void)
+{
+  operand_data_table = htab_create_alloc (64, hash_struct_operand_data,
+					  eq_struct_operand_data, 0,
+					  xcalloc, free);
 }
