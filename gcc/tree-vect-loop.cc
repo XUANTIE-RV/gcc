@@ -5635,6 +5635,12 @@ get_initial_defs_for_reduction (loop_vec_info loop_vinfo,
   tree_vector_builder elts (vector_type, nunits, 1);
   elts.quick_grow (nunits);
   gimple_seq ctor_seq = NULL;
+  if (neutral_op
+      && !useless_type_conversion_p (TREE_TYPE (vector_type),
+				     TREE_TYPE (neutral_op)))
+    neutral_op = gimple_convert (&ctor_seq,
+				 TREE_TYPE (vector_type),
+				 neutral_op);
   for (j = 0; j < nunits * number_of_vectors; ++j)
     {
       tree op;
