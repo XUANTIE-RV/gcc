@@ -10050,16 +10050,6 @@ vectorizable_slp_permutation_1 (vec_info *vinfo, gimple_stmt_iterator *gsi,
     }
 
   gcc_assert (perm.length () == SLP_TREE_LANES (node));
-  if (dump_p)
-    {
-      dump_printf_loc (MSG_NOTE, vect_location,
-		       "vectorizing permutation");
-      for (unsigned i = 0; i < perm.length (); ++i)
-	dump_printf (MSG_NOTE, " op%u[%u]", perm[i].first, perm[i].second);
-      if (repeating_p)
-	dump_printf (MSG_NOTE, " (repeat %d)\n", SLP_TREE_LANES (node));
-      dump_printf (MSG_NOTE, "\n");
-    }
 
   /* Load-lanes permute.  This permute only acts as a forwarder to
      select the correct vector def of the load-lanes load which
