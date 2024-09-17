@@ -8711,8 +8711,9 @@ vectorizable_store (vec_info *vinfo,
 	aggr_type = build_array_type_nelts (elem_type, group_size * nunits);
       else
 	aggr_type = vectype;
-      bump = vect_get_data_ptr_increment (vinfo, gsi, dr_info, aggr_type,
-					  memory_access_type, loop_lens);
+      if (!costing_p)
+	bump = vect_get_data_ptr_increment (vinfo, gsi, dr_info, aggr_type,
+					    memory_access_type, loop_lens);
     }
 
   if (mask && !costing_p)
@@ -10783,8 +10784,9 @@ vectorizable_load (vec_info *vinfo,
 	aggr_type = build_array_type_nelts (elem_type, group_size * nunits);
       else
 	aggr_type = vectype;
-      bump = vect_get_data_ptr_increment (vinfo, gsi, dr_info, aggr_type,
-					  memory_access_type, loop_lens);
+      if (!costing_p)
+	bump = vect_get_data_ptr_increment (vinfo, gsi, dr_info, aggr_type,
+					    memory_access_type, loop_lens);
     }
 
   auto_vec<tree> vec_offsets;
