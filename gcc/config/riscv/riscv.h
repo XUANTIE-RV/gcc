@@ -511,8 +511,10 @@ enum reg_class
 {
   NO_REGS,			/* no registers in set */
   SIBCALL_REGS,			/* registers used by indirect sibcalls */
+  RVC_GR_REGS,			/* RVC general registers */
   JALR_REGS,			/* registers used by indirect calls */
   GR_REGS,			/* integer registers */
+  RVC_FP_REGS,			/* RVC floating-point registers */
   FP_REGS,			/* floating-point registers */
   FRAME_REGS,			/* arg pointer and frame pointer */
   VM_REGS,			/* v0.t registers */
@@ -534,8 +536,10 @@ enum reg_class
 {									\
   "NO_REGS",								\
   "SIBCALL_REGS",							\
+  "RVC_GR_REGS",							\
   "JALR_REGS",								\
   "GR_REGS",								\
+  "RVC_FP_REGS",							\
   "FP_REGS",								\
   "FRAME_REGS",								\
   "VM_REGS",								\
@@ -559,8 +563,10 @@ enum reg_class
 {									\
   { 0x00000000, 0x00000000, 0x00000000, 0x00000000 },	/* NO_REGS */		\
   { 0xf003fcc0, 0x00000000, 0x00000000, 0x00000000 },	/* SIBCALL_REGS */	\
+  { 0x0000ff00, 0x00000000, 0x00000000, 0x00000000 },	/* RVC_GR_REGS */	\
   { 0xffffffc0, 0x00000000, 0x00000000, 0x00000000 },	/* JALR_REGS */		\
   { 0xffffffff, 0x00000000, 0x00000000, 0x00000000 },	/* GR_REGS */		\
+  { 0x00000000, 0x0000ff00, 0x00000000, 0x00000000 },	/* RVC_FP_REGS */	\
   { 0x00000000, 0xffffffff, 0x00000000, 0x00000000 },	/* FP_REGS */		\
   { 0x00000000, 0x00000000, 0x00000003, 0x00000000 },	/* FRAME_REGS */	\
   { 0x00000000, 0x00000000, 0x00000000, 0x00000001 },	/* V0_REGS */		\
