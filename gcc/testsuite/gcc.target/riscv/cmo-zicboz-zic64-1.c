@@ -1,4 +1,4 @@
-/* { dg-do compile } */
+/* { dg-do compile { target { ! riscv_abi_e } } } */
 /* { dg-options "-march=rv64gc_zic64b_zicboz -mabi=lp64d" } */
 /* { dg-skip-if "" { *-*-* } {"-O0" "-Os" "-Og" "-Oz" "-flto" } } */
 /* { dg-final { check-function-bodies "**" "" } } */
