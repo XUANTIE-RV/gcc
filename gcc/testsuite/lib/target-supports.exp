@@ -1954,6 +1954,14 @@ proc check_effective_target_riscv_zacas { } {
     }]
 }
 
+proc check_effective_target_riscv_zalasr { } {
+    return [check_no_compiler_messages riscv_ext_zalasr assembly {
+       #ifndef __riscv_zalasr
+       #error "Not __riscv_zalasr"
+       #endif
+    }]
+}
+
 # Return 1 if the target arch supports the double precision floating point
 # extension, 0 otherwise.  Cache the result.
 
@@ -2302,7 +2310,7 @@ proc check_effective_target_riscv_v_misalign_ok { } {
 proc riscv_get_arch { } {
     set gcc_march ""
     # ??? do we neeed to add more extensions to the list below?
-    foreach ext { i m a f d q c b v zicsr zifencei zfh zba zbb zbc zbkb zbkc zbs zvfh ztso zaamo zalrsc zabha zacas } {
+    foreach ext { i m a f d q c b v zicsr zifencei zfh zba zbb zbc zbkb zbkc zbs zvfh ztso zaamo zalrsc zabha zacas zalasr } {
 	if { [check_no_compiler_messages  riscv_ext_$ext assembly [string map [list DEF __riscv_$ext] {
 		#ifndef DEF
 		#error "Not DEF"
@@ -2515,6 +2523,14 @@ proc add_options_for_riscv_zacas { flags } {
 proc remove_options_for_riscv_zacas { flags } {
     set modified_flags [remove_options_for_riscv_zaamo $flags]
     return [remove_options_for_riscv_z_ext zacas $modified_flags]
+}
+
+proc add_options_for_riscv_zalasr { flags } {
+    return [add_options_for_riscv_z_ext zalasr $flags]
+}
+
+proc remove_options_for_riscv_zalasr { flags } {
+    return [remove_options_for_riscv_z_ext zalasr $flags]
 }
 
 proc add_options_for_riscv_zfh { flags } {
