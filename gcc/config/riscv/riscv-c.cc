@@ -281,20 +281,7 @@ riscv_pragma_intrinsic (cpp_reader *)
   if (strcmp (name, "vector") == 0
       || strcmp (name, "xtheadvector") == 0)
     {
-      struct pragma_intrinsic_flags backup_flags;
-
-      riscv_pragma_intrinsic_flags_pollute (&backup_flags);
-
-      riscv_option_override ();
-      init_adjust_machine_modes ();
-      riscv_vector::reinit_builtins ();
       riscv_vector::handle_pragma_vector ();
-
-      riscv_pragma_intrinsic_flags_restore (&backup_flags);
-
-      /* Re-initialize after the flags are restored.  */
-      riscv_option_override ();
-      init_adjust_machine_modes ();
     }
   else
     error ("unknown %<#pragma riscv intrinsic%> option %qs", name);
