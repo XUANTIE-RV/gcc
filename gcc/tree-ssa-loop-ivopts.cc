@@ -4745,6 +4745,10 @@ get_address_cost (struct ivopts_data *data, struct iv_use *use,
 
   if (!aff_combination_const_p (aff_inv))
     {
+      if (targetm.iv_gen_load_index == NULL
+	 || targetm.iv_gen_load_index (avg_loop_niter (data->current_loop),
+				       mem_mode))
+      {
       parts.index = integer_one_node;
       /* Addressing mode "base + index".  */
       ok_without_ratio_p = valid_mem_ref_p (mem_mode, as, &parts, code);
@@ -4788,6 +4792,7 @@ get_address_cost (struct ivopts_data *data, struct iv_use *use,
 	}
       else
 	parts.index = NULL_TREE;
+      }
     }
   else
     {
@@ -4846,8 +4851,15 @@ get_address_cost (struct ivopts_data *data, struct iv_use *use,
 	 generated invariant expression may not be hoisted out of loop by
 	 following pass.  We penalize the cost by rounding up in order to
 	 neutralize such effects.  */
+#ifdef TARGET_XUANTIE_IV_ADJUST_ADDR_COST
+      if (TARGET_XUANTIE_IV_ADJUST_ADDR_COST)
+  {
+#endif
       cost.cost = adjust_setup_cost (data, cost.cost, true);
       cost.scratch = cost.cost;
+#ifdef TARGET_XUANTIE_IV_ADJUST_ADDR_COST
+  }
+#endif
     }
 
   cost += var_cost;
@@ -5617,6 +5629,7 @@ determine_group_iv_cost_cond (struct ivopts_data *data,
      be target-dependent.  This information should be added to the
      target costs for each backend.  */
   if (!elim_cost.infinite_cost_p () /* Do not try to decrease infinite! */
+      && elim_cost.cost > 0 /* Do not try to decrease to a negative cost */
       && integer_zerop (*bound_cst)
       && (operand_equal_p (*control_var, cand->var_after, 0)
 	  || operand_equal_p (*control_var, cand->var_before, 0)))

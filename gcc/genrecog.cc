@@ -4493,6 +4493,8 @@ change_state (output_state *os, position *pos, unsigned int indent)
 
     case POS_XEXP:
       change_state (os, pos->base, indent);
+      printf_indent (indent, "if (REG_P(x%d)) return %s;\n",
+		     os->id_to_var[pos->base->id], get_failure_return (os->type));
       printf_indent (indent, "x%d = XEXP (x%d, %d);\n",
 		     var, os->id_to_var[pos->base->id], pos->arg);
       break;

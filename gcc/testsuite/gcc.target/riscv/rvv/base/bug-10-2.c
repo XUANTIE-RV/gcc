@@ -1,4 +1,4 @@
-/* { dg-do compile { target { rv64 } } } */
+/* { dg-do run { target { rv64 } } } */
 /* { dg-require-effective-target rv64 } */
 /* { dg-require-effective-target riscv_v } */
 /* { dg-options " -march=rv64gcv_zvfh -mabi=lp64d -O2" } */

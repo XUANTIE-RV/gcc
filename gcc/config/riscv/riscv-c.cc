@@ -34,77 +34,6 @@ along with GCC; see the file COPYING3.  If not see
 
 #define builtin_define(TXT) cpp_define (pfile, TXT)
 
-struct pragma_intrinsic_flags
-{
-  int intrinsic_target_flags;
-
-  int intrinsic_riscv_vector_elen_flags;
-  int intrinsic_riscv_zvl_flags;
-  int intrinsic_riscv_zvb_subext;
-  int intrinsic_riscv_zvk_subext;
-};
-
-static void
-riscv_pragma_intrinsic_flags_pollute (struct pragma_intrinsic_flags *flags)
-{
-  flags->intrinsic_target_flags = target_flags;
-  flags->intrinsic_riscv_vector_elen_flags = riscv_vector_elen_flags;
-  flags->intrinsic_riscv_zvl_flags = riscv_zvl_flags;
-  flags->intrinsic_riscv_zvb_subext = riscv_zvb_subext;
-  flags->intrinsic_riscv_zvk_subext = riscv_zvk_subext;
-
-  target_flags = target_flags
-    | MASK_VECTOR;
-
-  riscv_zvl_flags = riscv_zvl_flags
-    | MASK_ZVL32B
-    | MASK_ZVL64B
-    | MASK_ZVL128B
-    | MASK_ZVL256B
-    | MASK_ZVL512B
-    | MASK_ZVL1024B
-    | MASK_ZVL2048B
-    | MASK_ZVL4096B;
-
-  riscv_vector_elen_flags = riscv_vector_elen_flags
-    | MASK_VECTOR_ELEN_32
-    | MASK_VECTOR_ELEN_64
-    | MASK_VECTOR_ELEN_FP_16
-    | MASK_VECTOR_ELEN_FP_32
-    | MASK_VECTOR_ELEN_FP_64;
-
-  riscv_zvb_subext = riscv_zvb_subext
-    | MASK_ZVBB
-    | MASK_ZVBC
-    | MASK_ZVKB;
-
-  riscv_zvk_subext = riscv_zvk_subext
-    | MASK_ZVKG
-    | MASK_ZVKNED
-    | MASK_ZVKNHA
-    | MASK_ZVKNHB
-    | MASK_ZVKSED
-    | MASK_ZVKSH
-    | MASK_ZVKN
-    | MASK_ZVKNC
-    | MASK_ZVKNG
-    | MASK_ZVKS
-    | MASK_ZVKSC
-    | MASK_ZVKSG
-    | MASK_ZVKT;
-}
-
-static void
-riscv_pragma_intrinsic_flags_restore (struct pragma_intrinsic_flags *flags)
-{
-  target_flags = flags->intrinsic_target_flags;
-
-  riscv_vector_elen_flags = flags->intrinsic_riscv_vector_elen_flags;
-  riscv_zvl_flags = flags->intrinsic_riscv_zvl_flags;
-  riscv_zvb_subext = flags->intrinsic_riscv_zvb_subext;
-  riscv_zvk_subext = flags->intrinsic_riscv_zvk_subext;
-}
-
 static int
 riscv_ext_version_value (unsigned major, unsigned minor)
 {
@@ -118,6 +47,34 @@ void
 riscv_cpu_cpp_builtins (cpp_reader *pfile)
 {
   builtin_define ("__riscv");
+
+  if (TARGET_XUANTIE)
+    builtin_define ("__riscv_xthead");
+
+  if (TARGET_XUANTIE_ZPN)
+      builtin_define ("__riscv_dsp");
+
+  if (TARGET_XTHEADVECTOR)
+    builtin_define_with_int_value ("__riscv_v", 7000);
+
+  if (TARGET_XTHEADMATRIX)
+    builtin_define ("__riscv_matrix");
+
+#ifdef THEAD_VERSION_NUMBER
+#define STR(a) #a
+#define XSTR(a) STR(a)
+  cpp_define_formatted (pfile, "__THEAD_VERSION__=\"%s\"", XSTR (THEAD_VERSION_NUMBER));
+#else
+  builtin_define ("__THEAD_VERSION__=\"undefined\"");
+#endif
+
+#ifndef TARGET_LINUX
+  builtin_define_with_int_value ("__THEAD_SIZEOF_PTHREAD_MUTEXATTR_T", 20);
+  builtin_define_with_int_value ("__THEAD_SIZEOF_PTHREAD_COND_T", 64);
+  builtin_define_with_int_value ("__THEAD_SIZEOF_PTHREAD_CONDATTR_T", 24);
+  builtin_define_with_int_value ("__THEAD_SIZEOF_PTHREAD_ATTR_T", 64);
+  builtin_define_with_int_value ("__THEAD_SIZEOF_PTHREAD_MUTEX_T", 40);
+#endif
 
   if (TARGET_RVC || TARGET_ZCA)
     builtin_define ("__riscv_compressed");
@@ -210,15 +167,25 @@ riscv_cpu_cpp_builtins (cpp_reader *pfile)
     {
       builtin_define ("__riscv_vector");
       builtin_define_with_int_value ("__riscv_v_intrinsic",
+				     riscv_rvv_v0p10_compatible_p ?
+				     riscv_ext_version_value (0, 10) :
 				     riscv_ext_version_value (0, 12));
 
       if (rvv_vector_bits == RVV_VECTOR_BITS_ZVL)
 	builtin_define_with_int_value ("__riscv_v_fixed_vlen", TARGET_MIN_VLEN);
+
+      if (TARGET_VECTOR_ELEN_FP_16)
+	builtin_define ("__riscv_vector_fp16");
+
+      if (TARGET_VECTOR_ELEN_BF_16)
+	builtin_define ("__riscv_vector_bf16");
     }
 
   if (TARGET_XTHEADVECTOR)
     builtin_define_with_int_value ("__riscv_th_v_intrinsic",
-				   riscv_ext_version_value (0, 11));
+            riscv_rvv_v0p10_compatible_p ?
+				    riscv_ext_version_value (0, 10) :
+				    riscv_ext_version_value (0, 11));
 
   /* Define architecture extension test macros.  */
   builtin_define_with_int_value ("__riscv_arch_test", 1);
@@ -283,6 +250,8 @@ riscv_pragma_intrinsic (cpp_reader *)
     {
       riscv_vector::handle_pragma_vector ();
     }
+  else if (strcmp (name, "xtheadmatrix") == 0)
+    xt_rvm_handle_pragma_xtheadmatrix ();
   else
     error ("unknown %<#pragma riscv intrinsic%> option %qs", name);
 }
@@ -302,6 +271,9 @@ riscv_check_builtin_call (location_t loc, vec<location_t> arg_loc, tree fndecl,
     case RISCV_BUILTIN_VECTOR:
       return riscv_vector::check_builtin_call (loc, arg_loc, subcode,
 					       fndecl, nargs, args);
+    case RISCV_BUILTIN_MATRIX:
+      return xt_rvm_check_builtin_call (loc, arg_loc, subcode,
+					fndecl, nargs, args);
     }
   gcc_unreachable ();
 }
@@ -328,6 +300,10 @@ riscv_resolve_overloaded_builtin (unsigned int uncast_location, tree fndecl,
     case RISCV_BUILTIN_VECTOR:
       new_fndecl = riscv_vector::resolve_overloaded_builtin (loc, subcode,
 							     fndecl, arglist);
+      break;
+    case RISCV_BUILTIN_MATRIX:
+      new_fndecl = xt_rvm_resolve_overloaded_builtin (loc, subcode,
+						      fndecl, arglist);
       break;
     default:
       gcc_unreachable ();

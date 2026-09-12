@@ -1042,12 +1042,19 @@ want_inline_small_function_p (struct cgraph_edge *e, bool report)
       /* Apply param_max_inline_insns_auto limit for functions not declared
 	 inline.  Bypass the limit when speedup seems big.  */
       else if (!DECL_DECLARED_INLINE_P (callee->decl)
+#ifdef TARGET_XUANTIE_UNHOT_INLINE
+	       && (!TARGET_XUANTIE_UNHOT_INLINE || !big_speedup_p (e))
+#endif
 	       && growth >= inline_insns_auto (e->caller, apply_hints,
 					       apply_hints2)
 	       && (apply_hints || apply_hints2
+#ifdef TARGET_XUANTIE_UNHOT_INLINE
+		   || (!TARGET_XUANTIE_UNHOT_INLINE && !big_speedup_p (e))
+#else
+		   || !big_speedup_p (e)
+#endif
 		   || growth >= inline_insns_auto (e->caller, true,
-						   apply_hints2)
-		   || !big_speedup_p (e)))
+						   apply_hints2)))
 	{
 	  /* growth_positive_p is expensive, always test it last.  */
 	  if (growth >= inline_insns_single (e->caller, false, false)

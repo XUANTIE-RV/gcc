@@ -53,6 +53,9 @@
 
     /* Ignoring RCsc atomic load-acquire on MEMMODEL_SEQ_CST due to
        Note 3 abi break for when TARGET_ZALASR is enabled.  */
+    if (TARGET_ZALASR && model == MEMMODEL_SEQ_CST)
+      return "<load>.aq\t%0,%1";
+
     if (model == MEMMODEL_SEQ_CST)
       return "fence\trw,rw\;"
 	     "<load>\t%0,%1";

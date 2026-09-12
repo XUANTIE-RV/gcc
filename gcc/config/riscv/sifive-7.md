@@ -91,6 +91,11 @@
        (eq_attr "type" "fcvt,fcvt_i2f,fcvt_f2i,fcmp,fmove"))
   "sifive_7_B")
 
+(define_insn_reservation "sifive_7_fp_minmax" 3
+  (and (eq_attr "tune" "sifive_7")
+       (eq_attr "type" "fminmax"))
+  "sifive_7_B")
+
 (define_insn_reservation "sifive_7_fdiv_s" 27
   (and (eq_attr "tune" "sifive_7")
        (eq_attr "type" "fdiv,fsqrt")

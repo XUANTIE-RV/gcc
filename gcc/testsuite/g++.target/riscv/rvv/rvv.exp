@@ -37,16 +37,18 @@ if [istarget riscv32-*-*] then {
 # Initialize `dg'.
 dg-init
 
+set XT_FLAG "-mrvv-auto-vectorize -mtune=rocket"
+
 # Main loop.
 set CFLAGS "-march=$gcc_march -mabi=$gcc_mabi -O3"
 dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/base/*.C]] \
-	"" $CFLAGS
+	"$XT_FLAG" $CFLAGS
 
 dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/autovec/*.\[C\]]] \
-        "" $CFLAGS
+        "$XT_FLAG" $CFLAGS
 
 dg-runtest [lsort [glob -nocomplain $srcdir/$subdir/xtheadvector/*.C]] \
-	"" $CFLAGS
+	"$XT_FLAG" $CFLAGS
 
 # All done.
 dg-finish

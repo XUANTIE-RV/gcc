@@ -196,7 +196,7 @@
 (define_expand "clzsi2"
   [(set (match_operand:SI 0 "register_operand")
 	(clz:SI (match_operand:SI 1 "register_operand")))]
-  "TARGET_ZBB || (!TARGET_64BIT && TARGET_XTHEADBB)")
+  "TARGET_ZBB || (!TARGET_64BIT && TARGET_XTHEADBB) || TARGET_XUANTIE_ZPN")
 
 (define_expand "ctz<mode>2"
   [(set (match_operand:GPR 0 "register_operand")
@@ -222,8 +222,8 @@
        (bitmanip_bitwise:X (not:X (match_operand:X 1 "register_operand" "r"))
               (match_operand:X 2 "const_arith_operand" "I")))
   (clobber (match_scratch:X 3 "=&r"))]
-  "(TARGET_ZBB || TARGET_ZBKB) && !TARGET_ZCB
-   && !optimize_function_for_size_p (cfun)"
+  "(TARGET_ZBB || TARGET_ZBKB)
+   && !(optimize_function_for_size_p (cfun) && TARGET_ZCB)"
   "#"
   "&& reload_completed"
   [(set (match_dup 3) (match_dup 2))
@@ -316,7 +316,8 @@
 		     (match_operand:QI 2 "arith_operand")))]
   "TARGET_64BIT && (TARGET_ZBB || TARGET_XTHEADBB || TARGET_ZBKB)"
 {
-  if (TARGET_XTHEADBB && !immediate_operand (operands[2], VOIDmode))
+  if (!(TARGET_ZBB || TARGET_ZBKB) &&
+      TARGET_XTHEADBB && !immediate_operand (operands[2], VOIDmode))
     FAIL;
 })
 
@@ -334,7 +335,8 @@
                     (match_operand:QI 2 "arith_operand" "rI")))]
   "TARGET_ZBB || TARGET_ZBKB || TARGET_XTHEADBB"
 {
-  if (TARGET_XTHEADBB && !immediate_operand (operands[2], VOIDmode))
+  if (!(TARGET_ZBB || TARGET_ZBKB) &&
+      TARGET_XTHEADBB && !immediate_operand (operands[2], VOIDmode))
     FAIL;
   if (TARGET_64BIT && register_operand (operands[2], QImode))
     {
@@ -484,8 +486,13 @@
 (define_expand "bswaphi2"
   [(set (match_operand:HI 0 "register_operand" "=r")
         (bswap:HI (match_operand:HI 1 "register_operand" "r")))]
-  "TARGET_ZBB"
+  "TARGET_ZBB || TARGET_XUANTIE_ZPN"
 {
+  if (TARGET_XUANTIE_ZPN)
+    {
+      emit_insn (gen_dsp_bswaphi2 (operands[0], operands[1]));
+      DONE;
+    }
   rtx tmp = gen_reg_rtx (word_mode);
   rtx newop1 = gen_lowpart (word_mode, operands[1]);
   if (TARGET_64BIT)
@@ -542,13 +549,15 @@
 						(match_operand:DI 2 "immediate_operand" "i"))
 	   0)))
    (clobber (match_scratch:DI 3 "=&r"))
-   (clobber (match_scratch:DI 4 "=&r"))]
+   (clobber (match_scratch:DI 4 "=&r"))
+   (clobber (match_scratch:DI 5 "=&r"))]
   "TARGET_64BIT && TARGET_ZBB && sext_hwi (INTVAL (operands[2]), 32) >= 0"
   "#"
   "&& reload_completed"
-  [(set (match_dup 3) (sign_extend:DI (match_dup 1)))
+  [(set (match_dup 3) (zero_extend:DI (match_dup 1)))
    (set (match_dup 4) (match_dup 2))
-   (set (match_dup 0) (<minmax_optab>:DI (match_dup 3) (match_dup 4)))]
+   (set (match_dup 5) (<minmax_optab>:DI (match_dup 3) (match_dup 4)))
+   (set (match_dup 0) (sign_extend:DI (subreg:SI (match_dup 5) 0)))]
   ""
   [(set_attr "type" "bitmanip")])
 
@@ -796,7 +805,7 @@
 	 (pc)))
    (clobber (match_scratch:X 5 "=&r"))
    (clobber (match_scratch:X 6 "=&r"))]
-  "TARGET_ZBS && TARGET_ZBB"
+  "TARGET_ZBS && TARGET_ZBB && (UINTVAL (operands[3]) & UINTVAL (operands[4]))"
   "#"
   "&& reload_completed"
   [(set (match_dup 5) (zero_extract:X (match_dup 2)
@@ -812,9 +821,6 @@
 {
    unsigned HOST_WIDE_INT twobits_mask = UINTVAL (operands[3]);
    unsigned HOST_WIDE_INT singlebit_mask = UINTVAL (operands[4]);
-
-   /* We should never see an unsatisfiable condition.  */
-   gcc_assert (twobits_mask & singlebit_mask);
 
    int setbit = ctz_hwi (singlebit_mask);
    int clearbit = ctz_hwi (twobits_mask & ~singlebit_mask);

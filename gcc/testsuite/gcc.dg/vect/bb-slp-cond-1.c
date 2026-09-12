@@ -1,4 +1,5 @@
 /* { dg-require-effective-target vect_condition } */
+/* { dg-require-effective-target riscv_rvv_zvl128b_or_scalar } */
 /* { dg-additional-options "-fdump-tree-vect-details" } */
 
 #include "tree-vect.h"

@@ -261,4 +261,4 @@ c
 
 ! { dg-final { scan-tree-dump-times "vectorized 1 loops" 1 "vect" { target { ! vect_element_align } } } }
 ! { dg-final { scan-tree-dump-times "vectorized 5 loops" 1 "vect" { target { vect_element_align && { ! vect_call_sqrtf } } } } }
-! { dg-final { scan-tree-dump-times "vectorized 6 loops" 1 "vect" { target { vect_element_align && vect_call_sqrtf } } } }
+! { dg-final { scan-tree-dump-times "vectorized 7 loops" 1 "vect" { target { vect_element_align && vect_call_sqrtf } } } }

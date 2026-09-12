@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-require-effective-target riscv_rvv_zvl128b_or_scalar } */
 /* { dg-options "-O2 -fdump-tree-ivopts-details" } */
 
 int a[128];

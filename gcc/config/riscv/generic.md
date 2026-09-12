@@ -47,6 +47,11 @@
        (eq_attr "type" "mfc,mtc,fcvt,fcvt_i2f,fcvt_f2i,fmove,fcmp"))
   "alu")
 
+(define_insn_reservation "generic_fminmax" 3
+  (and (eq_attr "tune" "generic")
+       (eq_attr "type" "fminmax"))
+  "alu")
+
 (define_insn_reservation "generic_branch" 1
   (and (eq_attr "tune" "generic")
        (eq_attr "type" "branch,jump,call,jalr,ret,trap"))

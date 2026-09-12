@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc-details -O2" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details -O2" } */
 
 // File_Ac3.cpp.ii
 // We don't support non-constant polynomials.

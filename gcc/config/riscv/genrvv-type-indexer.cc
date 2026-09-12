@@ -227,6 +227,10 @@ same_ratio_eew_bf16_type (unsigned sew, int lmul_log2)
   return bfloat16_type (elmul_log2);
 }
 
+#define XUANTIE_GENRVV_TYPE_INDEXER_CC
+#include "xuantie-genrvv-type-indexer.cc"
+#undef XUANTIE_GENRVV_TYPE_INDEXER_CC
+
 int
 main (int argc, const char **argv)
 {
@@ -246,6 +250,17 @@ main (int argc, const char **argv)
       std::stringstream mode;
       mode << "vbool" << vbool << "_t";
       fprintf (fp, "DEF_RVV_TYPE_INDEX (\n");
+      fprintf (fp, "  /*XT_MAQA_MASK*/ INVALID,\n");
+      fprintf (fp, "  /*XT_MAQA_QUAD_SIGNED_TRUNC*/ INVALID,\n");
+      fprintf (fp, "  /*XT_MAQA_QUAD_UNSIGNED_TRUNC*/ INVALID,\n");
+      fprintf (fp, "  /*XT_DOUBLE_TRUNC_FLOAT_FP8E4M3*/ INVALID,\n");
+      fprintf (fp, "  /*XT_DOUBLE_TRUNC_FLOAT_FP8E5M2*/ INVALID,\n");
+      fprintf (fp, "  /*XT_QUAD_TRUNC_VECTOR*/ INVALID,\n");
+      fprintf (fp, "  /*XT_QUAD_TRUNC_SCALAR*/ INVALID,\n");
+      fprintf (fp, "  /*XT_QUAD_TRUNC_BFLOAT_VECTOR*/ INVALID,\n");
+      fprintf (fp, "  /*XT_QUAD_TRUNC_BFLOAT_SCALAR*/ INVALID,\n");
+      fprintf (fp, "  /*XT_DOUBLE_EXT_VECTOR*/ INVALID,\n");
+      fprintf (fp, "  /*XT_QUAD_EXT_VECTOR*/ INVALID,\n");
       fprintf (fp, "  /*VECTOR*/ %s,\n", mode.str ().c_str ());
       fprintf (fp, "  /*MASK*/ %s,\n", mode.str ().c_str ());
       fprintf (fp, "  /*SIGNED*/ INVALID,\n");
@@ -299,6 +314,30 @@ main (int argc, const char **argv)
 	      continue;
 
 	    fprintf (fp, "DEF_RVV_TYPE_INDEX (\n");
+	    fprintf (fp, "  /*XT_MAQA_MASK*/ %s,\n",
+		     maskmode (sew / 4, lmul_log2).c_str ());
+	    fprintf (fp, "  /*XT_MAQA_QUAD_SIGNED_TRUNC*/ %s,\n",
+		     inttype (sew / 4, lmul_log2, /*unsigned_p*/ false).c_str ());
+	    fprintf (fp, "  /*XT_MAQA_QUAD_UNSIGNED_TRUNC*/ %s,\n",
+		     inttype (sew / 4, lmul_log2, /*unsigned_p*/ true).c_str ());
+	    fprintf (fp, "  /*XT_DOUBLE_TRUNC_FLOAT_FP8E4M3*/ INVALID,\n");
+	    fprintf (fp, "  /*XT_DOUBLE_TRUNC_FLOAT_FP8E5M2*/ INVALID,\n");
+	    fprintf (fp, "  /*XT_QUAD_TRUNC_VECTOR*/ %s,\n",
+		     same_ratio_eew_type (sew, lmul_log2, sew / 4, unsigned_p,
+					  false)
+		       .c_str ());
+	    fprintf (fp, "  /*XT_QUAD_TRUNC_SCALAR*/ %s,\n",
+		     same_ratio_eew_type (sew, lmul_log2, sew / 4, unsigned_p,
+					  false)
+		       .c_str ());
+	    fprintf (fp, "  /*XT_QUAD_TRUNC_BFLOAT_VECTOR*/ INVALID,\n");
+	    fprintf (fp, "  /*XT_QUAD_TRUNC_BFLOAT_SCALAR*/ INVALID,\n");
+	    fprintf (fp, "  /*XT_DOUBLE_EXT_VECTOR*/ %s,\n",
+		     same_ratio_eew_type (sew, lmul_log2, sew * 2, unsigned_p, false)
+		       .c_str ());
+	    fprintf (fp, "  /*XT_QUAD_EXT_VECTOR*/ %s,\n",
+		     same_ratio_eew_type (sew, lmul_log2, sew * 4, unsigned_p, false)
+		       .c_str ());
 	    fprintf (fp, "  /*VECTOR*/ %s,\n",
 		     inttype (sew, lmul_log2, nf, unsigned_p).c_str ());
 	    fprintf (fp, "  /*MASK*/ %s,\n",
@@ -398,6 +437,23 @@ main (int argc, const char **argv)
 	  continue;
 
 	fprintf (fp, "DEF_RVV_TYPE_INDEX (\n");
+	fprintf (fp, "  /*XT_MAQA_MASK*/ INVALID,\n");
+	fprintf (fp, "  /*XT_MAQA_QUAD_SIGNED_TRUNC*/ INVALID,\n");
+	fprintf (fp, "  /*XT_MAQA_QUAD_UNSIGNED_TRUNC*/ INVALID,\n");
+	fprintf (fp, "  /*XT_DOUBLE_TRUNC_FLOAT_FP8E4M3*/ %s,\n",
+		 same_ratio_eew_fp8e4_type (16, lmul_log2).c_str ());
+	fprintf (fp, "  /*XT_DOUBLE_TRUNC_FLOAT_FP8E5M2*/ %s,\n",
+		 same_ratio_eew_fp8e5_type (16, lmul_log2).c_str ());
+	fprintf (fp, "  /*XT_QUAD_TRUNC_VECTOR*/ INVALID,\n");
+	fprintf (fp, "  /*XT_QUAD_TRUNC_SCALAR*/ INVALID,\n");
+	fprintf (fp, "  /*XT_QUAD_TRUNC_BFLOAT_VECTOR*/ INVALID,\n");
+	fprintf (fp, "  /*XT_QUAD_TRUNC_BFLOAT_SCALAR*/ INVALID,\n");
+	fprintf (fp, "  /*XT_DOUBLE_EXT_VECTOR*/ %s,\n",
+		 same_ratio_eew_type (16, lmul_log2, 32, false, true)
+		   .c_str ());
+	fprintf (fp, "  /*XT_QUAD_EXT_VECTOR*/ %s,\n",
+		 same_ratio_eew_type (16, lmul_log2, 64, false, true)
+		   .c_str ());
 	fprintf (fp, "  /*VECTOR*/ %s,\n",
 		 bfloat16_type (lmul_log2, nf).c_str ());
 	fprintf (fp, "  /*MASK*/ %s,\n", maskmode (16, lmul_log2).c_str ());
@@ -461,6 +517,29 @@ main (int argc, const char **argv)
 	    continue;
 
 	  fprintf (fp, "DEF_RVV_TYPE_INDEX (\n");
+	  fprintf (fp, "  /*XT_MAQA_MASK*/ INVALID,\n");
+	  fprintf (fp, "  /*XT_MAQA_QUAD_SIGNED_TRUNC*/ INVALID,\n");
+	  fprintf (fp, "  /*XT_MAQA_QUAD_UNSIGNED_TRUNC*/ INVALID,\n");
+	  fprintf (fp, "  /*XT_DOUBLE_TRUNC_FLOAT_FP8E4M3*/ %s,\n",
+		   same_ratio_eew_fp8e4_type (sew, lmul_log2).c_str ());
+	  fprintf (fp, "  /*XT_DOUBLE_TRUNC_FLOAT_FP8E5M2*/ %s,\n",
+		   same_ratio_eew_fp8e5_type (sew, lmul_log2).c_str ());
+	  fprintf (fp, "  /*XT_QUAD_TRUNC_VECTOR*/ %s,\n",
+		   same_ratio_eew_type (sew, lmul_log2, sew / 4, false, true)
+		       .c_str ());
+	  fprintf (fp, "  /*XT_QUAD_TRUNC_SCALAR*/ %s,\n",
+		   same_ratio_eew_type (sew, lmul_log2, sew / 4, false, true)
+		       .c_str ());
+	  fprintf (fp, "  /*XT_QUAD_TRUNC_BFLOAT_VECTOR*/ %s,\n",
+		   same_ratio_quad_trunc_bf16_type (sew, lmul_log2).c_str ());
+	  fprintf (fp, "  /*XT_QUAD_TRUNC_BFLOAT_SCALAR*/ %s,\n",
+		   same_ratio_quad_trunc_bf16_type (sew, lmul_log2).c_str ());
+	  fprintf (fp, "  /*XT_DOUBLE_EXT_VECTOR*/ %s,\n",
+		   same_ratio_eew_type (sew, lmul_log2, sew * 2, false, true)
+		       .c_str ());
+	  fprintf (fp, "  /*XT_QUAD_EXT_VECTOR*/ %s,\n",
+		   same_ratio_eew_type (sew, lmul_log2, sew * 4, false, true)
+		       .c_str ());
 	  fprintf (fp, "  /*VECTOR*/ %s,\n",
 		   floattype (sew, lmul_log2, nf).c_str ());
 	  fprintf (fp, "  /*MASK*/ %s,\n", maskmode (sew, lmul_log2).c_str ());

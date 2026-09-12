@@ -1,5 +1,6 @@
 /* { dg-do compile } */
 /* { dg-require-effective-target vect_double } */
+/* { dg-require-effective-target riscv_rvv_zvl128b_or_scalar } */
 /* { dg-additional-options "-mavx" { target avx } } */
 
 double x[10], y[6], z[4];

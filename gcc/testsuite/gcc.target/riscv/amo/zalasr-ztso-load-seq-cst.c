@@ -1,7 +1,7 @@
 /* { dg-do compile } */
 /* Verify that load mappings match the PSABI doc's recommended mapping.  */
 /* { dg-options "-O3" } */
-/* { dg-add-options riscv_zalasr } */
+/* { dg-remove-options riscv_zalasr } */
 /* { dg-add-options riscv_ztso } */
 /* { dg-skip-if "" { *-*-* } { "-g" "-flto"} } */
 /* { dg-final { check-function-bodies "**" "" } } */

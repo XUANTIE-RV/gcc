@@ -435,6 +435,12 @@ DEF_RVV_B_OPS (vbool4_t, 0)
 DEF_RVV_B_OPS (vbool2_t, 0)
 DEF_RVV_B_OPS (vbool1_t, 0)
 
+#define XUANTIE_VECTOR_BUILTINS_TYPES_DEF
+#ifndef XUANTIE_CVWN_GUARD
+#include "xuantie-vector-builtins.cc"
+#endif
+#undef XUANTIE_VECTOR_BUILTINS_TYPES_DEF
+
 DEF_RVV_WEXTI_OPS (vint16mf4_t, RVV_REQUIRE_MIN_VLEN_64)
 DEF_RVV_WEXTI_OPS (vint16mf2_t, 0)
 DEF_RVV_WEXTI_OPS (vint16m1_t, 0)

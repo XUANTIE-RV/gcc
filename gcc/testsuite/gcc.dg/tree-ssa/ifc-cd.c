@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-O3 -fdump-tree-ifcvt-details-blocks-details" } */
+/* { dg-options "-O3 -ftree-vectorize -fdump-tree-ifcvt-details-blocks-details" } */
 
 void foo (int *x1, int *x2, int *x3, int *x4, int *y)
 {

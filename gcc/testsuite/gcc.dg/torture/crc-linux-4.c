@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc-details -w" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details -w" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-flto" } } */
 
 /* We don't detect, it's optimized to branch-less CRC.  */

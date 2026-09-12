@@ -105,3 +105,12 @@ default_compute_multilib(
 {
   return multilib;
 }
+
+/* Default version of TARGET_COMPUTE_MULTILIB_OS.  */
+const char *
+default_compute_multilib_os(
+  const char *multilib_os,
+  const char *)
+{
+  return multilib_os;
+}

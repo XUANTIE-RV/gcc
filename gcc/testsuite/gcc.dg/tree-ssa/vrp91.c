@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-S -O2 -fdump-tree-vrp2" } */
+/* { dg-options "-S -O2 -ftree-vectorize -fdump-tree-vrp2" } */
 
 unsigned short data;
 void foo ()

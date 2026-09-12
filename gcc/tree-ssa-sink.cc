@@ -654,7 +654,10 @@ sink_code_in_bb (basic_block bb, virtual_operand_live &vop_live)
   unsigned todo = 0;
 
   /* Sink common stores from the predecessor through our virtual PHI.  */
-  todo |= sink_common_stores_to_bb (bb);
+#ifdef TARGET_XUANTIE_SINK_COMMON_STORE
+  if (TARGET_XUANTIE_SINK_COMMON_STORE)
+#endif
+    todo |= sink_common_stores_to_bb (bb);
 
   /* If this block doesn't dominate anything, there can't be any place to sink
      the statements to.  */

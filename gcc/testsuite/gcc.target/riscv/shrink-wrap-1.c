@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-require-effective-target riscv_i } */
 /* { dg-options "-fshrink-wrap" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-Os" "-Oz" } } */
 

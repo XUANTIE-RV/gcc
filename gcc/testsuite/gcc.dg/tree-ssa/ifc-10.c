@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-Ofast -fno-split-loops -fdump-tree-ifcvt-stats-blocks-details" } */
+/* { dg-options "-Ofast -ftree-vectorize -fno-split-loops -fdump-tree-ifcvt-stats-blocks-details" } */
 /* { dg-require-visibility "" } */
 
 int b[256] = {0}, y;

@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-flto" } } */
 
 // Modified Coremark test, we don't detect.

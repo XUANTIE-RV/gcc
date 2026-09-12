@@ -383,10 +383,10 @@ find_bswap_or_nop_load (gimple *stmt, tree ref, struct symbolic_number *n)
   base_addr = get_inner_reference (ref, &bitsize, &bitpos, &offset, &mode,
 				   &unsignedp, &reversep, &volatilep);
 
-  if (TREE_CODE (base_addr) == TARGET_MEM_REF)
-    /* Do not rewrite TARGET_MEM_REF.  */
-    return false;
-  else if (TREE_CODE (base_addr) == MEM_REF)
+  if (TREE_CODE (base_addr) == MEM_REF
+      || (TREE_CODE (base_addr) == TARGET_MEM_REF
+	  && TMR_INDEX (base_addr) == NULL_TREE
+	  && TMR_INDEX2 (base_addr) == NULL_TREE))
     {
       poly_offset_int bit_offset = 0;
       tree off = TREE_OPERAND (base_addr, 1);
@@ -4974,6 +4974,8 @@ lhs_valid_for_store_merging_p (tree lhs)
     case MEM_REF:
     case VIEW_CONVERT_EXPR:
       return true;
+    case TARGET_MEM_REF:
+      return TMR_INDEX (lhs) == NULL_TREE && TMR_INDEX2 (lhs) == NULL_TREE;
     default:
       return false;
     }
@@ -5064,15 +5066,15 @@ mem_valid_for_store_merging (tree mem, poly_uint64 *pbitsize,
   if (reversep)
     return NULL_TREE;
 
-  /* We do not want to rewrite TARGET_MEM_REFs.  */
-  if (TREE_CODE (base_addr) == TARGET_MEM_REF)
-    return NULL_TREE;
   /* In some cases get_inner_reference may return a
      MEM_REF [ptr + byteoffset].  For the purposes of this pass
      canonicalize the base_addr to MEM_REF [ptr] and take
      byteoffset into account in the bitpos.  This occurs in
      PR 23684 and this way we can catch more chains.  */
-  else if (TREE_CODE (base_addr) == MEM_REF)
+  if (TREE_CODE (base_addr) == MEM_REF
+      || (TREE_CODE (base_addr) == TARGET_MEM_REF
+	  && TMR_INDEX (base_addr) == NULL_TREE
+	  && TMR_INDEX2 (base_addr) == NULL_TREE))
     {
       if (!adjust_bit_pos (mem_ref_offset (base_addr), &bitpos,
 			   &bitregion_start, &bitregion_end))

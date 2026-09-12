@@ -1,5 +1,5 @@
 /* { dg-do run } */
-/* { dg-options "-fdump-tree-crc-details" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details -mtune=rocket" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-flto" } } */
 
 #include <stdlib.h>
@@ -68,6 +68,6 @@ int main ()
 /* { dg-final { scan-tree-dump "calc_crc function maybe contains CRC calculation." "crc" } } */
 /* { dg-final { scan-tree-dump "Loop iteration number is 7" "crc" } } */
 /* { dg-final { scan-tree-dump "Bit forward" "crc"} } */
-/* { dg-final { scan-tree-dump-times "Polynomial's value is \\\{\[0, \]*1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1\\\}" 1 "crc"} } */
+/* { dg-final { scan-tree-dump-times "Polynomial's value is \\\{\[0, \]*1, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1\\\}" 1 "crc" { target { vect256 } } } } */
 /* { dg-final { scan-tree-dump "calculates CRC!" "crc"} } */
 /* { dg-final { scan-tree-dump-times "Couldn't generate faster CRC code." 0 "crc"} } */

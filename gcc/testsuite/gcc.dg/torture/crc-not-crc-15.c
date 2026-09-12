@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-O3" "-flto" } } */
 
 /* With -O3 the cycles is split into 2,

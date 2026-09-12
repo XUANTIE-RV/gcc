@@ -111,7 +111,7 @@ public:
   const riscv_subset_t *end () const {return NULL;};
 
   int match_score (riscv_subset_list *) const;
-
+  void xt_finalize (void);
   void set_loc (location_t);
 
   void set_allow_adding_dup (bool v) { m_allow_adding_dup = v; }

@@ -747,6 +747,8 @@ options are changed via @code{#pragma GCC optimize} or by using the
 
 @hook TARGET_COMPUTE_MULTILIB
 
+@hook TARGET_COMPUTE_MULTILIB_OS
+
 
 @defmac SWITCHABLE_TARGET
 Some targets need to switch between substantially different subtargets
@@ -4632,6 +4634,8 @@ If you don't define this, a reasonable default is used.
 @hook TARGET_OVERLAP_OP_BY_PIECES_P
 
 @hook TARGET_COMPARE_BY_PIECES_BRANCH_RATIO
+
+@hook TARGET_BY_PIECES_MODE_SUPPORTED_P
 
 @defmac MOVE_MAX_PIECES
 A C expression used by @code{move_by_pieces} to determine the largest unit

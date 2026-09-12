@@ -1,5 +1,5 @@
 /* { dg-do run } */
-/* { dg-options "-march=rv64gcv_zvl256b -mabi=lp64d -O3" } */
+/* { dg-options "-O3" } */
 /* { dg-require-effective-target rv64 } */
 /* { dg-require-effective-target riscv_v } */
 

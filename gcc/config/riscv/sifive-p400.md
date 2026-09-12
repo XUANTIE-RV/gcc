@@ -153,6 +153,11 @@
        (eq_attr "type" "fmove,fcvt"))
   "p400_float_pipe,sifive_p400_fpu")
 
+(define_insn_reservation "sifive_p400_fminmax" 2
+  (and (eq_attr "tune" "sifive_p400")
+       (eq_attr "type" "fminmax"))
+  "p400_float_pipe,sifive_p400_fpu")
+
 (define_insn_reservation "sifive_p400_fdiv_s" 18
   (and (eq_attr "tune" "sifive_p400")
        (eq_attr "type" "fdiv,fsqrt")

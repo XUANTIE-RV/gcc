@@ -234,7 +234,7 @@ public:
   /* opt_pass methods: */
   virtual bool gate (function *) final override
   {
-    return TARGET_VECTOR && optimize > 0;
+    return TARGET_VECTOR && !TARGET_XTHEADVECTOR && optimize > 0;
   }
   virtual unsigned int execute (function *) final override;
 

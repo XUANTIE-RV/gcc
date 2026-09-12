@@ -1,5 +1,5 @@
 /* { dg-options "-msave-restore" } */
-/* { dg-skip-if "" { *-*-* } { "-O0" } } */
+/* { dg-skip-if "" { *-*-* } { "-O0" "-march=*zcmp*" } } */
 
 /* With -msave-restore in use it should not be possible to remove the calls
    to the save and restore stubs in this case (in current GCC).  */

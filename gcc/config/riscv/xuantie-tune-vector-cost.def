@@ -1,0 +1,63 @@
+/* Copyright (C) 2025 Free Software Foundation, Inc.
+   Contributed by Alibaba Damo Academy Xuantie Team.
+
+   This file is part of GCC.
+
+   GCC is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   GCC is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GCC; see the file COPYING3.  If not see
+   <http://www.gnu.org/licenses/>.  */
+
+static const common_vector_cost xt_c950_vls_vector_cost = {
+  3, /* int_stmt_cost  */
+  4, /* fp_stmt_cost  */
+  99, /* gather_load_cost  */
+  32, /* scatter_store_cost  */
+  8, /* segment_permute (2) */
+  9, /* segment_permute (3) */
+  9, /* segment_permute (4) */
+  12, /* segment_permute (5) */
+  12, /* segment_permute (6) */
+  12, /* segment_permute (7) */
+  12, /* segment_permute (8) */
+  2, /* vec_to_scalar_cost  */
+  2, /* scalar_to_vec_cost  */
+  4, /* permute_cost  */
+  6, /* align_load_cost  */
+  1, /* align_store_cost  */
+  8, /* unalign_load_cost  */
+  2, /* unalign_store_cost  */
+  6, /* reduce_i8_cost  */
+  6, /* reduce_i16_cost  */
+  6, /* reduce_i32_cost  */
+  6, /* reduce_i64_cost  */
+  11, /* reduce_f16_cost  */
+  11, /* reduce_f32_cost  */
+  9,  /* reduce_f64_cost  */
+  17, /* ordered_reduce_f16_cost  */
+  16, /* ordered_reduce_f32_cost  */
+  12, /* ordered_reduce_f64_cost  */
+};
+
+static const scalable_vector_cost xt_c950_vla_vector_cost(xt_c950_vls_vector_cost);
+
+static const struct cpu_vector_cost xt_c950_vector_cost = {
+  1,			    /* scalar_int_stmt_cost  */
+  2,			    /* scalar_fp_stmt_cost  */
+  4,			    /* scalar_load_cost  */
+  1,			    /* scalar_store_cost  */
+  1,			    /* cond_taken_branch_cost  */
+  1,			    /* cond_not_taken_branch_cost  */
+  &xt_c950_vls_vector_cost, /* vls  */
+  &xt_c950_vla_vector_cost, /* vla  */
+  &rvv_regmove_vector_cost, /* regmove  */
+};

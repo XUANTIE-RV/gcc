@@ -1,5 +1,5 @@
 /* { dg-do run { target { lp64 } } } */
-/* { dg-options "-fdump-tree-crc-details" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-flto" } } */
 
 #include <stdint.h>

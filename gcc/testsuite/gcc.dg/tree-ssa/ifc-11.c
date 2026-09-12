@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-Ofast -fdump-tree-ifcvt-stats-blocks-details" } */
+/* { dg-options "-Ofast -ftree-vectorize -fdump-tree-ifcvt-stats-blocks-details" } */
 /* { dg-require-visibility "" } */
 
 int a[1024] = {0.0};

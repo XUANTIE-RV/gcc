@@ -1,0 +1,444 @@
+/* Copyright (C) 2024 Free Software Foundation, Inc.
+   Contributed by Alibaba Damo Academy Xuantie Team.
+
+   This file is part of GCC.
+
+   GCC is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   GCC is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GCC; see the file COPYING3.  If not see
+   <http://www.gnu.org/licenses/>.  */
+
+#ifdef RISCV_TUNE
+
+RISCV_TUNE("e901", generic, xt_e9_tune_info)
+RISCV_TUNE("e902", generic, xt_e9_tune_info)
+RISCV_TUNE("e906", generic, xt_e9_tune_info)
+RISCV_TUNE("e907", generic, xt_e9_tune_info)
+RISCV_TUNE("c906v", c906v, xt_c906v_tune_info)
+RISCV_TUNE("c910", c910, xt_c910_tune_info)
+RISCV_TUNE("c908", c908, xt_c908_tune_info)
+RISCV_TUNE ("c908x", c908x, xt_c908_tune_info)
+RISCV_TUNE("c907", c907, xt_c907_tune_info)
+RISCV_TUNE("c920v2.c908v", c908, xt_c908_tune_info)
+RISCV_TUNE("zhijiang", c950, xt_c950_tune_info)
+RISCV_TUNE("xt-c925", c950, xt_c950_tune_info)
+RISCV_TUNE("xt-c930", c950, xt_c950_tune_info)
+RISCV_TUNE("xt-c950", c950, xt_c950_tune_info)
+
+#endif
+
+/* This is a list of cores that implement RISC-V.
+
+   Before using #include to read this file, define a macro:
+
+      RISCV_CORE(CORE_NAME, ARCH, MICRO_ARCH)
+
+   The CORE_NAME is the name of the core, represented as a string.
+   The ARCH is the default arch of the core, represented as a string,
+   can be NULL if no default arch.
+   The MICRO_ARCH is the name of the core for which scheduling decisions
+   will be made, represented as an identifier.  */
+
+#ifdef RISCV_CORE
+
+// XUANTIE E Series
+RISCV_CORE ("e901-cp",		"rv32e_zicsr_zifencei_zca_zcb_zcmp_zcmt_xtheadse_xtheadcbi",				"e901")
+RISCV_CORE ("e901b-cp",		"rv32e_zicsr_zifencei_zca_zcb_zcmp_zcmt_zba_zbb_zbs_xtheadse_xtheadcbi",		"e901")
+RISCV_CORE ("e901zm-cp",	"rv32e_zicsr_zifencei_zmmul_zca_zcb_zcmp_zcmt_xtheadse_xtheadcbi",			"e901")
+RISCV_CORE ("e901bzm-cp",	"rv32e_zicsr_zifencei_zmmul_zca_zcb_zcmp_zcmt_zba_zbb_zbs_xtheadse_xtheadcbi",	"e901")
+RISCV_CORE ("e901plus-cp",	"rv32e_zicsr_zifencei_zca_zcb_zcmp_zcmt_xtheadse_xtheadcbi",				"e901")
+RISCV_CORE ("e901plusb-cp",	"rv32e_zicsr_zifencei_zca_zcb_zcmp_zcmt_zba_zbb_zbs_xtheadse_xtheadcbi",		"e901")
+RISCV_CORE ("e901plusm-cp",	"rv32em_zicsr_zifencei_zca_zcb_zcmp_zcmt_xtheadse_xtheadcbi",				"e901")
+RISCV_CORE ("e901plusbm-cp",	"rv32em_zicsr_zifencei_zca_zcb_zcmp_zcmt_zba_zbb_zbs_xtheadse_xtheadcbi",		"e901")
+
+RISCV_CORE ("e902",           "rv32ec_zicsr_zifencei_xtheadse",                                      "e902")
+RISCV_CORE ("e902m",          "rv32emc_zicsr_zifencei_xtheadse",                                     "e902")
+RISCV_CORE ("e902t",          "rv32ec_zicsr_zifencei_xtheadse",                                      "e902")
+RISCV_CORE ("e902mt",         "rv32emc_zicsr_zifencei_xtheadse",                                     "e902")
+
+RISCV_CORE ("e906",           "rv32imac_zicntr_zicsr_zifencei_zihpm_xtheade",                                     "e906")
+RISCV_CORE ("e906f",          "rv32imafc_zicntr_zicsr_zifencei_zihpm_xtheade",                                    "e906")
+RISCV_CORE ("e906fd",         "rv32imafdc_zicntr_zicsr_zifencei_zihpm_xtheade",                                   "e906")
+RISCV_CORE ("e906p",          "rv32imacp_zicntr_zicsr_zifencei_zihpm_zpsfoperand_xtheade",                        "e906")
+RISCV_CORE ("e906fp",         "rv32imafcp_zicntr_zicsr_zifencei_zihpm_zpsfoperand_xtheade",                       "e906")
+RISCV_CORE ("e906fdp",        "rv32imafdcp_zicntr_zicsr_zifencei_zihpm_zpsfoperand_xtheade",                      "e906")
+
+RISCV_CORE ("e907",           "rv32imac_zicntr_zicsr_zifencei_zihpm_xtheade",                                     "e907")
+RISCV_CORE ("e907f",          "rv32imafc_zicntr_zicsr_zifencei_zihpm_xtheade",                                    "e907")
+RISCV_CORE ("e907fd",         "rv32imafdc_zicntr_zicsr_zifencei_zihpm_xtheade",                                   "e907")
+RISCV_CORE ("e907p",          "rv32imacp_zicntr_zicsr_zifencei_zihpm_zpsfoperand_xtheade",                        "e907")
+RISCV_CORE ("e907fp",         "rv32imafcp_zicntr_zicsr_zifencei_zihpm_zpsfoperand_xtheade",                       "e907")
+RISCV_CORE ("e907fdp",        "rv32imafdcp_zicntr_zicsr_zifencei_zihpm_zpsfoperand_xtheade",                      "e907")
+
+// XUANTIE C Series
+RISCV_CORE ("c906",           "rv64imac_zicntr_zicsr_zifencei_zihpm_xtheadc",                                     "c906v")
+RISCV_CORE ("c906fd",         "rv64imafdc_zicntr_zicsr_zifencei_zihpm_zfh_xtheadc",                                   "c906v")
+RISCV_CORE ("c906fdv",        "rv64imafdc_zicntr_zicsr_zifencei_zihpm_zfh_xtheadc_xtheadvector",                          "c906v")
+
+RISCV_CORE ("c910",           "rv64imafdc_zicntr_zicsr_zifencei_zihpm_zfh_xtheadc",                                   "c910")
+RISCV_CORE ("c920",           "rv64imafdc_zicntr_zicsr_zifencei_zihpm_zfh_xtheadc_xtheadvector",                          "c910")
+
+// 64 bits by default for C908.
+RISCV_CORE ("c908",           "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc",  "c908")
+RISCV_CORE ("c908v",          "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot", "c908")
+RISCV_CORE ("c908-rv64",      "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc",  "c908")
+RISCV_CORE ("c908v-rv64",     "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot", "c908")
+RISCV_CORE ("c908-rv32",      "rv32imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc",  "c908")
+RISCV_CORE ("c908v-rv32",     "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot", "c908")
+RISCV_CORE ("c908x",	      "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_"
+			      "zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_"
+			      "zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_"
+			      "zvl512b_sstc_svinval_svnapot_svpbmt_xtheadc_"
+			      "xtheadvdot_xtheadvsfa_xtheadvfcvt_"
+			      "xtheadvreduction_xtheadlpw_xxtcsrcacherpl", "c908x")
+RISCV_CORE ("c908x-cp",       "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_"
+			      "zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_"
+			      "zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_"
+			      "zvl512b_sstc_svinval_svnapot_svpbmt_"
+			      "xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xtheadcvwn_"
+			      "xtheadvcpml_xxtcsrcacherpl",
+			      "c908x")
+RISCV_CORE ("c908x-cp-xt",    "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_"
+			      "zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_"
+			      "zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_"
+			      "zvl512b_sstc_svinval_svnapot_svpbmt_xtheadc_"
+			      "xtheadvcpml_xtheadvdot_xtheadvsfa_xtheadvfcvt_"
+			      "xtheadvreduction_xtheadlpw_xtheadcbi_xtheadcei_xtheadcf_"
+			      "xtheadcv_xtheadcvwn_xxtcsrcacherpl", "c908x")
+
+// 64 bits and no FPRs by default for C908.
+RISCV_CORE ("c908i",           "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc",  "c908")
+
+// 64 bits by default for C908_V2.
+RISCV_CORE ("c908_v2",		 "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908v_v2",		 "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xtheadvdot_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908-cp_v2",	 "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908v-cp_v2",	 "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908vk-cp_v2",	 "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfbfmin_zvfbfwma_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908-cp-xt_v2",	 "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908v-cp-xt_v2",	 "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908vk-cp-xt_v2",	 "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfbfmin_zvfbfwma_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908_v2-rv32",	 "rv32imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908v_v2-rv32",	 "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xtheadvdot_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908-cp_v2-rv32",	 "rv32imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908v-cp_v2-rv32",	 "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908vk-cp_v2-rv32",	"rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfbfmin_zvfbfwma_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908-cp-xt_v2-rv32",	"rv32imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908v-cp-xt_v2-rv32",	"rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("c908vk-cp-xt_v2-rv32",	"rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfbfmin_zvfbfwma_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+
+// 64 bits and no FPRs by default for C908_V2.
+RISCV_CORE ("c908i_v2",		 "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zca_zcb_zba_zbb_zbc_zbs_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("c908i-cp_v2",	 "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zca_zcb_zba_zbb_zbc_zbs_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadcbi_xtheadcei_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("c908i-cp-xt_v2",	 "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zca_zcb_zba_zbb_zbc_zbs_smaia_smcsrind_ssaia_sscsrind_sstc_svinval_svnapot_svpbmt_svvptc_xtheadc_xtheadlpw_xtheadcbi_xtheadcei_xxtcsrcacherpl",  "c908")
+
+// 64 bits by default for C907.
+RISCV_CORE ("c907",           "rv64imac_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zca_zcb_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc",  "c907")
+RISCV_CORE ("c907fd",           "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc",  "c907")
+RISCV_CORE ("c907fdv",           "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot",  "c907")
+RISCV_CORE ("c907fdvm",           "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadmatrix0p3_xtheadvdot",  "c907")
+RISCV_CORE ("c907-rv64",           "rv64imac_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zca_zcb_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc",  "c907")
+RISCV_CORE ("c907fd-rv64",           "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc",  "c907")
+RISCV_CORE ("c907fdv-rv64",           "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot",  "c907")
+RISCV_CORE ("c907fdvm-rv64",           "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadmatrix0p3_xtheadvdot",  "c907")
+RISCV_CORE ("c907-rv32",           "rv32imac_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zca_zcb_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc",  "c907")
+RISCV_CORE ("c907fd-rv32",           "rv32imafdc_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc",  "c907")
+RISCV_CORE ("c907fdv-rv32",           "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot",  "c907")
+RISCV_CORE ("c907fdvm-rv32",           "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcf_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadmatrix0p3_xtheadvdot",  "c907")
+
+// 64 bits by default for C910V2 and C920V2.
+RISCV_CORE ("c910v2",           "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc",  "c910")
+RISCV_CORE ("c920v2",           "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot",  "c910")
+
+// 64 bits by default for C910V3 and C920V3
+RISCV_CORE ("c910v3",         "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zimop_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc",  "c910")
+RISCV_CORE ("c920v3",         "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zimop_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot",  "c910")
+RISCV_CORE ("c910v3-cp",      "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zimop_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadcbi_xtheadcei_xtheadcf",  "c910")
+RISCV_CORE ("c920v3-cp",      "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zimop_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadcbi_xtheadcei_xtheadcf_xtheadcv",  "c910")
+RISCV_CORE ("c910v3-cp-xt",   "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zimop_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_zbb_zbc_zbs_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadcbi_xtheadcei_xtheadcf",  "c910")
+RISCV_CORE ("c920v3-cp-xt",   "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicond_zicsr_zifencei_zihintntl_zihintpause_zihpm_zimop_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_zbb_zbc_zbs_zvfbfmin_zvfbfwma_zvfh_sscofpmf_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv",  "c910")
+
+// XUANTIE R Series
+RISCV_CORE ("r910",           "rv64imafdc_zicntr_zicsr_zifencei_zihpm_zfh_xtheadc",                                   "c910")
+RISCV_CORE ("r920",           "rv64imafdc_zicntr_zicsr_zifencei_zihpm_zfh_xtheadc_xtheadvector",                          "c910")
+
+RISCV_CORE ("r908",           "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcmop_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fd",         "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fdv",        "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadvdot_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908-rv64",      "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcmop_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fd-rv64",    "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908fdv-rv64",   "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadvdot_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908-rv32",      "rv32imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcmop_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fd-rv32",    "rv32imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcf_zcmop_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fdv-rv32",   "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcf_zcmop_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadvdot_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908-cp",           "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcmop_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fd-cp",         "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fdv-cp",        "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908fdvk-cp",        "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908-cp-rv64",      "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcmop_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fd-cp-rv64",    "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fdv-cp-rv64",   "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908fdvk-cp-rv64",        "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908-cp-rv32",      "rv32imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcmop_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fd-cp-rv32",    "rv32imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcf_zcmop_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fdv-cp-rv32",   "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcf_zcmop_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908fdvk-cp-rv32",        "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcf_zcmop_zfh_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_sstc_svinval_svnapot_svpbmt_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+
+RISCV_CORE ("r908-cp-xt",           "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcmop_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadcbi_xtheadcei_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fd-cp-xt",         "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fdv-cp-xt",        "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908fdvk-cp-xt",        "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908-cp-xt-rv64",      "rv64imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcmop_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadcbi_xtheadcei_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fd-cp-xt-rv64",    "rv64imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908fdv-cp-xt-rv64",   "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908fdvk-cp-xt-rv64",        "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcmop_zfh_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908-cp-xt-rv32",      "rv32imac_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcmop_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadcbi_xtheadcei_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fd-cp-xt-rv32",    "rv32imafdc_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcf_zcmop_zfh_zba_zbb_zbc_zbs_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadcbi_xtheadcei_xtheadcf_xxtcsrcacherpl",  "c908")
+RISCV_CORE ("r908fdv-cp-xt-rv32",   "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcf_zcmop_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+RISCV_CORE ("r908fdvk-cp-xt-rv32",        "rv32imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zimop_zca_zcb_zcd_zcf_zcmop_zfh_zba_zbb_zbc_zbs_zvbb_zvbc_zvbc32e_zvfh_zvkb_zvkg_zvkgs_zvkn_zvknc_zvkned_zvkng_zvknhb_zvks_zvksc_zvksed_zvksg_zvksh_zvkt_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadlpw_xtheadfpp_xtheadvdot_xtheadcbi_xtheadcei_xtheadcf_xtheadcv_xxtcsrcacherpl", "c908")
+
+
+RISCV_CORE ("c920v2.c908v",          "rv64imafdcv_zicbom_zicbop_zicboz_zicntr_zicsr_zifencei_zihintpause_zihpm_zfh_zba_zbb_zbc_zbs_zvfh_sstc_svinval_svnapot_svpbmt_xtheadc_xtheadvdot", "c920v2.c908v")
+
+RISCV_CORE("xt-c930-cp",	"rv64imafdch_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_"
+				"shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_",
+				"xt-c930")
+RISCV_CORE("xt-c9301fdt",	"rv64imafdch_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_"
+				"shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_",
+				"xt-c930")
+RISCV_CORE("xt-c930v-cp",	"rv64imafdcvh_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_zvbb_zvbc_zvbc32e_"
+				"zvfbfmin_zvfbfwma_zvfh_zvfhmin_zvkb_zvkg_zvkgs_zvkn_"
+				"zvknc_zvkned_zvkng_zvknha_zvknhb_zvksc_zvksed_zvksg_"
+				"zvksh_zvkt_zvl256b_zvqdotq_shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_xtheadcv_"
+				"xtheadvarith_xtheadvcoder_xtheadvcrypto_xtheadvdot_"
+				"xtheadvfoe8m0min_xtheadvfofp4min_xtheadvfofp8min",
+				"xt-c930")
+RISCV_CORE("xt-c9301fdvkt",	"rv64imafdcvh_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_zvbb_zvbc_zvbc32e_"
+				"zvfbfmin_zvfbfwma_zvfh_zvfhmin_zvkb_zvkg_zvkgs_zvkn_"
+				"zvknc_zvkned_zvkng_zvknha_zvknhb_zvksc_zvksed_zvksg_"
+				"zvksh_zvkt_zvl256b_zvqdotq_shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_xtheadcv_"
+				"xtheadvarith_xtheadvcoder_xtheadvcrypto_xtheadvdot_"
+				"xtheadvfoe8m0min_xtheadvfofp4min_xtheadvfofp8min",
+				"xt-c930")
+RISCV_CORE("xt-c925-cp",	"rv64imafdch_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_"
+				"shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_",
+				"xt-c925")
+RISCV_CORE("xt-c9251fdt",	"rv64imafdch_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_"
+				"shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_",
+				"xt-c925")
+RISCV_CORE("xt-c925v-cp",	"rv64imafdcvh_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_"
+				"zvfbfmin_zvfbfwma_zvfh_zvfhmin_zvl128b_zvqdotq_"
+				"shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_xtheadcv_"
+				"xtheadvcoder_xtheadvdot_"
+				"xtheadvfoe8m0min_xtheadvfofp4min_xtheadvfofp8min",
+				"xt-c925")
+RISCV_CORE("xt-c9251fdvt",	"rv64imafdcvh_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_"
+				"zvfbfmin_zvfbfwma_zvfh_zvfhmin_zvl128b_zvqdotq_"
+				"shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_xtheadcv_"
+				"xtheadvcoder_xtheadvdot_"
+				"xtheadvfoe8m0min_xtheadvfofp4min_xtheadvfofp8min",
+				"xt-c925")
+RISCV_CORE("xt-c925vk-cp",	"rv64imafdcvh_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_zvbb_zvbc_zvbc32e_"
+				"zvfbfmin_zvfbfwma_zvfh_zvfhmin_zvkb_zvkg_zvkgs_zvkn_"
+				"zvknc_zvkned_zvkng_zvknha_zvknhb_zvksc_zvksed_zvksg_"
+				"zvksh_zvkt_zvl128b_zvqdotq_shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_xtheadcv_"
+				"xtheadvarith_xtheadvcoder_xtheadvcrypto_xtheadvdot_"
+				"xtheadvfoe8m0min_xtheadvfofp4min_xtheadvfofp8min",
+				"xt-c925")
+RISCV_CORE("xt-c9251fdvkt",	"rv64imafdcvh_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_zvbb_zvbc_zvbc32e_"
+				"zvfbfmin_zvfbfwma_zvfh_zvfhmin_zvkb_zvkg_zvkgs_zvkn_"
+				"zvknc_zvkned_zvkng_zvknha_zvknhb_zvksc_zvksed_zvksg_"
+				"zvksh_zvkt_zvl128b_zvqdotq_shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_xtheadcv_"
+				"xtheadvarith_xtheadvcoder_xtheadvcrypto_xtheadvdot_"
+				"xtheadvfoe8m0min_xtheadvfofp4min_xtheadvfofp8min",
+				"xt-c925")
+
+// XUANTIE C9501 Series (based on zhijiang)
+// xt-c9501fdvt: fdv + thead extensions (no crypto, no matrix)
+RISCV_CORE("xt-c9501fdvt",	"rv64imafdcvh_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_"
+				"zvfbfmin_zvfbfwma_zvfh_zvfhmin_zvl256b_zvqdotq_"
+				"shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_xtheadcv_"
+				"xtheadvcoder_xtheadvdot_"
+				"xtheadvfoe8m0min_xtheadvfofp4min_xtheadvfofp8min",
+				"xt-c950")
+// xt-c9501fdvkt: fdv + crypto + thead extensions (no matrix)
+RISCV_CORE("xt-c9501fdvkt",	"rv64imafdcvh_zfhmin_zic64b_zicbom_zicbop_zicboz_"
+				"ziccamoa_ziccamoc_ziccif_zicclsm_ziccrse_zicfilp_"
+				"zicfiss_zicntr_zicond_zicsr_zifencei_zihintntl_"
+				"zihintpause_zihpm_zimop_za64rs_zabha_zacas_zalasr_"
+				"zama16b_zawrs_zfa_zfbfmin_zfh_zca_zcb_zcd_zcmop_zba_"
+				"zbb_zbc_zbs_zkr_zkt_zmmul_zvbb_zvbc_zvbc32e_"
+				"zvfbfmin_zvfbfwma_zvfh_zvfhmin_zvkb_zvkg_zvkgs_zvkn_"
+				"zvknc_zvkned_zvkng_zvknha_zvknhb_zvksc_zvksed_zvksg_"
+				"zvksh_zvkt_zvl256b_zvqdotq_"
+				"shcounterenw_shgatpa_shtvala_shvsatpa_"
+				"shvstvala_shvstvecd_smaia_smcdeleg_smcntrpmf_smcsrind_"
+				"smctr_smepmp_smmpm_smmtt_smnpm_smrnmi_smstateen_"
+				"ssaia_ssccfg_ssccptr_sscofpmf_"
+				"sscounterenw_sscsrind_ssctr_ssdbltrp_ssdtso_ssnpm_sspm_ssqosid_ssstateen_"
+				"ssstrict_sstc_sstvala_sstvecd_ssu64xl_supm_svade_svadu_"
+				"svbare_svinval_svnapot_svpbmt_svvptc_"
+				"xtheadaioe_"
+				"xtheadcbi_xtheadcbop_xtheadcf_xtheadcrc_xtheadcv_"
+				"xtheadvarith_xtheadvcoder_xtheadvcrypto_xtheadvdot_"
+				"xtheadvfoe8m0min_xtheadvfofp4min_xtheadvfofp8min",
+				"xt-c950")
+RISCV_CORE("zhijiang-p",	"rv64gc_zicond_zfa_zfh_zcb_zba_zbb_zbc_zbs",
+				"zhijiang")
+
+RISCV_CORE("zhijiang-pv",	"rv64gcv_zicond_zfa_zfh_zcb_zba_zbb_zbc_zbs_zvl256b",
+				"zhijiang")
+
+#endif

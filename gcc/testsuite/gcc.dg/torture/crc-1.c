@@ -1,5 +1,5 @@
 /* { dg-do run } */
-/* { dg-options "-fdump-tree-crc-details -fdisable-tree-phiopt2 -fdisable-tree-phiopt3" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details -fdisable-tree-phiopt2 -fdisable-tree-phiopt3" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-flto" } } */
 /* { dg-require-effective-target int32plus } */
 

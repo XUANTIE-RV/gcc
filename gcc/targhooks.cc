@@ -2134,6 +2134,13 @@ default_compare_by_pieces_branch_ratio (machine_mode)
   return 1;
 }
 
+/* Return true if the MODE supports pieces operations.  */
+bool
+default_by_pieces_mode_supported_p (fixed_size_mode)
+{
+  return true;
+}
+
 /* Write PATCH_AREA_SIZE NOPs into the asm outfile FILE around a function
    entry.  If RECORD_P is true and the target supports named sections,
    the location of the NOPs will be recorded in a special object section

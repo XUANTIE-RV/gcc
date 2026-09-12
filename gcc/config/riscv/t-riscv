@@ -137,6 +137,9 @@ riscv-zicfilp.o: $(srcdir)/config/riscv/riscv-zicfilp.cc \
 		$(srcdir)/config/riscv/riscv-zicfilp.cc
 
 PASSES_EXTRA += $(srcdir)/config/riscv/riscv-passes.def
+PASSES_EXTRA += $(srcdir)/config/riscv/xuantie-passes.def
+TM_P_H += $(srcdir)/config/riscv/xuantie-protos.h
+TM_H += $(srcdir)/config/riscv/xuantie-ext.h
 
 $(common_out_file): $(srcdir)/config/riscv/riscv-cores.def \
     $(srcdir)/config/riscv/riscv-protos.h \

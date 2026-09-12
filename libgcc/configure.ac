@@ -49,6 +49,17 @@ AC_SUBST(libgcc_topdir)
 AC_CONFIG_AUX_DIR($libgcc_topdir)
 AC_CONFIG_HEADER(auto-target.h:config.in)
 
+AC_ARG_ENABLE(libgcctf,
+	[AS_HELP_STRING([--enable-libgcctf],
+		[Build libcc_tf.a])],
+	[],
+	[enable_libgcctf=no]
+	)
+
+AS_IF([test "x$enable_libgcctf" != xno],
+	[AC_SUBST(enable_libgcctf, --enable-libgcctf)],
+	[AC_SUBST(enable_libgcctf, --disable-libgcctf)])
+
 AC_ARG_ENABLE(shared,
 [  --disable-shared        don't provide a shared libgcc],
 [

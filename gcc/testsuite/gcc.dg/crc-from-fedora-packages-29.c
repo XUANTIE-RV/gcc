@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc-details -O2" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details -O2" } */
 
 // File - hash.c.i.
 /* We don't support cases with multiple conditional branches in the loop.  */

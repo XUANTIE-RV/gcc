@@ -1045,6 +1045,9 @@ precompute_register_parameters (int num_actuals, struct arg_data *args,
 		     || (GET_CODE (args[i].value) == SUBREG
 			 && REG_P (SUBREG_REG (args[i].value)))))
 		 && args[i].mode != BLKmode
+#ifdef TARGET_XUANTIE_LARGE_IMMEDIATE_P
+		 && !TARGET_XUANTIE_LARGE_IMMEDIATE_P (args[i].value, args[i].mode)
+#endif
 		 && (set_src_cost (args[i].value, args[i].mode,
 				   optimize_insn_for_speed_p ())
 		     > COSTS_N_INSNS (1))

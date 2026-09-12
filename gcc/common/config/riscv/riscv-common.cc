@@ -34,6 +34,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "diagnostic-core.h"
 #include "config/riscv/riscv-protos.h"
 #include "config/riscv/riscv-subset.h"
+#include "xuantie-common.cc"
 
 #ifdef  TARGET_BIG_ENDIAN_DEFAULT
 #undef  TARGET_DEFAULT_TARGET_FLAGS
@@ -75,6 +76,9 @@ struct riscv_implied_info_t
 /* Implied ISA info, must end with NULL sentinel.  */
 static const riscv_implied_info_t riscv_implied_info[] =
 {
+  /* To reduce the likelihood of code synchronization conflicts,
+     the code is added here instead of at the end of the table.  */
+  XUANTIE_IMPLIED_TABLE
   {"m", "zmmul"},
 
   {"d", "f"},
@@ -99,6 +103,8 @@ static const riscv_implied_info_t riscv_implied_info[] =
   {"zabha", "zaamo"},
   {"zacas", "zaamo"},
 
+  {"zcmop", "zca"},
+
   {"b", "zba"},
   {"b", "zbb"},
   {"b", "zbs"},
@@ -112,6 +118,7 @@ static const riscv_implied_info_t riscv_implied_info[] =
   {"zicfiss", "zicsr"},
   {"zicfiss", "zimop"},
   {"zicfilp", "zicsr"},
+
   {"zclsd", "zilsd"},
   {"zclsd", "zca"},
 
@@ -130,8 +137,16 @@ static const riscv_implied_info_t riscv_implied_info[] =
   {"zks", "zksed"},
   {"zks", "zksh"},
 
-  {"v", "zvl128b"},
-  {"v", "zve64d"},
+  {"v", "zvl128b",
+   [] (const riscv_subset_list *subset_list) -> bool
+   {
+     return !subset_list->lookup ("v", 0, 7);
+   }},
+  {"v", "zve64d",
+   [] (const riscv_subset_list *subset_list) -> bool
+   {
+     return !subset_list->lookup ("v", 0, 7);
+   }},
 
   {"zve32f", "f"},
   {"zve64f", "f"},
@@ -253,8 +268,11 @@ static const riscv_implied_info_t riscv_implied_info[] =
   {"smaia", "ssaia"},
   {"smstateen", "ssstateen"},
   {"smepmp", "zicsr"},
+  {"smdbltrp", "zicsr"},
   {"ssaia", "zicsr"},
   {"sscofpmf", "zicsr"},
+  {"ssdbltrp", "zicsr"},
+  {"ssdtso", "zicsr"},
   {"ssstateen", "zicsr"},
   {"sstc", "zicsr"},
 
@@ -330,7 +348,7 @@ static const struct riscv_ext_version riscv_ext_version_table[] =
   {"zalrsc", ISA_SPEC_CLASS_NONE, 1, 0},
   {"zabha", ISA_SPEC_CLASS_NONE, 1, 0},
   {"zacas", ISA_SPEC_CLASS_NONE, 1, 0},
-  {"zalasr", ISA_SPEC_CLASS_NONE, 0, 3},
+  {"zalasr", ISA_SPEC_CLASS_NONE, 1, 0},
 
   {"zba", ISA_SPEC_CLASS_NONE, 1, 0},
   {"zbb", ISA_SPEC_CLASS_NONE, 1, 0},
@@ -440,14 +458,19 @@ static const struct riscv_ext_version riscv_ext_version_table[] =
   {"zcmt", ISA_SPEC_CLASS_NONE, 1, 0},
 
   {"smaia",     ISA_SPEC_CLASS_NONE, 1, 0},
+  {"smcntrpmf",     ISA_SPEC_CLASS_NONE, 1, 0},
+  {"smdbltrp",  ISA_SPEC_CLASS_NONE, 1, 0},
   {"smepmp",    ISA_SPEC_CLASS_NONE, 1, 0},
   {"smstateen", ISA_SPEC_CLASS_NONE, 1, 0},
 
   {"ssaia",     ISA_SPEC_CLASS_NONE, 1, 0},
   {"sscofpmf",  ISA_SPEC_CLASS_NONE, 1, 0},
+  {"ssdbltrp",  ISA_SPEC_CLASS_NONE, 1, 0},
+  {"ssdtso",    ISA_SPEC_CLASS_NONE, 1, 0},
   {"ssstateen", ISA_SPEC_CLASS_NONE, 1, 0},
   {"sstc",      ISA_SPEC_CLASS_NONE, 1, 0},
 
+  {"svadu",      ISA_SPEC_CLASS_NONE, 1, 0},
   {"svinval", ISA_SPEC_CLASS_NONE, 1, 0},
   {"svnapot", ISA_SPEC_CLASS_NONE, 1, 0},
   {"svpbmt",  ISA_SPEC_CLASS_NONE, 1, 0},
@@ -458,6 +481,8 @@ static const struct riscv_ext_version riscv_ext_version_table[] =
   {"xcvsimd", ISA_SPEC_CLASS_NONE, 1, 0},
   {"xcvbi", ISA_SPEC_CLASS_NONE, 1, 0},
 
+  /* To reduce the likelihood of code synchronization conflicts.  */
+  XUANTIE_EXT_VERSION_TABLE
   {"xtheadba", ISA_SPEC_CLASS_NONE, 1, 0},
   {"xtheadbb", ISA_SPEC_CLASS_NONE, 1, 0},
   {"xtheadbs", ISA_SPEC_CLASS_NONE, 1, 0},
@@ -610,7 +635,7 @@ riscv_subset_list::~riscv_subset_list ()
     }
 }
 
-/* Compute the match score of two arch string, return 0 if incompatible.  */
+/* Compute the match score of two arch string, return -1 if incompatible.  */
 int
 riscv_subset_list::match_score (riscv_subset_list *list) const
 {
@@ -620,7 +645,7 @@ riscv_subset_list::match_score (riscv_subset_list *list) const
 
   /* Impossible to match if XLEN is different.  */
   if (list->m_xlen != this->m_xlen)
-    return 0;
+    return -1;
 
   /* There is different code gen in libstdc++ and libatomic between w/ A-ext
      and w/o A-ext, and it not work if using soft and hard atomic mechanism
@@ -629,7 +654,7 @@ riscv_subset_list::match_score (riscv_subset_list *list) const
   list_has_a_ext = list->lookup ("a") != NULL;
 
   if (has_a_ext != list_has_a_ext)
-    return 0;
+    return -1;
 
 
   /* list must be subset of current this list, otherwise it not safe to
@@ -640,10 +665,12 @@ riscv_subset_list::match_score (riscv_subset_list *list) const
   for (s = list->m_head; s != NULL; s = s->next)
     if (this->lookup (s->name.c_str ()) != NULL)
       score++;
+    else if (xt_match_score_inc_p (s->name.c_str (), this, list))
+      score++;
     else
-      return 0;
+      return -1;
 
-  return score;
+  return (score != 0) ? score : -1;
 }
 
 /* Get the rank for single-letter subsets, lower value meaning higher
@@ -1427,7 +1454,7 @@ riscv_subset_list::check_conflict_ext ()
   if (lookup ("zcf") && m_xlen == 64)
     error_at (m_loc, "%<-march=%s%>: zcf extension supports in rv32 only",
 	      m_arch);
-  
+
   if (lookup ("zilsd") && m_xlen == 64)
     error_at (m_loc, "%<-march=%s%>: zilsd extension supports in rv32 only",
 	      m_arch);
@@ -1454,7 +1481,7 @@ riscv_subset_list::check_conflict_ext ()
 	error_at (m_loc, "%<-march=%s%>: zcd conflicts with zcmp", m_arch);
     }
 
-  if ((lookup ("v") || lookup ("zve32x")
+  if (((lookup ("v") && !lookup ("v", 0, 7)) || lookup ("zve32x")
 	 || lookup ("zve64x") || lookup ("zve32f")
 	 || lookup ("zve64f") || lookup ("zve64d")
 	 || lookup ("zvl32b") || lookup ("zvl64b")
@@ -1645,6 +1672,7 @@ riscv_subset_list::parse (const char *arch, location_t loc)
     goto fail;
 
   subset_list->finalize ();
+  subset_list->xt_finalize ();
 
   return subset_list;
 
@@ -1778,7 +1806,7 @@ static const riscv_ext_flag_table_t riscv_ext_flag_table[] =
   RISCV_EXT_FLAG_ENTRY ("ziccif",      x_riscv_zi_subext, MASK_ZICCIF),
   RISCV_EXT_FLAG_ENTRY ("zicclsm",     x_riscv_zi_subext, MASK_ZICCLSM),
   RISCV_EXT_FLAG_ENTRY ("ziccrse",     x_riscv_zi_subext, MASK_ZICCRSE),
-  RISCV_EXT_FLAG_ENTRY ("zilsd", x_riscv_zi_subext, MASK_ZILSD),
+ RISCV_EXT_FLAG_ENTRY ("zilsd",     x_riscv_zi_subext, MASK_ZILSD),
 
   RISCV_EXT_FLAG_ENTRY ("zicboz", x_riscv_zicmo_subext, MASK_ZICBOZ),
   RISCV_EXT_FLAG_ENTRY ("zicbom", x_riscv_zicmo_subext, MASK_ZICBOM),
@@ -1875,6 +1903,8 @@ static const riscv_ext_flag_table_t riscv_ext_flag_table[] =
   RISCV_EXT_FLAG_ENTRY ("xcvsimd", x_riscv_xcv_subext, MASK_XCVSIMD),
   RISCV_EXT_FLAG_ENTRY ("xcvbi",   x_riscv_xcv_subext, MASK_XCVBI),
 
+  /* To reduce the likelihood of code synchronization conflicts.  */
+  XUANTIE_EXT_FLAG_TABLE
   RISCV_EXT_FLAG_ENTRY ("xtheadba",      x_riscv_xthead_subext, MASK_XTHEADBA),
   RISCV_EXT_FLAG_ENTRY ("xtheadbb",      x_riscv_xthead_subext, MASK_XTHEADBB),
   RISCV_EXT_FLAG_ENTRY ("xtheadbs",      x_riscv_xthead_subext, MASK_XTHEADBS),
@@ -1949,28 +1979,12 @@ riscv_ext_is_subset (struct cl_target_option *opts,
       if (subset->*arch_ext_flag_tab->cl_var_ref & arch_ext_flag_tab->mask)
 	{
 	  if (!(opts->*arch_ext_flag_tab->cl_var_ref & arch_ext_flag_tab->mask))
-	    return false;
+	return false;
 	}
     }
   return true;
 }
 
-/* Return the mask of ISA extension in x_target_flags of gcc_options.  */
-
-int
-riscv_x_target_flags_isa_mask (void)
-{
-  int mask = 0;
-  const riscv_ext_flag_table_t *arch_ext_flag_tab;
-  for (arch_ext_flag_tab = &riscv_ext_flag_table[0];
-       arch_ext_flag_tab->ext;
-       ++arch_ext_flag_tab)
-    {
-      if (arch_ext_flag_tab->var_ref == &gcc_options::x_target_flags)
-	mask |= arch_ext_flag_tab->mask;
-    }
-  return mask;
-}
 
 /* Parse a RISC-V ISA string into an option mask.  Must clear or set all arch
    dependent mask bits, in case more than one -march string is passed.  */
@@ -2230,8 +2244,8 @@ riscv_check_conds (
   std::vector<std::string>::const_iterator itr;
   const char *checking_arg;
 
-  if (match_score == 0)
-    return 0;
+  if (match_score == -1)
+    return -1;
 
   for (itr = conds.begin (); itr != conds.end (); ++itr)
     {
@@ -2281,7 +2295,7 @@ riscv_select_multilib (
   const riscv_subset_list *subset_list, const struct switchstr *switches,
   int n_switches, const std::vector<riscv_multi_lib_info_t> &multilib_infos)
 {
-  int match_score = 0;
+  int match_score = -1;
   int max_match_score = 0;
   int best_match_multi_lib = -1;
   /* Try to decision which set we should used.  */
@@ -2302,7 +2316,7 @@ riscv_select_multilib (
 				       multilib_infos[i].conds);
 
       /* Record highest match score multi-lib setting.  */
-      if (match_score > max_match_score)
+      if (match_score >= max_match_score)
 	{
 	  best_match_multi_lib = i;
 	  max_match_score = match_score;
@@ -2350,10 +2364,6 @@ riscv_compute_multilib (
   std::vector<std::string> option_conds;
   std::string option_cond;
   riscv_multi_lib_info_t multilib_info;
-
-  /* Already found suitable, multi-lib, just use that.  */
-  if (multilib_dir != NULL)
-    return multilib_dir;
 
   /* Find march.  */
   riscv_current_arch_str =

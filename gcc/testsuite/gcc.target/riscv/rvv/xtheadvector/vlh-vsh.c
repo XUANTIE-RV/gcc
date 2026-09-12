@@ -1,4 +1,4 @@
-/* { dg-do compile } */
+/* { dg-do compile { target { rv32 } } } */
 /* { dg-options "-march=rv32gcxtheadvector -mabi=ilp32d -O3" } */
 /* { dg-final { check-function-bodies "**" "" } } */
 #include "riscv_th_vector.h"

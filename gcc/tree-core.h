@@ -1710,7 +1710,7 @@ struct GTY(()) tree_type_common {
 
   ENUM_BITFIELD(machine_mode) mode : MACHINE_MODE_BITSIZE;
 
-  unsigned int precision : 16;
+  unsigned int precision : 24;
   unsigned lang_flag_0 : 1;
   unsigned lang_flag_1 : 1;
   unsigned lang_flag_2 : 1;

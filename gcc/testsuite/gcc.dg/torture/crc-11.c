@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc-details" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-flto" } } */
 
 //We just don't check cases when the polynomial is a variable, as we can't replace it.

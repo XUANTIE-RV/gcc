@@ -1776,6 +1776,32 @@ vect_use_strided_gather_scatters_p (stmt_vec_info stmt_info,
     return vect_truncate_gather_scatter_offset (stmt_info, loop_vinfo,
 						masked_p, gs_info);
 
+  data_reference *dr = STMT_VINFO_DATA_REF (stmt_info);
+  tree step = DR_STEP (dr);
+  if (TREE_CODE (step) == INTEGER_CST && tree_int_cst_sgn (step) < 0)
+    {
+      /* The strided offset vector is rebuilt from DR_STEP below.  A negative
+	 step therefore needs a signed offset type, regardless of the type that
+	 vect_check_gather_scatter found from the original index expression.  */
+      tree old_offset_type = TREE_TYPE (gs_info->offset_vectype);
+      if (TYPE_UNSIGNED (old_offset_type))
+	{
+	  tree offset_type
+	    = build_nonstandard_integer_type (TYPE_PRECISION (old_offset_type),
+					      false);
+	  tree vectype = STMT_VINFO_VECTYPE (stmt_info);
+	  tree memory_type = TREE_TYPE (DR_REF (dr));
+	  if (!vect_gather_scatter_fn_p (loop_vinfo, DR_IS_READ (dr),
+					 masked_p, vectype, memory_type,
+					 offset_type, gs_info->scale,
+					 &gs_info->ifn,
+					 &gs_info->offset_vectype)
+	      || gs_info->ifn == IFN_LAST)
+	    return vect_truncate_gather_scatter_offset (stmt_info, loop_vinfo,
+							masked_p, gs_info);
+	}
+    }
+
   tree old_offset_type = TREE_TYPE (gs_info->offset);
   tree new_offset_type = TREE_TYPE (gs_info->offset_vectype);
 
@@ -14998,4 +15024,3 @@ vect_gen_len (tree len, tree start_index, tree end_index, tree len_limit)
 
   return stmts;
 }
-

@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc-details -O2" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details -O2" } */
 /* { dg-require-effective-target int32plus } */
 
 //File - Ac3 from Fedora, polynomial made const. Original crc-side-instr-21.c test

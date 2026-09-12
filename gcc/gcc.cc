@@ -8919,7 +8919,7 @@ driver::maybe_print_and_exit () const
     {
       printf (_("%s %s%s\n"), progname, pkgversion_string,
 	      version_string);
-      printf ("Copyright %s 2024 Free Software Foundation, Inc.\n",
+      printf ("Copyright %s 2026 Free Software Foundation, Inc.\n",
 	      _("(C)"));
       fputs (_("This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\n"),
@@ -9997,6 +9997,11 @@ set_multilib_dir (void)
       multilib_matches,
       multilib_exclusions,
       multilib_reuse);
+
+  multilib_os_dir =
+    targetm_common.compute_multilib_os (
+      multilib_os_dir,
+      multilib_dir);
 
   if (multilib_dir == NULL && multilib_os_dir != NULL
       && strcmp (multilib_os_dir, ".") == 0)

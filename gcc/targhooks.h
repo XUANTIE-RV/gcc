@@ -241,6 +241,7 @@ extern bool default_use_by_pieces_infrastructure_p (unsigned HOST_WIDE_INT,
 						    enum by_pieces_operation,
 						    bool);
 extern int default_compare_by_pieces_branch_ratio (machine_mode);
+extern bool default_by_pieces_mode_supported_p (fixed_size_mode);
 
 extern void default_print_patchable_function_entry (FILE *,
 						    unsigned HOST_WIDE_INT,

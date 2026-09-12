@@ -24,6 +24,10 @@
 namespace riscv_vector {
 
 namespace bases {
+#define XUANTIE_VECTOR_BUILTINS_BASES_H
+#include "xuantie-vector-builtins.cc"
+#undef XUANTIE_VECTOR_BUILTINS_BASES_H
+
 extern const function_base *const vsetvl;
 extern const function_base *const vsetvlmax;
 extern const function_base *const vle;

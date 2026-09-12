@@ -1165,9 +1165,12 @@ template<unsigned int N, typename Ca, typename Cb>
 inline bool
 maybe_eq (const poly_int<N, Ca> &a, const poly_int<N, Cb> &b)
 {
-  STATIC_ASSERT (N <= 2);
+  STATIC_ASSERT (N <= 3);
   if (N == 2)
     return maybe_eq_2 (a.coeffs[0], a.coeffs[1], b.coeffs[0], b.coeffs[1]);
+  if (N == 3)
+    return maybe_eq_2 (a.coeffs[0], a.coeffs[1], b.coeffs[0], b.coeffs[1])
+      && maybe_eq_2 (a.coeffs[0], a.coeffs[2], b.coeffs[0], b.coeffs[2]);
   return a.coeffs[0] == b.coeffs[0];
 }
 
@@ -1175,9 +1178,12 @@ template<unsigned int N, typename Ca, typename Cb>
 inline typename if_nonpoly<Cb, bool>::type
 maybe_eq (const poly_int<N, Ca> &a, const Cb &b)
 {
-  STATIC_ASSERT (N <= 2);
+  STATIC_ASSERT (N <= 3);
   if (N == 2)
     return maybe_eq_2 (a.coeffs[0], a.coeffs[1], b);
+  if (N == 3)
+    return maybe_eq_2 (a.coeffs[0], a.coeffs[1], b)
+      && maybe_eq_2 (a.coeffs[0], a.coeffs[2], b);
   return a.coeffs[0] == b;
 }
 
@@ -1185,9 +1191,12 @@ template<unsigned int N, typename Ca, typename Cb>
 inline typename if_nonpoly<Ca, bool>::type
 maybe_eq (const Ca &a, const poly_int<N, Cb> &b)
 {
-  STATIC_ASSERT (N <= 2);
+  STATIC_ASSERT (N <= 3);
   if (N == 2)
     return maybe_eq_2 (b.coeffs[0], b.coeffs[1], a);
+  if (N == 3)
+    return maybe_eq_2 (b.coeffs[0], b.coeffs[1], a)
+      && maybe_eq_2 (b.coeffs[0], b.coeffs[2], a);
   return a == b.coeffs[0];
 }
 

@@ -43,4 +43,9 @@ default_compute_multilib(
   const char *,
   const char *);
 
+const char *
+default_compute_multilib_os(
+  const char *multilib_os,
+  const char *);
+
 #endif

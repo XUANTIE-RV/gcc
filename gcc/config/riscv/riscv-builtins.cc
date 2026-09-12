@@ -39,6 +39,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "langhooks.h"
 #include "tm_p.h"
 #include "backend.h"
+#include "xuantie-ext-builtins.h"
 #include "gimple.h"
 #include "gimple-iterator.h"
 
@@ -54,6 +55,7 @@ along with GCC; see the file COPYING3.  If not see
 enum riscv_function_type {
 #define DEF_RISCV_FTYPE(NARGS, LIST) RISCV_FTYPE_NAME##NARGS LIST,
 #include "config/riscv/riscv-ftypes.def"
+#include "config/riscv/xuantie-ext-builtins-ftypes.def"
 #undef DEF_RISCV_FTYPE
   RISCV_MAX_FTYPE_MAX
 };
@@ -211,6 +213,7 @@ AVAIL (cvsimd, TARGET_XCVSIMD && !TARGET_64BIT)
 static const struct riscv_builtin_description riscv_builtins[] = {
   #include "riscv-cmo.def"
   #include "riscv-scalar-crypto.def"
+  #include "xuantie-ext-builtins-direct.def"
   #include "corev.def"
 
   DIRECT_BUILTIN (frflags, RISCV_USI_FTYPE, hard_float),
@@ -249,6 +252,7 @@ riscv_build_function_type (enum riscv_function_type type)
 				  NULL_TREE);				\
     break;
 #include "config/riscv/riscv-ftypes.def"
+#include "config/riscv/xuantie-ext-builtins-ftypes.def"
 #undef DEF_RISCV_FTYPE
       default:
 	gcc_unreachable ();
@@ -313,6 +317,8 @@ riscv_init_builtins (void)
 	  riscv_builtin_decl_index[d->icode] = i;
 	}
     }
+
+   xt_init_builtins ();
 }
 
 /* Implement TARGET_BUILTIN_DECL.  */
@@ -330,6 +336,8 @@ riscv_builtin_decl (unsigned int code, bool initialize_p ATTRIBUTE_UNUSED)
 
     case RISCV_BUILTIN_VECTOR:
       return riscv_vector::builtin_decl (subcode, initialize_p);
+    case RISCV_BUILTIN_MATRIX:
+      return xt_builtin_decl (subcode, initialize_p);
     }
   return error_mark_node;
 }
@@ -355,7 +363,11 @@ static rtx
 riscv_expand_builtin_insn (enum insn_code icode, unsigned int n_ops,
 			   struct expand_operand *ops, bool has_target_p)
 {
-  if (!maybe_expand_insn (icode, n_ops, ops))
+  /* The "clrov" has no operand. And this case can't be treated well at
+     "maybe_expand_insn", so we treat it specially. */
+  if (n_ops == 0)
+    emit_insn (GEN_FCN (icode) ());
+  else if (!maybe_expand_insn (icode, n_ops, ops))
     {
       error ("invalid argument to built-in function");
       return has_target_p ? gen_reg_rtx (ops[0].mode) : const0_rtx;
@@ -442,7 +454,10 @@ riscv_expand_builtin (tree exp, rtx target, rtx subtarget ATTRIBUTE_UNUSED,
 	  case RISCV_BUILTIN_DIRECT_NO_TARGET:
 	    return riscv_expand_builtin_direct (d->icode, target, exp, false);
 	  }
+        break;
       }
+      case RISCV_BUILTIN_MATRIX:
+	return xt_rvm_expand_builtins (subcode, exp, target);
     }
 
   gcc_unreachable ();
@@ -465,3 +480,5 @@ riscv_atomic_assign_expand_fenv (tree *hold, tree *clear, tree *update)
   *clear = build_call_expr (fsflags, 1, old_flags);
   *update = NULL_TREE;
 }
+
+#include "xuantie-ext-builtins.cc"

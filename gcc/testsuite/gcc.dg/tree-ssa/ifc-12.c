@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-Ofast -fdump-tree-ifcvt-stats-blocks-details -fno-split-loops" } */
+/* { dg-options "-Ofast -ftree-vectorize -fdump-tree-ifcvt-stats-blocks-details -fno-split-loops" } */
 /* { dg-require-visibility "" } */
 
 struct st

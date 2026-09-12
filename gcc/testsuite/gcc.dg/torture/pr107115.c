@@ -1,6 +1,6 @@
 /* { dg-do run } */
 /* PR/107115 */
-/* { dg-additional-options "-fno-schedule-insns -fno-schedule-insns2" } */
+/* { dg-additional-options "-fno-schedule-insns -fno-schedule-insns2 -fno-schedule-fusion" } */
 
 #include <stdlib.h>
 

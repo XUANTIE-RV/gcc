@@ -1,6 +1,6 @@
 /* { dg-do compile } */
-/* { dg-options "-O2 -march=rv64gc -mabi=lp64d -fno-schedule-insns -fno-schedule-insns2" } */
-/* { dg-skip-if "" { *-*-* } { "-flto" } } */
+/* { dg-options "-O2 -march=rv64gc -mabi=lp64d -fno-schedule-insns -fno-schedule-insns2 -fno-schedule-fusion" } */
+/* { dg-skip-if "" { *-*-* } { "-flto -fno-fat-lto-objects" } } */
 
 /*  Make sure no stack offset are misaligned.
 **  interrupt:

@@ -4012,6 +4012,17 @@ noce_process_if_block (struct noce_if_info *if_info)
 		 == BLOCK_FOR_INSN (if_info->cond_earliest))
 	     && !modified_in_p (x, insn_b));
 
+#ifdef TARGET_XUANTIE_EXTEND_RTL_IFCVT_COST
+      /* Add the cost of set insn in test_bb to original_cost. If the if_info
+	 doesn't consist of a else_bb, the set insn must be at the test_bb,
+	 which should be concerned, becasue the rtx_insn with condmov to
+	 generate will contain it. Notice that the set insn may be eliminated
+	 after register allocation, so the cost could be not very precise, e.g.
+	 the source of set_b is from the arguments. */
+      if (TARGET_XUANTIE_EXTEND_RTL_IFCVT_COST
+	  && insn_b && single_set (insn_b))
+	if_info->original_cost += pattern_cost (single_set (insn_b), speed_p);
+#endif
       /* We're going to be moving the evaluation of B down from above
 	 COND_EARLIEST to JUMP.  Make sure the relevant data is still
 	 intact.  */

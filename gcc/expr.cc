@@ -1013,6 +1013,9 @@ can_use_qi_vectors (by_pieces_operation op)
 static bool
 by_pieces_mode_supported_p (fixed_size_mode mode, by_pieces_operation op)
 {
+  if (!targetm.by_pieces_mode_supported_p (mode))
+    return false;
+
   if (optab_handler (mov_optab, mode) == CODE_FOR_nothing)
     return false;
 

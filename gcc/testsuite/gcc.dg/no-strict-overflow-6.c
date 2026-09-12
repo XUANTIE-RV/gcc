@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-require-effective-target riscv_rvv_zvl128b_or_scalar } */
 /* { dg-options "-fno-strict-overflow -O2 -fdump-tree-optimized" } */
 
 /* Source: Ian Lance Taylor.  */

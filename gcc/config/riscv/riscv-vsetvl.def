@@ -88,7 +88,7 @@ DEF_SEW_LMUL_RULE (ge_sew, sew_lmul, sew_lmul,
 		   use_next_sew_lmul)
 DEF_SEW_LMUL_RULE (ge_sew, ratio_only, ratio_and_ge_sew,
 		   next_ratio_valid_for_prev_sew_p, always_false,
-		   modify_lmul_with_next_ratio)
+		   use_max_sew_and_lmul_with_next_ratio)
 DEF_SEW_LMUL_RULE (ge_sew, sew_only, sew_only,
 		   sew_le_and_next_sew_le_prev_max_sew_p, always_false,
 		   use_next_sew)

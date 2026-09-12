@@ -171,6 +171,33 @@ loop_combined_static_and_iv_p (class loop *loop,
   return gimple_uid (SSA_NAME_DEF_STMT (op)) & 4;
 }
 
+/* Return true if the OP is a power of two or a power of two in phi node.  */
+
+static bool
+pow2p_or_pow2p_in_phi_p (tree op)
+{
+  if (TREE_CODE (op) == INTEGER_CST)
+    return pow2p_hwi (TREE_INT_CST_LOW (op));
+
+  if (TREE_CODE (op) != SSA_NAME)
+    return false;
+
+  gimple *phi_stmt = SSA_NAME_DEF_STMT (op);
+  if (gimple_code (phi_stmt) != GIMPLE_PHI)
+    return false;
+
+  size_t i;
+  tree val;
+  for (i = 0; i < gimple_phi_num_args (phi_stmt); i++)
+    {
+      val = gimple_phi_arg_def (phi_stmt, i);
+      if (TREE_CODE (val) == INTEGER_CST
+	  && pow2p_hwi (TREE_INT_CST_LOW (val)))
+	return true;
+    }
+  return false;
+}
+
 /* Decision about posibility of copying a given header.  */
 
 enum ch_decision
@@ -360,6 +387,32 @@ should_duplicate_loop_header_p (basic_block header, class loop *loop,
 		  continue;
 		}
 	    }
+
+#ifdef TARGET_XUANTIE_LOOP_DUP_HEADER_FOR_MOD_POW2P_OPTIMIZE
+	  /* Match the following:
+	     _1 = PHI <2, _2>
+	     _3 = _4 % _1
+	     _3 == 0  */
+	  if (TARGET_XUANTIE_LOOP_DUP_HEADER_FOR_MOD_POW2P_OPTIMIZE
+	      && gimple_code (last) == GIMPLE_ASSIGN
+	      && gimple_assign_rhs_code (last) == TRUNC_MOD_EXPR)
+	    {
+	      tree op1 = gimple_assign_rhs1 (last);
+	      tree op2 = gimple_assign_rhs2 (last);
+
+	      if ((loop_invariant_op_p (loop, op1)
+		   || loop_combined_static_and_iv_p (loop, op1)
+		   || loop_static_op_p (loop, op1))
+		  && pow2p_or_pow2p_in_phi_p (op2))
+		{
+		  gimple_set_uid (last, 4);
+		  if (dump_file && (dump_flags & TDF_DETAILS))
+		    fprintf (dump_file,
+			     "    Stmt is a power of 2 or a power of 2 in PHI op\n");
+		  continue;
+		}
+	    }
+#endif
 	}
 
       int insns = estimate_num_insns (last, &eni_size_weights);

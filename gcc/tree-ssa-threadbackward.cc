@@ -1049,6 +1049,10 @@ public:
   }
   bool gate (function *) override
   {
+#ifdef TARGET_XUANTIE_THREAD1
+    if (!TARGET_XUANTIE_THREAD1 && m_first)
+      return false;
+#endif
     return flag_thread_jumps && flag_expensive_optimizations;
   }
   unsigned int execute (function *fun) override

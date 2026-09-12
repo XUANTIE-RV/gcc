@@ -46,7 +46,7 @@
 (define_insn_reservation "vec_alu" 3
   (eq_attr "type" "vialu,viwalu,vext,vicalu,vshift,vnshift,viminmax,vicmp,\
 		   vimov,vsalu,vaalu,vsshift,vnclip,vmov,vfmov,vector,\
-		   vandn,vbrev,vbrev8,vrev8,vclz,vctz,vrol,vror,vwsll")
+		   vandn,vbrev,vbrev8,vrev8,vclz,vctz,vcpop,vrol,vror,vwsll")
   "vxu_ooo_issue,vxu_ooo_alu")
 
 ;; Vector float comparison, conversion etc.
@@ -64,7 +64,7 @@
 
 ;; Vector float addition.
 (define_insn_reservation "vec_fadd" 4
-  (eq_attr "type" "vfalu,vfwalu")
+  (eq_attr "type" "vfalu,vfwalu,vfwaluw")
   "vxu_ooo_issue,vxu_ooo_alu")
 
 ;; Vector float multiplication and FMA.
@@ -100,14 +100,14 @@
 
 ;; Vector reduction.
 (define_insn_reservation "vec_reduction" 8
-  (eq_attr "type" "vired,viwred,vfredu,vfwredu")
+  (eq_attr "type" "vired,viredl,viwred,vfredu,vfredusum,vfwredu")
   "vxu_ooo_issue,vxu_ooo_multicycle")
 
 ;; Vector ordered reduction, assume the latency number is for
 ;; a 128-bit vector.  It is scaled in riscv_sched_adjust_cost
 ;; for larger vectors.
 (define_insn_reservation "vec_ordered_reduction" 10
-  (eq_attr "type" "vfredo,vfwredo")
+  (eq_attr "type" "vfredo,vfredosum,vfwredo")
   "vxu_ooo_issue,vxu_ooo_multicycle*3")
 
 ;; Vector integer division, assume not pipelined.
@@ -117,7 +117,7 @@
 
 ;; Vector float divisions and sqrt, assume not pipelined.
 (define_insn_reservation "vec_float_divsqrt" 16
-  (eq_attr "type" "vfdiv,vfsqrt")
+  (eq_attr "type" "vfdiv,vfsqrt,vfrsqrt")
   "vxu_ooo_issue,vxu_ooo_multicycle*3")
 
 ;; Vector mask operations.
@@ -136,8 +136,8 @@
   (eq_attr "type" "wrvxrm,wrfrm")
   "vxu_ooo_issue,vxu_ooo_issue*3")
 
-;; Vector read vlen/vlenb.
+;; Read vector length or the floating-point rounding mode.
 (define_insn_reservation "vec_readlen" 4
-  (eq_attr "type" "rdvlenb,rdvl")
+  (eq_attr "type" "rdvlenb,rdvl,rdfrm")
   "vxu_ooo_issue,vxu_ooo_issue")
 

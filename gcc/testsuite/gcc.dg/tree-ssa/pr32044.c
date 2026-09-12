@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-require-effective-target riscv_rvv_zvl128b_or_scalar } */
 /* { dg-options "-O2 -fdump-tree-optimized" } */
 
 /* For powerpc, disable doloop IV cand generation in IVOPTs to avoid unexpected

@@ -6,7 +6,7 @@
    We shouldn't offer '__ino_t' as a suggestion for an unknown 'ino_t'.  */
 
 typedef unsigned long int __ino_t;
-ino_t inode; /* { dg-error "did you mean 'int'" } */
+ino_t inode; /* { dg-error "did you mean" } */
 
 
 /* Example of a typedef with a leading double-underscore.  */

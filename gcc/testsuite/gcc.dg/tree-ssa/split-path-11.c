@@ -1,5 +1,6 @@
 /* { dg-do compile } */
-/* { dg-options "-O2 -fsplit-paths -fdump-tree-split-paths-details -w" } */
+/* { dg-require-effective-target riscv_rvv_zvl128b_or_scalar } */
+/* { dg-options "-O2 -fsplit-paths -fdump-tree-split-paths-details -w -mno-rvv-auto-vectorize" } */
 
 void foo(unsigned long long *M)
 {

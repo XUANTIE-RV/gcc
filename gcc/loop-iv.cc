@@ -2111,6 +2111,99 @@ shorten_into_mode (class rtx_iv *iv, scalar_int_mode mode,
   iv->extend = signed_p ? IV_SIGN_EXTEND : IV_ZERO_EXTEND;
 }
 
+#ifdef TARGET_XUANTIE_SIGNEDNESS_COMPARISON_IV
+/* Return true if IV0 and IV1 (at least one of which uses IV_SIGN_EXTEND)
+   are compatible with unsigned comparison (LTU/LEU).
+
+   On riscv targets where PROMOTE_MODE naturally sign-extends certain narrow
+   modes to word_mode. In that case, the 64-bit unsigned comparison of
+   two sign-extended 32-bit values produces the same result as a 32-bit
+   unsigned comparison.
+
+   We handle three cases:
+   1. Both IVs use IV_SIGN_EXTEND: safe if both modes are naturally
+      sign-extended by the target.
+   2. One IV uses IV_SIGN_EXTEND, the other IV_ZERO_EXTEND: REJECT.
+      Mixed extend modes break the order-preserving property.
+   3. One IV uses IV_SIGN_EXTEND, the other IV_UNKNOWN_EXTEND: safe if
+      the IV_SIGN_EXTEND operand is naturally sign-extended by the target;
+      the IV_UNKNOWN_EXTEND operand is an invariant with mode == extend_mode,
+      and the target guarantees value in that mode is sign-extended
+      in registers. */
+
+static bool
+xt_iv_sign_extend_compatible_with_unsigned_cmp_p (class rtx_iv *iv0,
+					       class rtx_iv *iv1)
+{
+  /* Reject if either IV uses IV_ZERO_EXTEND.  Mixed SIGN + ZERO extend
+     breaks the order-preserving property of sign extension.  */
+  if (iv0->extend == IV_ZERO_EXTEND || iv1->extend == IV_ZERO_EXTEND)
+    return false;
+
+#if !defined(PROMOTE_MODE)
+  return false;
+#endif
+
+  /* For each IV that uses IV_SIGN_EXTEND, verify that its mode is
+     naturally sign-extended by the target hardware. */
+  if (iv0->extend == IV_SIGN_EXTEND)
+    {
+      int unsignedp = 1;
+      scalar_int_mode promoted_mode = iv0->mode;
+      PROMOTE_MODE (promoted_mode, unsignedp, NULL_TREE);
+      if (unsignedp)
+	return false;
+    }
+
+  if (iv1->extend == IV_SIGN_EXTEND)
+    {
+      int unsignedp = 1;
+      scalar_int_mode promoted_mode = iv1->mode;
+      PROMOTE_MODE (promoted_mode, unsignedp, NULL_TREE);
+      if (unsignedp)
+	return false;
+    }
+
+  /* If both are IV_SIGN_EXTEND, it guarantees LTU/LEU equivalence.  */
+  if (iv0->extend == IV_SIGN_EXTEND && iv1->extend == IV_SIGN_EXTEND)
+    return true;
+
+  /* Handle IV_UNKNOWN_EXTEND + IV_SIGN_EXTEND mixed case.
+     An IV_UNKNOWN_EXTEND operand is safe if:
+     (a) It is an invariant.
+     (b) Either its mode is already word_mode (the extend has already been
+         folded into the base value), or the target guarantees that values
+         in its narrow mode are sign-extended in registers
+         (LOAD_EXTEND_OP == SIGN_EXTEND).  */
+#if defined(WORD_REGISTER_OPERATIONS) && defined(LOAD_EXTEND_OP)
+  if (iv0->extend == IV_UNKNOWN_EXTEND)
+    {
+      if (iv0->step != const0_rtx)
+	return false;
+      /* If mode is narrower than word_mode, the value needs extending
+	 in registers — verify the hardware sign-extends it.  If mode
+	 is already word_mode, no extend occurs and the check is moot.  */
+      if (GET_MODE_BITSIZE (iv0->mode) < GET_MODE_BITSIZE (word_mode)
+	  && LOAD_EXTEND_OP (iv0->mode) != SIGN_EXTEND)
+	return false;
+    }
+
+  if (iv1->extend == IV_UNKNOWN_EXTEND)
+    {
+      if (iv1->step != const0_rtx)
+	return false;
+      if (GET_MODE_BITSIZE (iv1->mode) < GET_MODE_BITSIZE (word_mode)
+	  && LOAD_EXTEND_OP (iv1->mode) != SIGN_EXTEND)
+	return false;
+    }
+
+  return true;
+#else
+  return false;
+#endif
+}
+#endif
+
 /* Transforms IV0 and IV1 compared by COND so that they are both compared as
    subregs of the same mode if possible (sometimes it is necessary to add
    some assumptions to DESC).  */
@@ -2144,7 +2237,15 @@ canonicalize_iv_subregs (class rtx_iv *iv0, class rtx_iv *iv1,
       case LTU:
 	if (iv0->extend == IV_SIGN_EXTEND
 	    || iv1->extend == IV_SIGN_EXTEND)
+#ifdef TARGET_XUANTIE_SIGNEDNESS_COMPARISON_IV
+	  {
+	    if (!TARGET_XUANTIE_SIGNEDNESS_COMPARISON_IV
+		|| !xt_iv_sign_extend_compatible_with_unsigned_cmp_p (iv0, iv1))
+	      return false;
+	  }
+#else
 	  return false;
+#endif
 	signed_p = false;
 	break;
 

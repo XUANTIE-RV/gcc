@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc-details" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-O3" "-flto" } } */
 
  #include <stdint.h>

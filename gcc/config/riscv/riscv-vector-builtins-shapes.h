@@ -24,6 +24,10 @@
 namespace riscv_vector {
 
 namespace shapes {
+#define XUANTIE_VECTOR_BUILTINS_SHAPES_H
+#include "xuantie-vector-builtins.cc"
+#undef XUANTIE_VECTOR_BUILTINS_SHAPES_H
+
 extern const function_shape *const vsetvl;
 extern const function_shape *const vsetvlmax;
 extern const function_shape *const loadstore;

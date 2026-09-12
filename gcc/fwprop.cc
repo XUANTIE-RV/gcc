@@ -132,6 +132,21 @@ can_simplify_addr (rtx addr)
 	      && REGNO (reg) != ARG_POINTER_REGNUM));
 }
 
+/* Count the number of registers contained in X.  */
+
+static unsigned
+count_rtx_reg_num (rtx x)
+{
+  unsigned count = 0;
+
+  subrtx_var_iterator::array_type array;
+  FOR_EACH_SUBRTX_VAR (iter, array, x, ALL)
+    if (REG_P (*iter))
+      count++;
+
+  return count;
+}
+
 /* MEM is the result of an address simplification, and temporarily
    undoing changes OLD_NUM_CHANGES onwards restores the original address.
    Return whether it is good to use the new address instead of the
@@ -162,6 +177,22 @@ should_replace_address (int old_num_changes, rtx mem, rtx_insn *insn)
       gain -= set_src_cost (XEXP (mem, 0), VOIDmode, speed);
       redo_changes (old_num_changes);
     }
+
+#ifdef TARGET_XUANTIE_FWPROP2_ADDRESS_OPTIMIZE
+  if (TARGET_XUANTIE_FWPROP2_ADDRESS_OPTIMIZE && gain == 0)
+    {
+      /* With the same gain, we can tend to choose the more complex one
+	 without using extra registers. For example: "rs2 + rs1" and
+	 "rs2 + rs1 << imm2", obviously, "rs2 + rs1 << imm2" has more
+	 advantages due to it completes more operations.  */
+      int reg_count = count_rtx_reg_num (XEXP (mem, 0));
+      temporarily_undo_changes (old_num_changes);
+      reg_count -= count_rtx_reg_num (XEXP (mem, 0));
+      redo_changes (old_num_changes);
+      if (reg_count == 0)
+	return true;
+    }
+#endif
 
   return (gain > 0);
 }

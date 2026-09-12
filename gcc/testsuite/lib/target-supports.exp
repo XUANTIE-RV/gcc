@@ -1899,6 +1899,50 @@ proc check_effective_target_rv_float_abi_soft { } {
     }]
 }
 
+# Return 1 if the base ISA is RV32I or RV64I.
+
+proc check_effective_target_riscv_i { } {
+    return [check_no_compiler_messages riscv_i assembly {
+       #ifndef __riscv_i
+       #error "Not __riscv_i"
+       #endif
+    }]
+}
+
+# Return 1 if RVV 1.0 is enabled with a minimum VLEN of 128 bits.
+
+proc check_effective_target_riscv_rvv_zvl128b { } {
+    if { ![istarget riscv*-*-*] } {
+	return 0
+    }
+    return [check_no_compiler_messages riscv_rvv_zvl128b assembly {
+	#ifndef __riscv_v
+	    #error "Not __riscv_v"
+	#elif __riscv_v != 1000000
+	    #error "Not __riscv_v 1000000"
+	#elif __riscv_v_min_vlen != 128
+	    #error "Not __riscv_v_min_vlen 128"
+	#endif
+    }]
+}
+
+# Return 1 if RVV is disabled or RVV 1.0 has a minimum VLEN of 128 bits.
+
+proc check_effective_target_riscv_rvv_zvl128b_or_scalar { } {
+    if { ![istarget riscv*-*-*] } {
+	return 0
+    }
+    return [check_no_compiler_messages riscv_rvv_zvl128b_or_scalar assembly {
+	#ifdef __riscv_v
+	#if __riscv_v != 1000000
+	    #error "Not __riscv_v 1000000"
+	#elif __riscv_v_min_vlen != 128
+	    #error "Not __riscv_v_min_vlen 128"
+	#endif
+	#endif
+    }]
+}
+
 # Return 1 if the target arch supports the atomic extension, 0 otherwise.
 # Cache the result.
 
@@ -1974,6 +2018,102 @@ proc check_effective_target_riscv_zacas { } {
     }]
 }
 
+# Return 1 if the target arch supports the atomic LRSC extension, 0 otherwise.
+# Cache the result.
+
+proc check_effective_target_riscv_zalrsc { } {
+    return [check_no_compiler_messages riscv_ext_zalrsc assembly {
+       #ifndef __riscv_zalrsc
+       #error "Not __riscv_zalrsc"
+       #endif
+    }]
+}
+
+# Return 1 if the target arch supports the atomic AMO extension, 0 otherwise.
+# Cache the result.
+
+proc check_effective_target_riscv_zaamo { } {
+    return [check_no_compiler_messages riscv_ext_zaamo assembly {
+       #ifndef __riscv_zaamo
+       #error "Not __riscv_zaamo"
+       #endif
+    }]
+}
+
+# Return 1 if the target arch supports the atomic BHA extension, 0 otherwise.
+# Cache the result.
+
+proc check_effective_target_riscv_zabha { } {
+    return [check_no_compiler_messages riscv_ext_zabha assembly {
+       #ifndef __riscv_zabha
+       #error "Not __riscv_zabha"
+       #endif
+    }]
+}
+
+# Return 1 if the target arch supports the atomic CAS extension, 0 otherwise.
+# Cache the result.
+
+proc check_effective_target_riscv_zacas { } {
+    return [check_no_compiler_messages riscv_ext_zacas assembly {
+       #ifndef __riscv_zacas
+       #error "Not __riscv_zacas"
+       #endif
+    }]
+}
+
+proc check_effective_target_riscv_zalasr { } {
+    return [check_no_compiler_messages riscv_ext_zalasr assembly {
+       #ifndef __riscv_zalasr
+       #error "Not __riscv_zalasr"
+       #endif
+    }]
+}
+
+# Return 1 if the target arch supports the atomic LRSC extension, 0 otherwise.
+# Cache the result.
+
+proc check_effective_target_riscv_zalrsc { } {
+    return [check_no_compiler_messages riscv_ext_zalrsc assembly {
+       #ifndef __riscv_zalrsc
+       #error "Not __riscv_zalrsc"
+       #endif
+    }]
+}
+
+# Return 1 if the target arch supports the atomic AMO extension, 0 otherwise.
+# Cache the result.
+
+proc check_effective_target_riscv_zaamo { } {
+    return [check_no_compiler_messages riscv_ext_zaamo assembly {
+       #ifndef __riscv_zaamo
+       #error "Not __riscv_zaamo"
+       #endif
+    }]
+}
+
+# Return 1 if the target arch supports the atomic BHA extension, 0 otherwise.
+# Cache the result.
+
+proc check_effective_target_riscv_zabha { } {
+    return [check_no_compiler_messages riscv_ext_zabha assembly {
+       #ifndef __riscv_zabha
+       #error "Not __riscv_zabha"
+       #endif
+    }]
+}
+
+# Return 1 if the target arch supports the atomic CAS extension, 0 otherwise.
+# Cache the result.
+
+proc check_effective_target_riscv_zacas { } {
+    return [check_no_compiler_messages riscv_ext_zacas assembly {
+       #ifndef __riscv_zacas
+       #error "Not __riscv_zacas"
+       #endif
+    }]
+}
+
 proc check_effective_target_riscv_zalasr { } {
     return [check_no_compiler_messages riscv_ext_zalasr assembly {
        #ifndef __riscv_zalasr
@@ -1997,6 +2137,10 @@ proc check_effective_target_riscv_d { } {
 # Cache the result.
 
 proc check_effective_target_riscv_v { } {
+    if { [check_effective_target_riscv_xtheadvector] } {
+	return 0
+    }
+
     return [check_no_compiler_messages riscv_ext_v assembly {
        #ifndef __riscv_v
        #error "Not __riscv_v"
@@ -2075,6 +2219,15 @@ proc check_effective_target_riscv_ztso { } {
        #error "Not __riscv_ztso"
        #endif
     }]
+}
+
+# Return 1 if the assembler accepts the Ssdbltrp and Ssdtso extensions,
+# 0 otherwise.  Cache the result.
+
+proc check_effective_target_riscv_as_ssdbltrp_ssdtso { } {
+    return [check_no_compiler_messages riscv_as_ssdbltrp_ssdtso object {
+	int dummy;
+    } "-march=rv64i_ssdbltrp_ssdtso -mabi=lp64"]
 }
 
 # Return 1 if the target arch supports the Zbb extension, 0 otherwise.
@@ -2330,7 +2483,7 @@ proc check_effective_target_riscv_v_misalign_ok { } {
 proc riscv_get_arch { } {
     set gcc_march ""
     # ??? do we neeed to add more extensions to the list below?
-    foreach ext { i m a f d q c b v zicsr zifencei zfh zba zbb zbc zbkb zbkc zbs zvfh ztso zaamo zalrsc zabha zacas zalasr } {
+    foreach ext { i e m a f d q c b v zicsr zifencei zfh zba zbb zbc zbkb zbkc zbs zvfh ztso zaamo zalrsc zabha zacas zcb zfa zicond zalasr } {
 	if { [check_no_compiler_messages  riscv_ext_$ext assembly [string map [list DEF __riscv_$ext] {
 		#ifndef DEF
 		#error "Not DEF"
@@ -12260,6 +12413,9 @@ proc check_vect_support_and_set_flags { } {
     } elseif [istarget amdgcn-*-*] {
         set dg-do-what-default run
     } elseif [istarget riscv*-*-*] {
+	if { ![check_effective_target_riscv_v] || ![check_effective_target_riscv_rvv_zvl128b ] } {
+	    return 0
+	}
 	if [check_effective_target_riscv_v] {
 	    set dg-do-what-default run
 	    if [check_effective_target_riscv_v_misalign_ok] {

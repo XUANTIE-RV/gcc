@@ -53,10 +53,14 @@
 			  vmalu,vmpop,vmffs,vmsfs,vmiota,vmidx,vimovvx,vimovxv,vfmovvf,vfmovfv,\
 			  vslideup,vslidedown,vislide1up,vislide1down,vfslide1up,vfslide1down,\
 			  vgather,vcompress,vlsegde,vssegte,vlsegds,vssegts,vlsegdux,vlsegdox,\
-			  vssegtux,vssegtox,vlsegdff,vandn,vbrev,vbrev8,vrev8,vclz,vctz,vrol,\
+			  vssegtux,vssegtox,vlsegdff,vandn,vbrev,vbrev8,vrev8,vclz,vctz,vcpop,vrol,\
 			  vror,vwsll,vclmul,vclmulh,vghsh,vgmul,vaesef,vaesem,vaesdf,vaesdm,\
 			  vaeskf1,vaeskf2,vaesz,vsha2ms,vsha2ch,vsha2cl,vsm4k,vsm4r,vsm3me,vsm3c,\
 			  vfncvtbf16,vfwcvtbf16,vfwmaccbf16")
+	 (const_string "true")
+	 (eq_attr "type" "vcpx,vwncpx,vfncvtfp8,vfwcvtfp8,vfred,vary,vfsa,\
+			 vilo,vile,vcrcfoldr,vcrcfoldn,vgmulxor,\
+			 vfwaluw,vfrsqrt,viredl,vfredusum,vfredosum")
 	 (const_string "true")]
 	(const_string "false")))
 
@@ -78,10 +82,14 @@
 			  vmalu,vmpop,vmffs,vmsfs,vmiota,vmidx,vimovxv,vfmovfv,\
 			  vslideup,vslidedown,vislide1up,vislide1down,vfslide1up,vfslide1down,\
 			  vgather,vcompress,vlsegde,vssegte,vlsegds,vssegts,vlsegdux,vlsegdox,\
-			  vssegtux,vssegtox,vlsegdff,vandn,vbrev,vbrev8,vrev8,vclz,vctz,vrol,\
+			  vssegtux,vssegtox,vlsegdff,vandn,vbrev,vbrev8,vrev8,vclz,vctz,vcpop,vrol,\
 			  vror,vwsll,vclmul,vclmulh,vghsh,vgmul,vaesef,vaesem,vaesdf,vaesdm,\
 			  vaeskf1,vaeskf2,vaesz,vsha2ms,vsha2ch,vsha2cl,vsm4k,vsm4r,vsm3me,vsm3c,\
 			  vfncvtbf16,vfwcvtbf16,vfwmaccbf16")
+	 (const_string "true")
+	(eq_attr "type" "vwncpx,vfncvtfp8,vfwcvtfp8,vfsa,\
+			 vilo,vile,vcrcfoldr,vcrcfoldn,vgmulxor,\
+			 vfwaluw,vfrsqrt,viredl,vfredusum,vfredosum")
 	 (const_string "true")]
 	(const_string "false")))
 
@@ -485,13 +493,18 @@
 			  vimovxv,vfmovvf,vfmovfv,vslideup,vslidedown,\
 			  vislide1up,vislide1down,vfslide1up,vfslide1down,\
 			  vgather,vcompress,vlsegdux,vlsegdox,vssegtux,vssegtox,\
-			  vandn,vbrev,vbrev8,vrev8,vclz,vctz,vrol,vror,vwsll,\
+			  vandn,vbrev,vbrev8,vrev8,vclz,vctz,vcpop,vrol,vror,vwsll,\
 			  vclmul,vclmulh,vghsh,vgmul,vaesef,vaesem,vaesdf,vaesdm,\
 			  vaeskf1,vaeskf2,vaesz,vsha2ms,vsha2ch,vsha2cl,vsm4k,vsm4r,\
 			  vsm3me,vsm3c,vfncvtbf16,vfwcvtbf16,vfwmaccbf16")
 	   (const_int INVALID_ATTRIBUTE)
-	(and (eq_attr "type" "vlde,vste,vlsegde,vssegte,vlsegds,vssegts,\
-			       vlsegdff,vssegtux,vlsegdox,vlsegdux")
+	 (eq_attr "type" "vcpx,vwncpx,vfncvtfp8,vfwcvtfp8,vfred,vary,vfsa,\
+	 		 vilo,vile,vcrcfoldr,vcrcfoldn,vgmulxor,\
+			 vfwaluw,vfrsqrt,viredl,vfredusum,vfredosum")
+	   (const_int INVALID_ATTRIBUTE)
+	(and (eq_attr "type" "vlde,vste,vldm,vstm,vlds,vsts,vldux,vldox,vldff,\
+			      vldr,vstr,vlsegde,vlsegds,vlsegdux,vlsegdox,\
+			      vlsegdff,vstux,vstox,vssegte,vssegts,vssegtux,vssegtox,")
 	      (match_test "TARGET_XTHEADVECTOR"))
 	   (const_int INVALID_ATTRIBUTE)
 	 (eq_attr "mode" "RVVM8QI,RVVM1BI") (const_int 1)
@@ -799,6 +812,9 @@
 				vandn,vbrev,vbrev8,vrev8,vrol,vror,vwsll,vclmul,vclmulh,\
 				vfncvtbf16,vfwcvtbf16,vfwmaccbf16")
 	       (const_int 2)
+	       (eq_attr "type" "vfncvtfp8,vfwcvtfp8,vfred,vfsa,\
+				vfwaluw,vfrsqrt,viredl,vfredusum,vfredosum")
+	       (const_int 2)
 
 	       (eq_attr "type" "vimerge,vfmerge,vcompress,vghsh,vgmul,vaesef,vaesem,vaesdf,vaesdm,\
                                 vaeskf1,vaeskf2,vaesz,vsha2ms,vsha2ch,vsha2cl,vsm4k,vsm4r,vsm3me,vsm3c")
@@ -817,8 +833,17 @@
 				vfcmp,vfminmax,vfsgnj,vfclass,vfmerge,vfmov,\
 				vfcvtitof,vfncvtitof,vfncvtftoi,vfncvtftof,vmalu,vmiota,vmidx,\
 				vimovxv,vfmovfv,vslideup,vslidedown,vislide1up,vislide1down,vfslide1up,vfslide1down,\
-				vgather,vcompress,vmov,vnclip,vnshift,vandn,vcpop,vclz,vctz")
+				vgather,vcompress,vmov,vnclip,vnshift,vandn,vcpop,vclz,vctz,vrol,vror")
 	       (const_int 0)
+
+	       (eq_attr "type" "vfrsqrt,vfsa")
+	       (const_int 0)
+
+	       (eq_attr "type" "viredl,vfredusum,vfredosum")
+	       (const_int 3)
+
+	       (eq_attr "type" "vfwaluw")
+	       (const_int 4)
 
 	       (eq_attr "type" "vimovvx,vfmovvf")
 	       (const_int 1)
@@ -845,6 +870,11 @@
 			  vfncvtbf16,vfwcvtbf16")
 	   (const_int 4)
 
+	 (eq_attr "type" "vfsa,vfrsqrt,vilo,vile,vcrcfoldr,vcrcfoldn,vgmulxor")
+	   (const_int 4)
+	 (eq_attr "type" "viredl,vfwaluw,vfredusum,vfredosum")
+	   (const_int 5)
+
 	 ;; If operands[3] of "vlds" is not vector mode, it is pred_broadcast.
 	 ;; wheras it is pred_strided_load if operands[3] is vector mode.
          (eq_attr "type" "vlds")
@@ -858,13 +888,13 @@
 			  vfsgnj,vfmerge,vired,viwred,vfredu,vfredo,vfwredu,vfwredo,\
 			  vslideup,vslidedown,vislide1up,vislide1down,vfslide1up,vfslide1down,\
 			  vgather,viwmuladd,vfwmuladd,vlsegds,vlsegdux,vlsegdox,vandn,vrol,\
-                          vror,vwsll,vclmul,vclmulh,vfwmaccbf16")
+			  vror,vwsll,vclmul,vclmulh,vfwmaccbf16")
 	   (const_int 5)
 
 	 (eq_attr "type" "vicmp,vimuladd,vfcmp,vfmuladd")
 	   (const_int 6)
 
-	 (eq_attr "type" "vmpop,vmffs,vmidx,vssegte,vclz,vctz,vgmul,vaesef,vaesem,vaesdf,vaesdm,\
+	 (eq_attr "type" "vmpop,vmffs,vmidx,vssegte,vclz,vctz,vcpop,vgmul,vaesef,vaesem,vaesdf,vaesdm,\
                           vaesz,vsm4r")
 	   (const_int 3)]
   (const_int INVALID_ATTRIBUTE)))
@@ -878,6 +908,12 @@
                           vaeskf1,vaeskf2,vsha2ms,vsha2ch,vsha2cl,vsm4k,vsm3me,vsm3c,\
 			  vfncvtbf16,vfwcvtbf16")
 	   (symbol_ref "riscv_vector::get_ta(operands[5])")
+
+	 (eq_attr "type" "vfncvtfp8,vfwcvtfp8,vfsa,vfrsqrt,vilo,vile,vcrcfoldr,vcrcfoldn,vgmulxor")
+	   (symbol_ref "riscv_vector::get_ta(operands[5])")
+
+	 (eq_attr "type" "vfwaluw,viredl,vfredusum,vfredosum")
+	   (symbol_ref "riscv_vector::get_ta(operands[6])")
 
 	 ;; If operands[3] of "vlds" is not vector mode, it is pred_broadcast.
 	 ;; wheras it is pred_strided_load if operands[3] is vector mode.
@@ -911,6 +947,13 @@
 			  vfncvtbf16,vfwcvtbf16")
 	   (symbol_ref "riscv_vector::get_ma(operands[6])")
 
+	 (eq_attr "type" "vfncvtfp8,vfwcvtfp8,vfsa,vfrsqrt")
+	   (symbol_ref "riscv_vector::get_ma(operands[6])")
+
+	 (eq_attr "type" "vfwaluw")
+	   (symbol_ref "riscv_vector::get_ma(operands[7])")
+
+
 	 ;; If operands[3] of "vlds" is not vector mode, it is pred_broadcast.
 	 ;; wheras it is pred_strided_load if operands[3] is vector mode.
 	 (eq_attr "type" "vlds")
@@ -924,7 +967,7 @@
 			  vfwalu,vfwmul,vfsgnj,vfcmp,vslideup,vslidedown,\
 			  vislide1up,vislide1down,vfslide1up,vfslide1down,vgather,\
 			  viwmuladd,vfwmuladd,vlsegds,vlsegdux,vlsegdox,vandn,vrol,\
-                          vror,vwsll,vclmul,vclmulh,vfwmaccbf16")
+			  vror,vwsll,vclmul,vclmulh,vfwmaccbf16")
 	   (symbol_ref "riscv_vector::get_ma(operands[7])")
 
 	 (eq_attr "type" "vimuladd,vfmuladd")
@@ -943,6 +986,16 @@
 			  vimovxv,vfmovfv,vlsegde,vlsegdff,vmiota,vbrev,vbrev8,vrev8,\
 			  vfncvtbf16,vfwcvtbf16")
 	   (const_int 7)
+
+	 (eq_attr "type" "vilo,vile,vcrcfoldr,vcrcfoldn,vgmulxor")
+	   (const_int 6)
+
+	 (eq_attr "type" "vfncvtfp8,vfwcvtfp8,vfsa,vfrsqrt,viredl,vfredusum,vfredosum")
+	   (const_int 7)
+
+	 (eq_attr "type" "vfwaluw")
+	   (const_int 8)
+
 	 (eq_attr "type" "vldm,vstm,vmalu,vmalu,vgmul,vaesef,vaesem,vaesdf,vaesdm,vaesz,\
                           vsm4r")
 	   (const_int 5)
@@ -972,7 +1025,7 @@
                           vsm4k,vsm3me,vsm3c")
 	   (const_int 6)
 
-	 (eq_attr "type" "vmpop,vmffs,vssegte,vclz,vctz")
+	 (eq_attr "type" "vmpop,vmffs,vssegte,vclz,vctz,vcpop")
 	   (const_int 4)]
 	(const_int INVALID_ATTRIBUTE)))
 
@@ -983,13 +1036,10 @@
 	 (cond
 	   [(match_test "INTVAL (operands[9]) == riscv_vector::VXRM_RNU")
 	    (const_string "rnu")
-
 	    (match_test "INTVAL (operands[9]) == riscv_vector::VXRM_RNE")
 	    (const_string "rne")
-
 	    (match_test "INTVAL (operands[9]) == riscv_vector::VXRM_RDN")
 	    (const_string "rdn")
-
 	    (match_test "INTVAL (operands[9]) == riscv_vector::VXRM_ROD")
 	    (const_string "rod")]
 	   (const_string "none"))]
@@ -1430,7 +1480,7 @@
 (define_insn_and_split "*mov<mode>"
   [(set (match_operand:VLS_AVL_IMM 0 "reg_or_mem_operand" "=vr, m, vr")
 	(match_operand:VLS_AVL_IMM 1 "reg_or_mem_operand" "  m,vr, vr"))]
-  "TARGET_VECTOR
+  "TARGET_VECTOR && !TARGET_XTHEADVECTOR
    && (register_operand (operands[0], <MODE>mode)
        || register_operand (operands[1], <MODE>mode))"
   "@
@@ -1499,7 +1549,7 @@
 (define_insn_and_split "*mov<mode>_vls"
   [(set (match_operand:VLS 0 "register_operand" "=vr")
 	(match_operand:VLS 1 "register_operand" " vr"))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR && !TARGET_XTHEADVECTOR"
   "#"
   "&& 1"
   [(parallel [(set (match_dup 0) (match_dup 1))
@@ -1512,7 +1562,7 @@
   [(set (match_operand:VLS 0 "register_operand" "=vr")
 	(match_operand:VLS 1 "register_operand" " vr"))
    (use (reg:SI VTYPE_REGNUM))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR && !TARGET_XTHEADVECTOR"
   "vmv%m1r.v\t%0,%1"
   [(set_attr "type" "vmov")
    (set_attr "mode" "<MODE>")])
@@ -4221,7 +4271,7 @@
   "vn<insn>.w%o4\t%0,%3,%v4%p1"
   [(set_attr "type" "vnshift")
    (set_attr "mode" "<V_DOUBLE_TRUNC>")
-   (set_attr "spec_restriction" "none,none,thv,thv,none,thv,none,none,none,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,thv,thv,thv,none,none,thv,thv,none,none")])
 
 (define_insn "@pred_narrow_<optab><mode>_scalar"
   [(set (match_operand:<V_DOUBLE_TRUNC> 0 "register_operand"           "=vd, vd, vr, vr,  &vr,  &vr")
@@ -4243,7 +4293,7 @@
   "vn<insn>.w%o4\t%0,%3,%4%p1"
   [(set_attr "type" "vnshift")
    (set_attr "mode" "<V_DOUBLE_TRUNC>")
-   (set_attr "spec_restriction" "none,none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,thv,none,none")])
 
 ;; vncvt.x.x.w
 (define_insn "@pred_trunc<mode>"
@@ -4268,7 +4318,7 @@
    (set (attr "ta") (symbol_ref "riscv_vector::get_ta(operands[5])"))
    (set (attr "ma") (symbol_ref "riscv_vector::get_ma(operands[6])"))
    (set (attr "avl_type_idx") (const_int 7))
-   (set_attr "spec_restriction" "none,none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,thv,none,none")])
 
 ;; -------------------------------------------------------------------------------
 ;; ---- Predicated fixed-point operations
@@ -4738,7 +4788,8 @@
 	     [(match_operand:V_VLSI 3 "register_operand"         "  vr")
 	      (match_operand:V_VLSI 4 "vector_arith_operand"     "vrvi")])
 	  (match_dup 1)))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vms%B2.v%o4\t%0,%3,%v4,v0.t"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
@@ -4787,7 +4838,7 @@
   "vms%B3.v%o5\t%0,%4,%v5%p1"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,thv,thv,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,thv,thv,thv,thv,none,none")])
 
 (define_expand "@pred_ltge<mode>"
   [(set (match_operand:<VM> 0 "register_operand")
@@ -4820,7 +4871,8 @@
 	     [(match_operand:V_VLSI 3 "register_operand"         "  vr")
 	      (match_operand:V_VLSI 4 "vector_neg_arith_operand" "vrvj")])
 	  (match_dup 1)))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vms%B2.v%o4\t%0,%3,%v4,v0.t"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
@@ -4869,7 +4921,7 @@
   "vms%B3.v%o5\t%0,%4,%v5%p1"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,thv,thv,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,thv,thv,thv,thv,none,none")])
 
 (define_expand "@pred_cmp<mode>_scalar"
   [(set (match_operand:<VM> 0 "register_operand")
@@ -4904,7 +4956,8 @@
 	      (vec_duplicate:V_VLSI_QHS
 	        (match_operand:<VEL> 4 "register_operand"      "  r"))])
 	  (match_dup 1)))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vms%B2.vx\t%0,%3,%4,v0.t"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
@@ -4955,7 +5008,7 @@
   "vms%B3.vx\t%0,%4,%5%p1"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,none,none")])
 
 (define_expand "@pred_eqne<mode>_scalar"
   [(set (match_operand:<VM> 0 "register_operand")
@@ -4990,7 +5043,8 @@
 	        (match_operand:<VEL> 4 "register_operand"       "  r"))
 	      (match_operand:V_VLSI_QHS 3 "register_operand"        " vr")])
 	  (match_dup 1)))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vms%B2.vx\t%0,%3,%4,v0.t"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
@@ -5041,7 +5095,7 @@
   "vms%B3.vx\t%0,%4,%5%p1"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,none,none")])
 
 ;; Handle GET_MODE_INNER (mode) = DImode. We need to split them since
 ;; we need to deal with SEW = 64 in RV32 system.
@@ -5133,7 +5187,8 @@
 	      (vec_duplicate:V_VLSI_D
 	        (match_operand:<VEL> 4 "register_operand"       "  r"))])
 	  (match_dup 1)))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vms%B2.vx\t%0,%3,%4,v0.t"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
@@ -5157,7 +5212,8 @@
 	        (match_operand:<VEL> 4 "register_operand"       "  r"))
 	      (match_operand:V_VLSI_D 3 "register_operand"          " vr")])
 	  (match_dup 1)))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vms%B2.vx\t%0,%3,%4,v0.t"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
@@ -5208,7 +5264,7 @@
   "vms%B3.vx\t%0,%4,%5%p1"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,none,none")])
 
 ;; We don't use early-clobber for LMUL <= 1 to get better codegen.
 (define_insn "*pred_eqne<mode>_scalar"
@@ -5252,7 +5308,7 @@
   "vms%B3.vx\t%0,%4,%5%p1"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,none,none")])
 
 (define_insn "*pred_cmp<mode>_extended_scalar_merge_tie_mask"
   [(set (match_operand:<VM> 0 "register_operand"               "=vm")
@@ -5270,7 +5326,8 @@
 	        (sign_extend:<VEL>
 	          (match_operand:<VSUBEL> 4 "register_operand" "  r")))])
 	  (match_dup 1)))]
-  "TARGET_VECTOR && !TARGET_64BIT"
+  "TARGET_VECTOR && !TARGET_64BIT
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vms%B2.vx\t%0,%3,%4,v0.t"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
@@ -5322,7 +5379,7 @@
   "vms%B3.vx\t%0,%4,%5%p1"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,none,none")])
 
 (define_insn "*pred_eqne<mode>_extended_scalar_merge_tie_mask"
   [(set (match_operand:<VM> 0 "register_operand"                 "=vm")
@@ -5340,7 +5397,8 @@
 	          (match_operand:<VSUBEL> 4 "register_operand"   "  r")))
 	      (match_operand:V_VLSI_D 3 "register_operand"           " vr")])
 	  (match_dup 1)))]
-  "TARGET_VECTOR && !TARGET_64BIT"
+  "TARGET_VECTOR && !TARGET_64BIT
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vms%B2.vx\t%0,%3,%4,v0.t"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
@@ -5392,7 +5450,7 @@
   "vms%B3.vx\t%0,%4,%5%p1"
   [(set_attr "type" "vicmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,none,none")])
 
 ;; GE, vmsge.vx/vmsgeu.vx
 ;;
@@ -5657,14 +5715,14 @@
 	  (plus:V_VLSI
 	    (mult:V_VLSI
 	      (vec_duplicate:V_VLSI
-		(match_operand:<VEL> 2 "register_operand" "  r,  r"))
+		(match_operand:<VEL> 2 "reg_or_0_operand" " rJ, rJ"))
 	      (match_operand:V_VLSI 3 "register_operand"      "  0,  0"))
 	    (match_operand:V_VLSI 4 "register_operand"        " vr, vr"))
 	  (match_dup 3)))]
   "TARGET_VECTOR"
   "@
-   vmadd.vx\t%0,%2,%4%p1
-   vmadd.vx\t%0,%2,%4%p1"
+   vmadd.vx\t%0,%z2,%4%p1
+   vmadd.vx\t%0,%z2,%4%p1"
   [(set_attr "type" "vimuladd")
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "3")
@@ -5687,14 +5745,14 @@
 	  (plus:V_VLSI
 	    (mult:V_VLSI
 	      (vec_duplicate:V_VLSI
-		(match_operand:<VEL> 2 "register_operand" "  r,  r"))
+		(match_operand:<VEL> 2 "reg_or_0_operand" " rJ, rJ"))
 	      (match_operand:V_VLSI 3 "register_operand"      " vr, vr"))
 	    (match_operand:V_VLSI 4 "register_operand"        "  0,  0"))
 	  (match_dup 4)))]
   "TARGET_VECTOR"
   "@
-   vmacc.vx\t%0,%2,%3%p1
-   vmacc.vx\t%0,%2,%3%p1"
+   vmacc.vx\t%0,%z2,%3%p1
+   vmacc.vx\t%0,%z2,%3%p1"
   [(set_attr "type" "vimuladd")
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "4")
@@ -5753,14 +5811,14 @@
 	    (mult:V_VLSI_D
 	      (vec_duplicate:V_VLSI_D
 	        (sign_extend:<VEL>
-		  (match_operand:<VSUBEL> 2 "register_operand" "  r,  r")))
+		  (match_operand:<VSUBEL> 2 "reg_or_0_operand" " rJ, rJ")))
 	      (match_operand:V_VLSI_D 3 "register_operand"         "  0,  0"))
 	    (match_operand:V_VLSI_D 4 "register_operand"           " vr, vr"))
 	  (match_dup 3)))]
   "TARGET_VECTOR && !TARGET_64BIT"
   "@
-   vmadd.vx\t%0,%2,%4%p1
-   vmadd.vx\t%0,%2,%4%p1"
+   vmadd.vx\t%0,%z2,%4%p1
+   vmadd.vx\t%0,%z2,%4%p1"
   [(set_attr "type" "vimuladd")
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "3")
@@ -5784,14 +5842,14 @@
 	    (mult:V_VLSI_D
 	      (vec_duplicate:V_VLSI_D
 	        (sign_extend:<VEL>
-		  (match_operand:<VSUBEL> 2 "register_operand" "  r,  r")))
+		  (match_operand:<VSUBEL> 2 "reg_or_0_operand" " rJ, rJ")))
 	      (match_operand:V_VLSI_D 3 "register_operand"         " vr, vr"))
 	    (match_operand:V_VLSI_D 4 "register_operand"           "  0,  0"))
 	  (match_dup 4)))]
   "TARGET_VECTOR && !TARGET_64BIT"
   "@
-   vmacc.vx\t%0,%2,%3%p1
-   vmacc.vx\t%0,%2,%3%p1"
+   vmacc.vx\t%0,%z2,%3%p1
+   vmacc.vx\t%0,%z2,%3%p1"
   [(set_attr "type" "vimuladd")
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "4")
@@ -5942,13 +6000,13 @@
 	    (match_operand:V_VLSI 4 "register_operand"        " vr, vr")
 	    (mult:V_VLSI
 	      (vec_duplicate:V_VLSI
-		(match_operand:<VEL> 2 "register_operand" "  r,  r"))
+		(match_operand:<VEL> 2 "reg_or_0_operand" " rJ, rJ"))
 	      (match_operand:V_VLSI 3 "register_operand"      "  0,  0")))
 	  (match_dup 3)))]
   "TARGET_VECTOR"
   "@
-   vnmsub.vx\t%0,%2,%4%p1
-   vnmsub.vx\t%0,%2,%4%p1"
+   vnmsub.vx\t%0,%z2,%4%p1
+   vnmsub.vx\t%0,%z2,%4%p1"
   [(set_attr "type" "vimuladd")
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "3")
@@ -5972,13 +6030,13 @@
 	    (match_operand:V_VLSI 4 "register_operand"        "  0,  0")
 	    (mult:V_VLSI
 	      (vec_duplicate:V_VLSI
-		(match_operand:<VEL> 2 "register_operand" "  r,  r"))
+		(match_operand:<VEL> 2 "reg_or_0_operand" " rJ, rJ"))
 	      (match_operand:V_VLSI 3 "register_operand"      " vr, vr")))
 	  (match_dup 4)))]
   "TARGET_VECTOR"
   "@
-   vnmsac.vx\t%0,%2,%3%p1
-   vnmsac.vx\t%0,%2,%3%p1"
+   vnmsac.vx\t%0,%z2,%3%p1
+   vnmsac.vx\t%0,%z2,%3%p1"
   [(set_attr "type" "vimuladd")
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "4")
@@ -6038,13 +6096,13 @@
 	    (mult:V_VLSI_D
 	      (vec_duplicate:V_VLSI_D
 	        (sign_extend:<VEL>
-		  (match_operand:<VSUBEL> 2 "register_operand" "  r,  r")))
+		  (match_operand:<VSUBEL> 2 "reg_or_0_operand" " rJ, rJ")))
 	      (match_operand:V_VLSI_D 3 "register_operand"         "  0,  0")))
 	  (match_dup 3)))]
   "TARGET_VECTOR && !TARGET_64BIT"
   "@
-   vnmsub.vx\t%0,%2,%4%p1
-   vnmsub.vx\t%0,%2,%4%p1"
+   vnmsub.vx\t%0,%z2,%4%p1
+   vnmsub.vx\t%0,%z2,%4%p1"
   [(set_attr "type" "vimuladd")
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "3")
@@ -6069,13 +6127,13 @@
 	    (mult:V_VLSI_D
 	      (vec_duplicate:V_VLSI_D
 	        (sign_extend:<VEL>
-		  (match_operand:<VSUBEL> 2 "register_operand" "  r,  r")))
+		  (match_operand:<VSUBEL> 2 "reg_or_0_operand" " rJ, rJ")))
 	      (match_operand:V_VLSI_D 3 "register_operand"         " vr, vr")))
 	  (match_dup 4)))]
   "TARGET_VECTOR && !TARGET_64BIT"
   "@
-   vnmsac.vx\t%0,%2,%3%p1
-   vnmsac.vx\t%0,%2,%3%p1"
+   vnmsac.vx\t%0,%z2,%3%p1
+   vnmsac.vx\t%0,%z2,%3%p1"
   [(set_attr "type" "vimuladd")
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "4")
@@ -6738,6 +6796,7 @@
    vmv%m3r.v\t%0,%3\;vf<madd_msub>.vv\t%0,%4,%5%p1"
   [(set_attr "type" "vfmuladd")
    (set_attr "mode" "<MODE>")
+   (set_attr "spec_restriction" "none,none,thv,none,none,thv")
    (set (attr "frm_mode")
 	(symbol_ref "riscv_vector::get_frm_mode (operands[10])"))])
 
@@ -6770,6 +6829,7 @@
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "2")
    (set_attr "vl_op_idx" "5")
+   (set_attr "spec_restriction" "none,thv,none,thv")
    (set (attr "ta") (symbol_ref "riscv_vector::get_ta(operands[6])"))
    (set (attr "ma") (symbol_ref "riscv_vector::get_ma(operands[7])"))
    (set (attr "avl_type_idx") (const_int 8))
@@ -6805,6 +6865,7 @@
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "4")
    (set_attr "vl_op_idx" "5")
+   (set_attr "spec_restriction" "none,thv,none,thv")
    (set (attr "ta") (symbol_ref "riscv_vector::get_ta(operands[6])"))
    (set (attr "ma") (symbol_ref "riscv_vector::get_ma(operands[7])"))
    (set (attr "avl_type_idx") (const_int 8))
@@ -6864,6 +6925,7 @@
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "3")
    (set_attr "vl_op_idx" "5")
+   (set_attr "spec_restriction" "none,thv,none,thv")
    (set (attr "ta") (symbol_ref "riscv_vector::get_ta(operands[6])"))
    (set (attr "ma") (symbol_ref "riscv_vector::get_ma(operands[7])"))
    (set (attr "avl_type_idx") (const_int 8))
@@ -6900,6 +6962,7 @@
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "4")
    (set_attr "vl_op_idx" "5")
+   (set_attr "spec_restriction" "none,thv,none,thv")
    (set (attr "ta") (symbol_ref "riscv_vector::get_ta(operands[6])"))
    (set (attr "ma") (symbol_ref "riscv_vector::get_ma(operands[7])"))
    (set (attr "avl_type_idx") (const_int 8))
@@ -6961,6 +7024,7 @@
    vmv%m3r.v\t%0,%3\;vf<nmsub_nmadd>.vv\t%0,%4,%5%p1"
   [(set_attr "type" "vfmuladd")
    (set_attr "mode" "<MODE>")
+   (set_attr "spec_restriction" "none,none,thv,none,none,thv")
    (set (attr "frm_mode")
 	(symbol_ref "riscv_vector::get_frm_mode (operands[10])"))])
 
@@ -6994,6 +7058,7 @@
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "2")
    (set_attr "vl_op_idx" "5")
+   (set_attr "spec_restriction" "none,thv,none,thv")
    (set (attr "ta") (symbol_ref "riscv_vector::get_ta(operands[6])"))
    (set (attr "ma") (symbol_ref "riscv_vector::get_ma(operands[7])"))
    (set (attr "avl_type_idx") (const_int 8))
@@ -7030,6 +7095,7 @@
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "4")
    (set_attr "vl_op_idx" "5")
+   (set_attr "spec_restriction" "none,thv,none,thv")
    (set (attr "ta") (symbol_ref "riscv_vector::get_ta(operands[6])"))
    (set (attr "ma") (symbol_ref "riscv_vector::get_ma(operands[7])"))
    (set (attr "avl_type_idx") (const_int 8))
@@ -7091,6 +7157,7 @@
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "3")
    (set_attr "vl_op_idx" "5")
+   (set_attr "spec_restriction" "none,thv,none,thv")
    (set (attr "ta") (symbol_ref "riscv_vector::get_ta(operands[6])"))
    (set (attr "ma") (symbol_ref "riscv_vector::get_ma(operands[7])"))
    (set (attr "avl_type_idx") (const_int 8))
@@ -7128,6 +7195,7 @@
    (set_attr "mode" "<MODE>")
    (set_attr "merge_op_idx" "4")
    (set_attr "vl_op_idx" "5")
+   (set_attr "spec_restriction" "none,thv,none,thv")
    (set (attr "ta") (symbol_ref "riscv_vector::get_ta(operands[6])"))
    (set (attr "ma") (symbol_ref "riscv_vector::get_ma(operands[7])"))
    (set (attr "avl_type_idx") (const_int 8))
@@ -7338,7 +7406,7 @@
 	  (match_operand:VWEXTF 2 "vector_merge_operand"           "   vu,    0")))]
   "TARGET_VECTOR"
   "vfwadd.wv\t%0,%3,%4%p1"
-  [(set_attr "type" "vfwalu")
+  [(set_attr "type" "vfwaluw")
    (set_attr "mode" "<V_DOUBLE_TRUNC>")
    (set (attr "frm_mode")
 	(symbol_ref "riscv_vector::get_frm_mode (operands[9])"))])
@@ -7363,7 +7431,7 @@
 	  (match_operand:VWEXTF 2 "vector_merge_operand"           "   vu,    0")))]
   "TARGET_VECTOR"
   "vfwsub.wv\t%0,%3,%4%p1"
-  [(set_attr "type" "vfwalu")
+  [(set_attr "type" "vfwaluw")
    (set_attr "mode" "<V_DOUBLE_TRUNC>")
    (set (attr "frm_mode")
 	(symbol_ref "riscv_vector::get_frm_mode (operands[9])"))])
@@ -7389,7 +7457,7 @@
 	  (match_operand:VWEXTF 2 "vector_merge_operand"          " vu,  0, vu,  0")))]
   "TARGET_VECTOR"
   "vfw<insn>.wf\t%0,%3,%4%p1"
-  [(set_attr "type" "vf<widen_binop_insn_type>")
+  [(set_attr "type" "vf<widenw_binop_insn_type>")
    (set_attr "mode" "<V_DOUBLE_TRUNC>")
    (set (attr "frm_mode")
 	(symbol_ref "riscv_vector::get_frm_mode (operands[9])"))])
@@ -7576,7 +7644,8 @@
 	     [(match_operand:V_VLSF 3 "register_operand"           " vr")
 	      (match_operand:V_VLSF 4 "register_operand"           " vr")])
 	  (match_dup 1)))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vmf%B2.vv\t%0,%3,%4,v0.t"
   [(set_attr "type" "vfcmp")
    (set_attr "mode" "<MODE>")
@@ -7604,7 +7673,7 @@
   "vmf%B3.vv\t%0,%4,%5%p1"
   [(set_attr "type" "vfcmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,thv,thv,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,thv,thv,thv,thv,none,none")])
 
 (define_expand "@pred_cmp<mode>_scalar"
   [(set (match_operand:<VM> 0 "register_operand")
@@ -7639,7 +7708,8 @@
 	      (vec_duplicate:V_VLSF
 	        (match_operand:<VEL> 4 "register_operand"     "  f"))])
 	  (match_dup 1)))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vmf%B2.vf\t%0,%3,%4,v0.t"
   [(set_attr "type" "vfcmp")
    (set_attr "mode" "<MODE>")
@@ -7690,7 +7760,7 @@
   "vmf%B3.vf\t%0,%4,%5%p1"
   [(set_attr "type" "vfcmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,none,none")])
 
 (define_expand "@pred_eqne<mode>_scalar"
   [(set (match_operand:<VM> 0 "register_operand")
@@ -7725,7 +7795,8 @@
 	        (match_operand:<VEL> 4 "register_operand"     "  f"))
 	      (match_operand:V_VLSF 3 "register_operand"      " vr")])
 	  (match_dup 1)))]
-  "TARGET_VECTOR"
+  "TARGET_VECTOR
+   && !(TARGET_XTHEADVECTOR && riscv_vector::cmp_lmul_gt_one (<MODE>mode))"
   "vmf%B2.vf\t%0,%3,%4,v0.t"
   [(set_attr "type" "vfcmp")
    (set_attr "mode" "<MODE>")
@@ -7776,7 +7847,7 @@
   "vmf%B3.vf\t%0,%4,%5%p1"
   [(set_attr "type" "vfcmp")
    (set_attr "mode" "<MODE>")
-   (set_attr "spec_restriction" "none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,none,none")])
 
 ;; -------------------------------------------------------------------------------
 ;; ---- Predicated floating-point merge
@@ -7993,7 +8064,7 @@
    (set_attr "mode" "<VNCONVERT>")
    (set (attr "frm_mode")
 	(symbol_ref "riscv_vector::get_frm_mode (operands[8])"))
-   (set_attr "spec_restriction" "none,none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,thv,none,none")])
 
 (define_insn "@pred_narrow_<fix_cvt><mode>"
   [(set (match_operand:<VNCONVERT> 0 "register_operand"        "=vd, vd, vr, vr,  &vr,  &vr")
@@ -8036,7 +8107,7 @@
    (set_attr "mode" "<VNCONVERT>")
    (set (attr "frm_mode")
 	(symbol_ref "riscv_vector::get_frm_mode (operands[8])"))
-   (set_attr "spec_restriction" "none,none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,thv,none,none")])
 
 (define_insn "@pred_trunc<mode>"
   [(set (match_operand:<V_DOUBLE_TRUNC> 0 "register_operand"       "=vd, vd, vr, vr,  &vr,  &vr")
@@ -8060,7 +8131,7 @@
    (set_attr "mode" "<V_DOUBLE_TRUNC>")
    (set (attr "frm_mode")
 	(symbol_ref "riscv_vector::get_frm_mode (operands[8])"))
-   (set_attr "spec_restriction" "none,none,thv,thv,none,none")])
+   (set_attr "spec_restriction" "thv,thv,thv,thv,none,none")])
 
 (define_insn "@pred_rod_trunc<mode>"
   [(set (match_operand:<V_DOUBLE_TRUNC> 0 "register_operand"       "=vd, vd, vr, vr,  &vr,  &vr")
@@ -8080,7 +8151,8 @@
   "TARGET_VECTOR"
   "vfncvt.rod.f.f.w\t%0,%3%p1"
   [(set_attr "type" "vfncvtftof")
-   (set_attr "mode" "<V_DOUBLE_TRUNC>")])
+   (set_attr "mode" "<V_DOUBLE_TRUNC>")
+   (set_attr "spec_restriction" "thv,thv,thv,thv,none,none")])
 
 ;; -------------------------------------------------------------------------------
 ;; ---- Predicated reduction operations
@@ -8375,8 +8447,14 @@
        vmv.x.s a0,v8  */
   rtx nbits = force_reg (Pmode, gen_int_mode (GET_MODE_BITSIZE (Pmode), Pmode));
   rtx high_bits = gen_reg_rtx (<MODE>mode);
+  rtx vl_reg = const1_rtx;
+  if (TARGET_XTHEADVECTOR)
+    {
+      vl_reg = gen_reg_rtx (Pmode);
+      emit_move_insn (vl_reg, const1_rtx);
+    }
   emit_insn (gen_pred_scalar (LSHIFTRT, <MODE>mode, high_bits, CONSTM1_RTX (<VM>mode),
-  			RVV_VUNDEF (<MODE>mode), operands[1], nbits, /* vl */ const1_rtx,
+  			RVV_VUNDEF (<MODE>mode), operands[1], nbits, /* vl */ vl_reg,
 			gen_int_mode (riscv_vector::TAIL_ANY, Pmode),
 			gen_int_mode (riscv_vector::MASK_ANY, Pmode),
 			gen_int_mode (riscv_vector::NONVLMAX, Pmode)));

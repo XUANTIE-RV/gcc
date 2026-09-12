@@ -1,3 +1,5 @@
+/* { dg-require-effective-target riscv_rvv_zvl128b_or_scalar } */
+
 #include "tree-vect.h"
 
 #if VECTOR_BITS > 256

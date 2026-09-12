@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-w -fdump-tree-crc-details" } */
+/* { dg-options "-foptimize-crc -w -fdump-tree-crc-details" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-flto" } } */
 
 /* Test from busybox, we don't verify as it depends on endian variable.  */

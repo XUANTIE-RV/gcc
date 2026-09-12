@@ -91,6 +91,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "errors.h"
 #include "read-md.h"
 #include "gensupport.h"
+#include "hash-table.h"
 
 /* No instruction can have more operands than this.  Sorry for this
    arbitrary limit, but what machine will have an instruction with
@@ -177,8 +178,8 @@ static void output_operand_data (void);
 static void output_insn_data (void);
 static void output_get_insn_name (void);
 static void scan_operands (class data *, rtx, int, int);
-static int compare_operands (struct operand_data *,
-			     struct operand_data *);
+static int compare_operands (const struct operand_data *,
+			     const struct operand_data *);
 static void place_operands (class data *);
 static void process_template (class data *, const char *);
 static void validate_insn_alternatives (class data *);
@@ -536,7 +537,8 @@ scan_operands (class data *d, rtx part, int this_address_p,
 /* Compare two operands for content equality.  */
 
 static int
-compare_operands (struct operand_data *d0, struct operand_data *d1)
+compare_operands (const struct operand_data *d0,
+		  const struct operand_data *d1)
 {
   const char *p0, *p1;
 
@@ -574,6 +576,46 @@ compare_operands (struct operand_data *d0, struct operand_data *d1)
   return 1;
 }
 
+/* This is a class that takes into account the necessary elements for
+   comparing the equality of two operands in its hash value.  */
+struct operand_data_hasher : nofree_ptr_hash <operand_data>
+{
+  static inline hashval_t hash (const operand_data *);
+  static inline bool equal (const operand_data *, const operand_data *);
+};
+
+hashval_t
+operand_data_hasher::hash (const operand_data * op_info)
+{
+  inchash::hash h;
+  const char *pred, *cons;
+
+  pred = op_info->predicate;
+  if (!pred)
+    pred = "";
+  h.add (pred, strlen (pred) + 1);
+
+  cons = op_info->constraint;
+  if (!cons)
+    cons = "";
+  h.add (cons, strlen (cons) + 1);
+
+  h.add_object (op_info->mode);
+  h.add_object (op_info->strict_low);
+  h.add_object (op_info->eliminable);
+  return h.end ();
+}
+
+bool
+operand_data_hasher::equal (const operand_data * op_info1,
+			    const operand_data * op_info2)
+{
+  return compare_operands (op_info1, op_info2);
+}
+
+/* Hashtable of konwn pattern operands.  */
+static hash_table<operand_data_hasher> *operand_datas;
+
 /* Scan the list of operands we've already committed to output and either
    find a subsequence that is the same, or allocate a new one at the end.  */
 
@@ -581,6 +623,7 @@ static void
 place_operands (class data *d)
 {
   struct operand_data *od, *od2;
+  struct operand_data **slot;
   int i;
 
   if (d->n_operands == 0)
@@ -589,23 +632,24 @@ place_operands (class data *d)
       return;
     }
 
-  od = lookup_operand_data (&d->operand[0]);
+  od = operand_datas->find (&d->operand[0]);
   /* Brute force substring search.  */
-  for (i = 0; od; od = od->eq_next, i = 0)
-      {
-	od2 = od->next;
-	i = 1;
-	while (1)
-	  {
-	    if (i == d->n_operands)
-	      goto full_match;
-	    if (od2 == NULL)
-	      goto partial_match;
-	    if (! compare_operands (od2, &d->operand[i]))
-	      break;
-	    ++i, od2 = od2->next;
-	  }
-      }
+  for (; od; od = od->eq_next)
+    {
+      od2 = od->next;
+      i = 1;
+      while (1)
+	{
+	  if (i == d->n_operands)
+	    goto full_match;
+	  if (od2 == NULL)
+	    goto partial_match;
+	  if (! compare_operands (od2, &d->operand[i]))
+	    break;
+	  ++i, od2 = od2->next;
+	}
+    }
+  i = 0;
 
   /* Either partial match at the end of the list, or no match.  In either
      case, we tack on what operands are remaining to the end of the list.  */
@@ -617,7 +661,20 @@ place_operands (class data *d)
       *odata_end = od2;
       odata_end = &od2->next;
       od2->index = next_operand_number++;
-      insert_operand_data (od2);
+      /* Insert the operand_data variable OD2 into the hash table.
+	 If a variable with the same hash value already exists in
+	 the hash table, insert the element at the end of the
+	 linked list connected through the eq_next member.  */
+      slot = operand_datas->find_slot (od2, INSERT);
+      if (*slot)
+	{
+	  struct operand_data *last = (struct operand_data *) *slot;
+	  while (last->eq_next)
+	    last = last->eq_next;
+	  last->eq_next = od2;
+	}
+      else
+	*slot = od2;
     }
   *odata_end = NULL;
   return;
@@ -1062,7 +1119,7 @@ main (int argc, const char **argv)
   progname = "genoutput";
 
   init_insn_for_nothing ();
-  init_operand_data_table ();
+  operand_datas = new hash_table<operand_data_hasher> (1024);
 
   if (!init_rtx_reader_args (argc, argv))
     return (FATAL_EXIT_CODE);

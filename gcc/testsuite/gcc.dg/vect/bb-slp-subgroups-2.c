@@ -1,5 +1,6 @@
 /* { dg-require-effective-target vect_int } */
 /* { dg-require-effective-target vect_perm } */
+/* { dg-require-effective-target riscv_rvv_zvl128b_or_scalar } */
 /* PR tree-optimization/67682.  */
 
 #include "tree-vect.h"

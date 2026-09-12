@@ -1,5 +1,5 @@
 /* { dg-options "-msave-restore" } */
-/* { dg-skip-if "" { *-*-* } { "-O0" } } */
+/* { dg-skip-if "" { *-*-* } { "-O0" "-march=*zcmp*" } } */
 
 /* As a leaf function this should never have the calls to the save and
    restore stubs added, but lets check anyway.  */

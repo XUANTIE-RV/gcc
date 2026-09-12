@@ -3564,6 +3564,7 @@ public:
   {
     if (flag_predictive_commoning != 0)
       return true;
+
     /* Loop vectorization enables predictive commoning implicitly
        only if predictive commoning isn't set explicitly, and it
        doesn't allow unrolling.  */

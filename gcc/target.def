@@ -3785,6 +3785,12 @@ negative number from this hook.",
  default_compare_by_pieces_branch_ratio)
 
 DEFHOOK
+(by_pieces_mode_supported_p,
+ "Return true if the MODE @var{mode} supports pieces operations.",
+ bool, (fixed_size_mode mode),
+ default_by_pieces_mode_supported_p)
+
+DEFHOOK
 (slow_unaligned_access,
  "This hook returns true if memory accesses described by the\n\
 @var{mode} and @var{alignment} parameters have a cost many times greater\n\
@@ -7137,6 +7143,10 @@ DEFHOOKPOD
 following it should not be run.  Usually true only for virtual assembler\n\
 targets.",
 bool, false)
+
+DEFHOOK
+(iv_gen_load_index, "*",
+bool, (HOST_WIDE_INT loop_niter, machine_mode mem_mode), NULL)
 
 /* Leave the boolean fields at the end.  */
 

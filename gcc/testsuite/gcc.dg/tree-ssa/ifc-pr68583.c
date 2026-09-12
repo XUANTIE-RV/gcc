@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-O3 -fdump-tree-ifcvt-blocks-details" } */
+/* { dg-options "-O3 -ftree-vectorize -fdump-tree-ifcvt-blocks-details --param=max-stores-to-sink=2" } */
 
 void foo (long *a)
 {

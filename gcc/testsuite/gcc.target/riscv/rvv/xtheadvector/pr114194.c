@@ -1,6 +1,6 @@
 /* { dg-do compile } */
-/* { dg-options "-march=rv32gc_xtheadvector -O2" { target { rv32 } } } */
-/* { dg-options "-march=rv64gc_xtheadvector -O2" { target { rv64 } } } */
+/* { dg-options "-march=rv32gc_xtheadvector -mabi=ilp32d -O2" { target { rv32 } } } */
+/* { dg-options "-march=rv64gc_xtheadvector -mabi=lp64d -O2" { target { rv64 } } } */
 /* { dg-final { check-function-bodies "**" "" } } */
 
 /*

@@ -803,6 +803,17 @@ and @var{MULTILIB_REUSE}.
 The default definition does nothing but return @var{multilib_dir} directly.
 @end deftypefn
 
+@deftypefn {Common Target Hook} {const char *} TARGET_COMPUTE_MULTILIB_OS (const char *@var{multilib_os_dir}, const char *@var{multilib_dir})
+Some targets like RISC-V might have complicated multilib os dir which
+needs to change it according to the value of multilib_dir.  This hook allows
+targets to override the result from the built-in multilib mechanism.
+@var{multilib_os_dir} is the os dirnames for multi-lib, which will override
+the result of MULTILIB_OSDIRNAMES.
+@var{multilib_dir} is the multi-lib result which is computed by the built-in
+multi-lib mechanism.
+The default definition does nothing but return @var{multilib_os_dir} directly.
+@end deftypefn
+
 
 @defmac SWITCHABLE_TARGET
 Some targets need to switch between substantially different subtargets
@@ -7082,6 +7093,10 @@ factor by which branches should be reduced over the plain expansion with
 one comparison per @var{mode}-sized piece.  A port can also prevent a
 particular mode from being used for block comparisons by returning a
 negative number from this hook.
+@end deftypefn
+
+@deftypefn {Target Hook} bool TARGET_BY_PIECES_MODE_SUPPORTED_P (fixed_size_mode @var{mode})
+Return true if the MODE @var{mode} supports pieces operations.
 @end deftypefn
 
 @defmac MOVE_MAX_PIECES

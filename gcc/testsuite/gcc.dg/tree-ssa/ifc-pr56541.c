@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-O3 -fdump-tree-ifcvt-stats-blocks-details" } */
+/* { dg-options "-O3 -ftree-vectorize -fdump-tree-ifcvt-stats-blocks-details" } */
 
 float a,b,c,d;
 

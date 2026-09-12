@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc-details" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-flto" } } */
 
 // Test from roms/ipxe/src/util/zbin.c

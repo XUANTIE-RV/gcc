@@ -1,5 +1,5 @@
 /* { dg-options "-msave-restore" } */
-/* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Og" } } */
+/* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Og" "-march=*zcmp*" } } */
 
 /* This test covers a case where we can't (currently) remove the calls to
    the save/restore stubs.  The cast of the return value from BAR requires

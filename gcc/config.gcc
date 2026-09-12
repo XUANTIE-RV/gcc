@@ -554,6 +554,14 @@ riscv*)
 	extra_objs="${extra_objs} thead.o riscv-target-attr.o riscv-zicfilp.o"
 	d_target_objs="riscv-d.o"
 	extra_headers="riscv_vector.h riscv_crypto.h riscv_bitmanip.h riscv_th_vector.h riscv_cmo.h"
+	extra_headers="${extra_headers} riscv-dsp.h"
+	extra_headers="${extra_headers} thead_matrix.h"
+	extra_headers="${extra_headers} riscv_vector_v0p10_non_policy.h riscv_vector_v0p10.h riscv_vector_v0p10_vsseg.h riscv_vector_v0p10_non_policy_common.h riscv_vector_v0p10_non_policy_xtheadvector.h riscv_vector_v0p10_vsseg_common.h riscv_vector_v0p10_vsseg_xtheadvector.h"
+	extra_headers="${extra_headers} riscv_vector_v0p10_xtheadvdot.h"
+	extra_headers="${extra_headers} riscv_vector_v0p10_bf16.h"
+	extra_headers="${extra_headers} riscv_th_cop.h riscv_th_cop_vector.h"
+	target_gtfiles="$target_gtfiles \$(srcdir)/config/riscv/xuantie-ext-builtins.cc"
+	extra_options="${extra_options} riscv/xuantie.opt"
 	target_gtfiles="$target_gtfiles \$(srcdir)/config/riscv/riscv-vector-builtins.cc"
 	target_gtfiles="$target_gtfiles \$(srcdir)/config/riscv/riscv-vector-builtins.h"
 	;;
@@ -2487,7 +2495,19 @@ riscv*-*-linux*)
 	tm_file="elfos.h gnu-user.h linux.h glibc-stdint.h ${tm_file} riscv/linux.h"
 	case "x${enable_multilib}" in
 	xno) ;;
-	xyes) tmake_file="${tmake_file} riscv/t-linux-multilib" ;;
+	xyes)
+		case ${target} in
+		riscv64-*-linux-musl*)
+			tmake_file="${tmake_file} riscv/t-linux-musl64-multilib"
+			;;
+		riscv32-*-linux-musl*)
+			tmake_file="${tmake_file} riscv/t-linux-musl32-multilib"
+			;;
+		*)
+			tmake_file="${tmake_file} riscv/t-linux-multilib"
+			;;
+		esac
+		;;
 	*) echo "Unknown value for enable_multilib"; exit 1
 	esac
 	tmake_file="${tmake_file} riscv/t-riscv riscv/t-linux"
@@ -4745,7 +4765,7 @@ case "${target}" in
 			exit 1
 			;;
 		esac
-		PYTHON=`which python || which python3 || which python2`
+		PYTHON=`which python3 || which python2 || which python`
 		if test "x${PYTHON}" != x; then
 			with_arch=`${PYTHON} ${srcdir}/config/riscv/arch-canonicalize -misa-spec=${with_isa_spec} ${with_arch}`
 		fi

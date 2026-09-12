@@ -99,31 +99,27 @@ using namespace riscv_vector;
 static void
 bitmap_union_of_preds_with_entry (sbitmap dst, sbitmap *src, basic_block b)
 {
-  unsigned int set_size = dst->size;
-  edge e;
-  unsigned ix;
-
-  for (ix = 0; ix < EDGE_COUNT (b->preds); ix++)
+  /* Handle case with no predecessors (including ENTRY block).  */
+  if (EDGE_COUNT (b->preds) == 0)
     {
-      e = EDGE_PRED (b, ix);
-      bitmap_copy (dst, src[e->src->index]);
-      break;
+      bitmap_clear (dst);
+      return;
     }
 
-  if (ix == EDGE_COUNT (b->preds))
-    bitmap_clear (dst);
-  else
-    for (ix++; ix < EDGE_COUNT (b->preds); ix++)
-      {
-	unsigned int i;
-	SBITMAP_ELT_TYPE *p, *r;
+  /* Initialize with first predecessor's bitmap.  */
+  edge first_pred = EDGE_PRED (b, 0);
+  bitmap_copy (dst, src[first_pred->src->index]);
 
-	e = EDGE_PRED (b, ix);
-	p = src[e->src->index]->elms;
-	r = dst->elms;
-	for (i = 0; i < set_size; i++)
-	  *r++ |= *p++;
-      }
+  /* Union remaining predecessors' bitmaps.  */
+  for (unsigned ix = 1; ix < EDGE_COUNT (b->preds); ix++)
+    {
+      edge e = EDGE_PRED (b, ix);
+      const sbitmap pred_src = src[e->src->index];
+
+      /* Perform bitmap OR operation element-wise.  */
+      for (unsigned i = 0; i < dst->size; i++)
+	dst->elms[i] |= pred_src->elms[i];
+    }
 }
 
 /* Compute the reaching defintion in and out based on the gen and KILL
@@ -314,7 +310,9 @@ vsetvl_insn_p (rtx_insn *rinsn)
   if (!rinsn || !vector_config_insn_p (rinsn))
     return false;
   return (INSN_CODE (rinsn) == CODE_FOR_vsetvldi
-	  || INSN_CODE (rinsn) == CODE_FOR_vsetvlsi);
+	  || INSN_CODE (rinsn) == CODE_FOR_vsetvlsi)
+	  || INSN_CODE (rinsn) == CODE_FOR_th_vsetvldi
+	  || INSN_CODE (rinsn) == CODE_FOR_th_vsetvlsi;
 }
 
 /* Return true if it is the bogus vsetvl_pre instruction:
@@ -669,6 +667,15 @@ has_no_uses (basic_block cfg_bb, rtx_insn *rinsn, int regno)
   return true;
 }
 
+static machine_mode
+get_insn_vtype_mode (rtx_insn *rinsn)
+{
+  extract_insn_cached (rinsn);
+  int mode_idx = get_attr_mode_idx (rinsn);
+  gcc_assert (mode_idx != INVALID_ATTRIBUTE);
+  return GET_MODE (recog_data.operand[mode_idx]);
+}
+
 /* Return true for the special block that we can't apply LCM optimization.  */
 static bool
 invalid_opt_bb_p (basic_block cfg_bb)
@@ -897,7 +904,35 @@ public:
     m_vl = other.get_vl ();
     m_avl_def = other.get_avl_def ();
   }
+  /* Return true if LMUL is valid in the current vsetvl context.
+     LMUL_1 and fractional LMULs (LMUL_F8, LMUL_F4, LMUL_F2) are always valid.
+     For integer LMULs (LMUL_2, LMUL_4, LMUL_8), they must not exceed current
+     VLMUL.  */
+  bool vlmul_valid_p (vlmul_type lmul) const
+  {
+    if (lmul == LMUL_1 || lmul > LMUL_8)
+      return true;
 
+    if (m_vlmul >= lmul)
+      return true;
+
+    rtx_insn* insn = m_insn->rtl ();
+    if (vector_config_insn_p (insn)
+	|| ignore_vlmul_insn_p (insn))
+      return true;
+
+    if (get_attr_type (insn) == TYPE_VLDR
+	|| get_attr_type (insn) == TYPE_VSTR
+	|| get_attr_type (insn) == TYPE_VMOV)
+      return true;
+
+    machine_mode vtype_mode = get_insn_vtype_mode (insn);
+    if (GET_MODE_CLASS (vtype_mode) == MODE_VECTOR_BOOL)
+      return true;
+
+    // TODO: We may also need to check register alignment (e.g., regno % lmul == 0).
+    return false;
+  }
   bool uninit_p () const { return m_state == state_type::UNINITIALIZED; }
   bool valid_p () const { return m_state == state_type::VALID; }
   bool unknown_p () const { return m_state == state_type::UNKNOWN; }
@@ -1188,7 +1223,7 @@ public:
        set the value of avl to (const_int 0) so that VSETVL PASS will
        insert vsetvl correctly.*/
     if (!get_avl ())
-      avl = GEN_INT (0);
+      avl = TARGET_XTHEADVECTOR ? gen_rtx_REG(Pmode, 0) : GEN_INT (0);
     rtx sew = gen_int_mode (get_sew (), Pmode);
     rtx vlmul = gen_int_mode (get_vlmul (), Pmode);
     rtx ta = gen_int_mode (get_ta (), Pmode);
@@ -1711,64 +1746,90 @@ private:
 
   /* modifiers  */
 
-  inline void nop (const vsetvl_info &prev ATTRIBUTE_UNUSED,
+  inline bool nop (const vsetvl_info &prev ATTRIBUTE_UNUSED,
 		   const vsetvl_info &next ATTRIBUTE_UNUSED)
-  {}
+  { return true; }
 
   /* modifiers for sew and lmul */
 
-  inline void use_min_of_max_sew (vsetvl_info &prev, const vsetvl_info &next)
+  inline bool use_min_of_max_sew (vsetvl_info &prev, const vsetvl_info &next)
   {
     prev.set_max_sew (MIN (prev.get_max_sew (), next.get_max_sew ()));
+    return true;
   }
-  inline void use_next_sew (vsetvl_info &prev, const vsetvl_info &next)
+  inline bool use_next_sew (vsetvl_info &prev, const vsetvl_info &next)
   {
     prev.set_sew (next.get_sew ());
     use_min_of_max_sew (prev, next);
+    return true;
   }
-  inline void use_max_sew (vsetvl_info &prev, const vsetvl_info &next)
+  inline bool use_max_sew (vsetvl_info &prev, const vsetvl_info &next)
   {
     bool prev_sew_larger = prev.get_sew () >= next.get_sew ();
     const vsetvl_info from = prev_sew_larger ? prev : next;
+    vlmul_type lmul = from.get_vlmul ();
+    if (!prev.vlmul_valid_p (lmul) || !next.vlmul_valid_p (lmul))
+      return false;
     prev.set_sew (from.get_sew ());
-    prev.set_vlmul (from.get_vlmul ());
+    prev.set_vlmul (lmul);
     prev.set_ratio (from.get_ratio ());
     use_min_of_max_sew (prev, next);
+    return true;
   }
-  inline void use_next_sew_lmul (vsetvl_info &prev, const vsetvl_info &next)
+  inline bool use_next_sew_lmul (vsetvl_info &prev, const vsetvl_info &next)
   {
+    vlmul_type lmul = next.get_vlmul ();
+    if (!prev.vlmul_valid_p (lmul))
+      return false;
     use_next_sew (prev, next);
-    prev.set_vlmul (next.get_vlmul ());
+    prev.set_vlmul (lmul);
     prev.set_ratio (next.get_ratio ());
+    return true;
   }
-  inline void use_next_sew_with_prev_ratio (vsetvl_info &prev,
+  inline bool use_next_sew_with_prev_ratio (vsetvl_info &prev,
 					    const vsetvl_info &next)
   {
+    vlmul_type lmul = calculate_vlmul (next.get_sew (), prev.get_ratio ());
+    if (!prev.vlmul_valid_p (lmul) || !next.vlmul_valid_p (lmul))
+      return false;
     use_next_sew (prev, next);
-    prev.set_vlmul (calculate_vlmul (next.get_sew (), prev.get_ratio ()));
+    prev.set_vlmul (lmul);
+    return true;
   }
-  inline void modify_lmul_with_next_ratio (vsetvl_info &prev,
+  inline bool modify_lmul_with_next_ratio (vsetvl_info &prev,
 					   const vsetvl_info &next)
   {
-    prev.set_vlmul (calculate_vlmul (prev.get_sew (), next.get_ratio ()));
+    vlmul_type lmul = calculate_vlmul (prev.get_sew (), next.get_ratio ());
+    if (!prev.vlmul_valid_p (lmul) || !next.vlmul_valid_p (lmul))
+      return false;
+    prev.set_vlmul (lmul);
     prev.set_ratio (next.get_ratio ());
+    return true;
   }
 
-  inline void use_max_sew_and_lmul_with_next_ratio (vsetvl_info &prev,
+  inline bool use_max_sew_and_lmul_with_next_ratio (vsetvl_info &prev,
 						    const vsetvl_info &next)
   {
     int max_sew = MAX (prev.get_sew (), next.get_sew ());
-    prev.set_vlmul (calculate_vlmul (max_sew, next.get_ratio ()));
+    vlmul_type lmul = calculate_vlmul (max_sew, next.get_ratio ());
+    if (!prev.vlmul_valid_p (lmul) || !next.vlmul_valid_p (lmul))
+      return false;
+    prev.set_vlmul (lmul);
     use_max_sew (prev, next);
     prev.set_ratio (next.get_ratio ());
+    return true;
   }
 
-  inline void use_max_sew_and_lmul_with_prev_ratio (vsetvl_info &prev,
+  inline bool use_max_sew_and_lmul_with_prev_ratio (vsetvl_info &prev,
 						    const vsetvl_info &next)
   {
     int max_sew = MAX (prev.get_sew (), next.get_sew ());
-    prev.set_vlmul (calculate_vlmul (max_sew, prev.get_ratio ()));
+    vlmul_type lmul = calculate_vlmul (max_sew, prev.get_ratio ());
+    if (!prev.vlmul_valid_p (lmul) || !next.vlmul_valid_p (lmul))
+      return false;
+    prev.set_vlmul (lmul);
     prev.set_sew (max_sew);
+    return true;
   }
 
   /* modifiers for tail and mask policy */
@@ -1955,7 +2016,7 @@ public:
     gcc_unreachable ();
   }
 
-  void merge_sew_lmul (vsetvl_info &prev, const vsetvl_info &next)
+  bool merge_sew_lmul (vsetvl_info &prev, const vsetvl_info &next)
   {
     gcc_assert (prev.valid_p () && next.valid_p ());
     sew_lmul_demand_type prev_flags = prev.get_sew_lmul_demand ();
@@ -1966,9 +2027,10 @@ public:
       && next_flags == sew_lmul_demand_type::NEXT_FLAGS)                       \
     {                                                                          \
       gcc_assert (COMPATIBLE_P (prev, next));                                  \
-      FUSE (prev, next);                                                       \
+      if (!(FUSE (prev, next)))                                                  \
+	return false;                                                          \
       prev.set_sew_lmul_demand (sew_lmul_demand_type::NEW_FLAGS);              \
-      return;                                                                  \
+      return true;                                                             \
     }
 
 #include "riscv-vsetvl.def"
@@ -2115,13 +2177,15 @@ public:
     return available_p;
   }
 
-  void merge (vsetvl_info &prev, const vsetvl_info &next)
+  bool merge (vsetvl_info &prev, const vsetvl_info &next)
   {
     gcc_assert (compatible_p (prev, next));
-    merge_sew_lmul (prev, next);
+    if (!merge_sew_lmul (prev, next))
+      return false;
     merge_policy (prev, next);
     merge_avl (prev, next);
     gcc_assert (available_p (prev, next));
+    return true;
   }
 };
 
@@ -2819,7 +2883,15 @@ pre_vsetvl::fuse_local_vsetvl_info ()
 		      fprintf (dump_file, "      curr_info: ");
 		      curr_info.dump (dump_file, "        ");
 		    }
-		  m_dem.merge (prev_info, curr_info);
+		  if (!m_dem.merge (prev_info, curr_info))
+		    {
+		      if (dump_file && (dump_flags & TDF_DETAILS))
+			fprintf (dump_file, "      Invaild Fuse\n");
+		      goto Fuse_Faild;
+		    }
+		  if (!curr_info.vl_used_by_non_rvv_insn_p ()
+		      && vsetvl_insn_p (curr_info.get_insn ()->rtl ()))
+		    m_delete_list.safe_push (curr_info);
 		  if (curr_info.get_read_vl_insn ())
 		    prev_info.set_read_vl_insn (curr_info.get_read_vl_insn ());
 		  if (dump_file && (dump_flags & TDF_DETAILS))
@@ -2831,6 +2903,7 @@ pre_vsetvl::fuse_local_vsetvl_info ()
 		}
 	      else
 		{
+Fuse_Faild:
 		  if (dump_file && (dump_flags & TDF_DETAILS))
 		    {
 		      fprintf (dump_file,
@@ -3012,7 +3085,12 @@ pre_vsetvl::earliest_fuse_vsetvl_info (int iter)
 		      fprintf (dump_file, "      curr_info: ");
 		      curr_info.dump (dump_file, "        ");
 		    }
-		  m_dem.merge (prev_info, curr_info);
+		  if (!m_dem.merge (prev_info, curr_info))
+		    {
+		      if (dump_file && (dump_flags & TDF_DETAILS))
+			fprintf (dump_file, "      Invaild Fuse\n");
+		      goto Fuse_Faild;
+		    }
 		  if (dump_file && (dump_flags & TDF_DETAILS))
 		    {
 		      fprintf (dump_file, "      prev_info after fused: ");
@@ -3026,6 +3104,7 @@ pre_vsetvl::earliest_fuse_vsetvl_info (int iter)
 	      else
 		{
 		  /* Cancel lift up if probabilities are equal.  */
+Fuse_Faild:
 		  if (successors_probability_equal_p (eg->src)
 		      || (dest_block_info.probability
 			    > src_block_info.probability
@@ -3108,7 +3187,12 @@ pre_vsetvl::earliest_fuse_vsetvl_info (int iter)
 		  fprintf (dump_file, "      curr_info: ");
 		  curr_info.dump (dump_file, "        ");
 		}
-	      m_dem.merge (prev_info, curr_info);
+	      if (!m_dem.merge (prev_info, curr_info))
+		{
+		  if (dump_file && (dump_flags & TDF_DETAILS))
+		    fprintf (dump_file, "      Invaild Fuse\n");
+		  continue;
+		}
 	      if (dump_file && (dump_flags & TDF_DETAILS))
 		{
 		  fprintf (dump_file, "      prev_info after fused: ");
@@ -3440,6 +3524,8 @@ pre_vsetvl::remove_avl_operand ()
 	      else
 		{
 		  rtx set = single_set (rinsn);
+		  if (!set)
+		    continue;
 		  rtx src
 		    = simplify_replace_rtx (SET_SRC (set), avl, const0_rtx);
 		  new_pat = gen_rtx_SET (SET_DEST (set), src);

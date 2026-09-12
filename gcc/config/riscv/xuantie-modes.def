@@ -1,0 +1,69 @@
+/* Copyright (C) 2024 Free Software Foundation, Inc.
+   Contributed by Alibaba Damo Academy Xuantie Team.
+
+   This file is part of GCC.
+
+   GCC is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   GCC is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GCC; see the file COPYING3.  If not see
+   <http://www.gnu.org/licenses/>.  */
+
+/* DSP modes.  */
+VECTOR_MODE_WITH_PREFIX (RVP, INT, QI, 4, 1);   /* RVP4QI */
+VECTOR_MODE_WITH_PREFIX (RVP, INT, QI, 8, 1);   /* RVP8QI */
+VECTOR_MODE_WITH_PREFIX (RVP, INT, HI, 2, 1);   /* RVP2HI */
+VECTOR_MODE_WITH_PREFIX (RVP, INT, HI, 4, 1);   /* RVP4HI */
+VECTOR_MODE_WITH_PREFIX (RVP, INT, HI, 8, 1);   /* RVP8HI */
+VECTOR_MODE_WITH_PREFIX (RVP, INT, SI, 2, 1);   /* RVP2SI */
+VECTOR_MODE_WITH_PREFIX (RVP, INT, SI, 4, 1);   /* RVP4SI */
+VECTOR_MODE_WITH_PREFIX (RVP, INT, DI, 2, 1);   /* RVP2DI */
+
+/* XTHEADMATRIX modes.  */
+#define RVM_WHOLE_MODES(LMUL)						\
+  VECTOR_MODE_WITH_PREFIX (RVMM, INT, QI, LMUL, 1);			\
+  VECTOR_MODE_WITH_PREFIX (RVMM, INT, HI, LMUL, 1);			\
+  VECTOR_MODE_WITH_PREFIX (RVMM, FLOAT, HF, LMUL, 1);			\
+  VECTOR_MODE_WITH_PREFIX (RVMM, INT, SI, LMUL, 1);			\
+  VECTOR_MODE_WITH_PREFIX (RVMM, FLOAT, SF, LMUL, 1);			\
+  VECTOR_MODE_WITH_PREFIX (RVMM, INT, DI, LMUL, 1);			\
+  VECTOR_MODE_WITH_PREFIX (RVMM, FLOAT, DF, LMUL, 1);			\
+									\
+  ADJUST_NUNITS (RVMM##LMUL##QI,					\
+		 xt_rvm_adjust_nunits (RVMM##LMUL##QImode, LMUL, 8));	\
+  ADJUST_NUNITS (RVMM##LMUL##HI,					\
+		 xt_rvm_adjust_nunits (RVMM##LMUL##HImode, LMUL, 4));	\
+  ADJUST_NUNITS (RVMM##LMUL##SI,					\
+		 xt_rvm_adjust_nunits (RVMM##LMUL##SImode, LMUL, 2));	\
+  ADJUST_NUNITS (RVMM##LMUL##DI,					\
+		 xt_rvm_adjust_nunits (RVMM##LMUL##DImode, LMUL, 1));	\
+  ADJUST_NUNITS (RVMM##LMUL##HF,					\
+		 xt_rvm_adjust_nunits (RVMM##LMUL##HFmode, LMUL, 4));	\
+  ADJUST_NUNITS (RVMM##LMUL##SF,					\
+		 xt_rvm_adjust_nunits (RVMM##LMUL##SFmode, LMUL, 2));	\
+  ADJUST_NUNITS (RVMM##LMUL##DF,					\
+		 xt_rvm_adjust_nunits (RVMM##LMUL##DFmode, LMUL, 1));	\
+									\
+  ADJUST_ALIGNMENT (RVMM##LMUL##QI, 1);					\
+  ADJUST_ALIGNMENT (RVMM##LMUL##HI, 2);					\
+  ADJUST_ALIGNMENT (RVMM##LMUL##SI, 4);					\
+  ADJUST_ALIGNMENT (RVMM##LMUL##DI, 8);					\
+  ADJUST_ALIGNMENT (RVMM##LMUL##HF, 2);					\
+  ADJUST_ALIGNMENT (RVMM##LMUL##SF, 4);					\
+  ADJUST_ALIGNMENT (RVMM##LMUL##DF, 8);
+
+RVM_WHOLE_MODES (1)
+RVM_WHOLE_MODES (2)
+
+#undef RVM_WHOLE_MODES
+
+#undef NUM_POLY_INT_COEFFS
+#define NUM_POLY_INT_COEFFS 3

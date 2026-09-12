@@ -157,6 +157,11 @@
        (eq_attr "type" "fmove,fcvt"))
   "float_pipe,sifive_p600_fpu")
 
+(define_insn_reservation "sifive_p600_fminmax" 2
+  (and (eq_attr "tune" "sifive_p600")
+       (eq_attr "type" "fminmax"))
+  "float_pipe,sifive_p600_fpu")
+
 (define_insn_reservation "sifive_p600_fdiv_s" 11
   (and (eq_attr "tune" "sifive_p600")
        (eq_attr "type" "fdiv,fsqrt")

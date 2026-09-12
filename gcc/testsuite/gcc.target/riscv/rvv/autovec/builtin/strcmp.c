@@ -1,5 +1,5 @@
 /* { dg-do compile { target { riscv_v } } } */
-/* { dg-additional-options "-O3 -minline-strcmp" } */
+/* { dg-additional-options "-O3 -minline-strcmp -mstringop-strategy=vector" } */
 
 int
 __attribute__ ((noipa))

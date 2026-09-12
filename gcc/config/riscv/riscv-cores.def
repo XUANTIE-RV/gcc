@@ -33,6 +33,9 @@
 #define RISCV_TUNE(TUNE_NAME, PIPELINE_MODEL, TUNE_INFO)
 #endif
 
+/* Implement the TUNEs for thead.  */
+#include "xuantie-cores.def"
+
 RISCV_TUNE("rocket", generic, rocket_tune_info)
 RISCV_TUNE("sifive-3-series", generic, rocket_tune_info)
 RISCV_TUNE("sifive-5-series", generic, rocket_tune_info)
@@ -61,6 +64,9 @@ RISCV_TUNE("size", generic, optimize_size_tune_info)
 #ifndef RISCV_CORE
 #define RISCV_CORE(CORE_NAME, ARCH, MICRO_ARCH)
 #endif
+
+/* Implement the COREs for thead.  */
+#include "xuantie-cores.def"
 
 RISCV_CORE("sifive-e20",      "rv32imc",    "rocket")
 RISCV_CORE("sifive-e21",      "rv32imac",   "rocket")

@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-O1" "-Os" "-flto" } } */
 
 /* We don't detect this case, because there are many conditional branches.

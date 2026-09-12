@@ -1,4 +1,5 @@
 /* { dg-do run { target { riscv_v } } } */
+/* { dg-require-effective-target riscv_rvv_zvl128b_or_scalar } */
 /* { dg-additional-options "-mcmodel=medany" } */
 
 #include "strided_load-1.c"

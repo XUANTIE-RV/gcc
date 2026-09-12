@@ -292,10 +292,15 @@
   switch (GET_CODE (op))
     {
     case CONST_INT:
+      #ifdef TARGET_XUANTIE_EXPAND_SPLIT_IMM
+      if (!TARGET_XUANTIE_EXPAND_SPLIT_IMM)
+	return true;
+      #endif
       return !splittable_const_int_operand (op, mode);
 
     case CONST_POLY_INT:
-      return known_eq (rtx_to_poly_int64 (op), BYTES_PER_RISCV_VECTOR);
+      return known_eq (rtx_to_poly_int64 (op), BYTES_PER_RISCV_VECTOR)
+		       || satisfies_constraint_xp (op);
 
     case CONST:
     case SYMBOL_REF:
@@ -571,8 +576,10 @@
 ;; or immediate (0 ~ 31), we define this predicate same as vector_length_operand here.
 ;; We don't use vector_length_operand directly to predicate vsll.vx/vsrl.vx/vsra.vx
 ;; since it may be confusing.
+;; But since the XTheadVector is the same as rvv 1.0, we redefine.
 (define_special_predicate "pmode_reg_or_uimm5_operand"
-  (match_operand 0 "vector_length_operand"))
+  (ior (match_operand 0 "pmode_register_operand")
+       (match_operand 0 "const_csr_operand")))
 
 (define_special_predicate "pmode_reg_or_0_operand"
   (ior (match_operand 0 "const_0_operand")

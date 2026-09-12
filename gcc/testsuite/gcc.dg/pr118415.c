@@ -1,6 +1,6 @@
 /* PR middle-end/118415 */
 /* { dg-do run } */
-/* { dg-options "-O2" } */
+/* { dg-options "-O2 -foptimize-crc" } */
 
 unsigned char crc_table_for_crc_8_polynomial_0x7[2] = { 0xff, 0xff };
 

@@ -3507,9 +3507,14 @@ try_combine (rtx_insn *i3, rtx_insn *i2, rtx_insn *i1, rtx_insn *i0,
      If the remaining SET came from I2 its destination should not be used
      between I2 and I3.  See PR82024.  */
 
-  if (!(added_sets_2 && i1 == 0)
-      && is_parallel_of_n_reg_sets (newpat, 2)
-      && asm_noperands (newpat) < 0)
+  /* Delete the constraint that "!(added_sets_2 && i1 == 0)", added_sets_2
+     means the i2 keep live after i3, the set0 and set1 below is the new set
+     insn tranformed from i2 and i3. The added_sets_2 is not necessary because
+     the if stmt below check the two set insns is unused or not, when the i3
+     is unused, it can be eliminated despite of the added_sets_2 is true.
+     And the i1 == 0 means just combine two insn, it seems ok because the
+     i1 is not necessary and the code below don't consider it. */
+  if (is_parallel_of_n_reg_sets (newpat, 2) && asm_noperands (newpat) < 0)
     {
       rtx set0 = XVECEXP (newpat, 0, 0);
       rtx set1 = XVECEXP (newpat, 0, 1);

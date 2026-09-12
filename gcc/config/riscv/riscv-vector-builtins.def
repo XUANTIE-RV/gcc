@@ -69,6 +69,11 @@ along with GCC; see the file COPYING3.  If not see
 /* Use "DEF_RVV_TYPE_INDEX" macro to define RVV function types.  */
 #ifndef DEF_RVV_TYPE_INDEX
 #define DEF_RVV_TYPE_INDEX(                                                    \
+  XT_MAQA_MASK, XT_MAQA_QUAD_SIGNED_TRUNC, XT_MAQA_QUAD_UNSIGNED_TRUNC,        \
+  XT_DOUBLE_TRUNC_FLOAT_FP8E4M3, XT_DOUBLE_TRUNC_FLOAT_FP8E5M2,                \
+  XT_QUAD_TRUNC_VECTOR, XT_QUAD_TRUNC_SCALAR,                                  \
+  XT_QUAD_TRUNC_BFLOAT_VECTOR, XT_QUAD_TRUNC_BFLOAT_SCALAR,                    \
+  XT_DOUBLE_EXT_VECTOR, XT_QUAD_EXT_VECTOR,                                    \
   VECTOR, MASK, SIGNED, UNSIGNED, EEW8_INDEX, EEW16_INDEX, EEW32_INDEX,        \
   EEW64_INDEX, SHIFT, DOUBLE_TRUNC, QUAD_TRUNC, OCT_TRUNC,                     \
   DOUBLE_TRUNC_SCALAR, DOUBLE_TRUNC_SIGNED, DOUBLE_TRUNC_UNSIGNED,             \
@@ -607,6 +612,36 @@ DEF_RVV_TUPLE_TYPE (vfloat64m4x2_t, 19, __rvv_float64m4x2_t, vfloat64m4_t, doubl
 DEF_RVV_TYPE (vfloat64m8_t, 17, __rvv_float64m8_t, double, RVVM8DF, _f64m8,
 	      _f64, _e64m8)
 
+DEF_RVV_TYPE (vfloat8e4m3mf8_t, 21, __rvv_float8e4m3mf8_t, int8, RVVMF8QI, _f8e4mf8,
+	      _f8e4, _e8mf8)
+DEF_RVV_TYPE (vfloat8e4m3mf4_t, 21, __rvv_float8e4m3mf4_t, int8, RVVMF4QI, _f8e4mf4,
+	      _f8e4, _e8mf4)
+DEF_RVV_TYPE (vfloat8e4m3mf2_t, 21, __rvv_float8e4m3mf2_t, int8, RVVMF2QI, _f8e4mf2,
+	      _f8e4, _e8mf2)
+DEF_RVV_TYPE (vfloat8e4m3m1_t, 20, __rvv_float8e4m3m1_t, int8, RVVM1QI, _f8e4m1,
+	      _f8e4, _e8m1)
+DEF_RVV_TYPE (vfloat8e4m3m2_t, 20, __rvv_float8e4m3m2_t, int8, RVVM2QI, _f8e4m2,
+	      _f8e4, _e8m2)
+DEF_RVV_TYPE (vfloat8e4m3m4_t, 20, __rvv_float8e4m3m4_t, int8, RVVM4QI, _f8e4m4,
+	      _f8e4, _e8m4)
+DEF_RVV_TYPE (vfloat8e4m3m8_t, 20, __rvv_float8e4m3m8_t, int8, RVVM8QI, _f8e4m8,
+	      _f8e4, _e8m8)
+
+DEF_RVV_TYPE (vfloat8e5m2mf8_t, 21, __rvv_float8e5m2mf8_t, int8, RVVMF8QI, _f8e5mf8,
+	      _f8e5, _e8mf8)
+DEF_RVV_TYPE (vfloat8e5m2mf4_t, 21, __rvv_float8e5m2mf4_t, int8, RVVMF4QI, _f8e5mf4,
+	      _f8e5, _e8mf4)
+DEF_RVV_TYPE (vfloat8e5m2mf2_t, 21, __rvv_float8e5m2mf2_t, int8, RVVMF2QI, _f8e5mf2,
+	      _f8e5, _e8mf2)
+DEF_RVV_TYPE (vfloat8e5m2m1_t, 20, __rvv_float8e5m2m1_t, int8, RVVM1QI, _f8e5m1,
+	      _f8e5, _e8m1)
+DEF_RVV_TYPE (vfloat8e5m2m2_t, 20, __rvv_float8e5m2m2_t, int8, RVVM2QI, _f8e5m2,
+	      _f8e5, _e8m2)
+DEF_RVV_TYPE (vfloat8e5m2m4_t, 20, __rvv_float8e5m2m4_t, int8, RVVM4QI, _f8e5m4,
+	      _f8e5, _e8m4)
+DEF_RVV_TYPE (vfloat8e5m2m8_t, 20, __rvv_float8e5m2m8_t, int8, RVVM8QI, _f8e5m8,
+	      _f8e5, _e8m8)
+
 DEF_RVV_OP_TYPE (vv)
 DEF_RVV_OP_TYPE (vx)
 DEF_RVV_OP_TYPE (vi)
@@ -647,6 +682,18 @@ DEF_RVV_PRED_TYPE (m)
 DEF_RVV_PRED_TYPE (tam)
 DEF_RVV_PRED_TYPE (tum)
 
+DEF_RVV_BASE_TYPE (xt_maqa_mask, get_vector_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_maqa_quad_signed_vector, get_vector_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_maqa_quad_unsigned_vector, get_vector_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_double_trunc_float_fp8e4m3_vector, get_vector_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_double_trunc_float_fp8e5m2_vector, get_vector_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_quad_trunc_vector, get_vector_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_quad_trunc_scalar, get_scalar_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_quad_trunc_bfloat_vector, get_vector_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_quad_trunc_bfloat_scalar, get_scalar_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_double_ext_vector, get_vector_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_quad_ext_vector, get_vector_type (type_idx))
+DEF_RVV_BASE_TYPE (xt_unsigned_int, unsigned_type_node)
 DEF_RVV_BASE_TYPE (vector, builtin_types[type_idx].vector)
 DEF_RVV_BASE_TYPE (scalar, builtin_types[type_idx].scalar)
 DEF_RVV_BASE_TYPE (mask, get_vector_type (type_idx))
@@ -719,6 +766,7 @@ DEF_RVV_VXRM_ENUM (RNU, VXRM_RNU)
 DEF_RVV_VXRM_ENUM (RNE, VXRM_RNE)
 DEF_RVV_VXRM_ENUM (RDN, VXRM_RDN)
 DEF_RVV_VXRM_ENUM (ROD, VXRM_ROD)
+DEF_RVV_VXRM_ENUM (NONE, VXRM_NONE)
 
 DEF_RVV_FRM_ENUM (RNE, FRM_RNE)
 DEF_RVV_FRM_ENUM (RTZ, FRM_RTZ)

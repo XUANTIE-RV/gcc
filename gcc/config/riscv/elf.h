@@ -32,10 +32,16 @@ along with GCC; see the file COPYING3.  If not see
   "--start-group -lc %{!specs=nosys.specs:-lgloss} --end-group " \
   "%{!nostartfiles:%{!nodefaultlibs:%{!nolibc:%{!nostdlib:%:riscv_multi_lib_check()}}}}"
 
+#define LIBGCC_SPEC "%{mccrt: -lgcc_tf -lcc-rt;!mccrt: -lgcc}"
+
 #undef  STARTFILE_SPEC
 #define STARTFILE_SPEC "crt0%O%s crtbegin%O%s"
 
 #undef  ENDFILE_SPEC
 #define ENDFILE_SPEC "crtend%O%s"
+
+/* The GNU C++ standard library requires that these macros be defined.  */
+#undef CPLUSPLUS_CPP_SPEC
+#define CPLUSPLUS_CPP_SPEC "-D_GNU_SOURCE %(cpp)"
 
 #define RISCV_USE_CUSTOMISED_MULTI_LIB select_by_abi_arch_cmodel

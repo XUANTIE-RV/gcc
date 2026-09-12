@@ -2943,7 +2943,7 @@ analyze_function_body (struct cgraph_node *node, bool early)
 	      ipa_predicate p = bb_predicate & will_be_nonconstant;
 	      int parm = load_or_store_of_ptr_parameter (&fbi, stmt);
 	      ipa_predicate sra_predicate = true;
-	      if (parm != -1)
+	      if (parm != -1 && !opt_for_fn (node->decl, optimize_size))
 		sra_predicate &= add_condition (info, params_summary, parm,
 						ptr_type_node, NULL,
 						ipa_predicate::not_sra_candidate, NULL, 0);

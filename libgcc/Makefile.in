@@ -959,6 +959,23 @@ libgcc.a libgcov.a libunwind.a libgcc_eh.a:
 	$(RANLIB) $@
 
 all: libgcc.a
+
+ifeq (@enable_libgcctf@,--enable-libgcctf)
+libgcc-tf-objects = $(patsubst %,%$(objext),$(LIB_TF_FUNCS))
+
+libgcc_tf.a: $(libgcc-tf-objects)
+
+libgcc_tf.a:
+	-rm -f $@
+
+	objects="$(objects)"; \
+	$(AR_CREATE_FOR_TARGET) $@ $$objects
+
+	$(RANLIB) $@
+
+all: libgcc_tf.a
+endif
+
 ifeq ($(enable_gcov),yes)
 all: libgcov.a
 endif
@@ -1187,6 +1204,11 @@ install-leaf: $(install-shared) $(install-libunwind)
 	$(INSTALL_DATA) libgcc.a $(DESTDIR)$(inst_libdir)/
 	chmod 644 $(DESTDIR)$(inst_libdir)/libgcc.a
 	$(RANLIB) $(DESTDIR)$(inst_libdir)/libgcc.a
+ifeq (@enable_libgcctf@,--enable-libgcctf)
+	$(INSTALL_DATA) libgcc_tf.a $(DESTDIR)$(inst_libdir)/
+	chmod 644 $(DESTDIR)$(inst_libdir)/libgcc_tf.a
+	$(RANLIB) $(DESTDIR)$(inst_libdir)/libgcc_tf.a
+endif
 ifeq ($(enable_gcov),yes)
 	$(INSTALL_DATA) libgcov.a $(DESTDIR)$(inst_libdir)/
 	chmod 644 $(DESTDIR)$(inst_libdir)/libgcov.a

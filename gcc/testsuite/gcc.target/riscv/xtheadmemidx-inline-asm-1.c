@@ -17,10 +17,10 @@ void foo (void *p, unsigned long off, unsigned long val)
 void bar (void *p, unsigned long off, unsigned long val)
 {
   unsigned long *tmp = (unsigned long*)(p + off);
-  asm volatile ("th.srd	%1,%0" : "=m"(*tmp) : "r"(val));
+  asm volatile ("th.srd	%1,%0" : "=e"(*tmp) : "r"(val));
 }
 
-/* { dg-final { scan-assembler "sd\t\[a-z\]\[0-9\]+,0\\(\[a-z\]\[0-9\]+\\)" { xfail *-*-* } } } */
-/* { dg-final { scan-assembler-not "sd\t\[a-z\]\[0-9\]+,\[a-z\]\[0-9\]+,\[a-z\]\[0-9\]+,0" { xfail *-*-* } } } */
+/* { dg-final { scan-assembler "sd\t\[a-z\]\[0-9\]+,0\\(\[a-z\]\[0-9\]+\\)" } } */
+/* { dg-final { scan-assembler-not "sd\t\[a-z\]\[0-9\]+,\[a-z\]\[0-9\]+,\[a-z\]\[0-9\]+,0" } } */
 /* { dg-final { scan-assembler "th\.srd\t\[a-z\]\[0-9\]+,\[a-z\]\[0-9\]+,\[a-z\]\[0-9\]+,0" } } */
 /* { dg-final { scan-assembler-not "th\.srd\t\[a-z\]\[0-9\]+,0\\(\[a-z\]\[0-9\]+\\)" } } */

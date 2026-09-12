@@ -1,0 +1,11 @@
+repos:
+-   repo: local
+    hooks:
+    -   id: Check_GNU_Style
+        name: Check GNU Style
+        entry: ./.check_style.sh
+        language: system
+        # files: \.(sh|bash)$
+        types: [file]
+        alias: cgs
+        # args: [ '-' ]

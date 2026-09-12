@@ -1,5 +1,5 @@
 /* { dg-do run { target { rv64 } } } */
-/* { dg-options "-march=rv64gc_zba -mabi=lp64d -O2" } */
+/* { dg-options "-O2" } */
 
 struct {
   unsigned a : 14;

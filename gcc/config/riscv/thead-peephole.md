@@ -1,5 +1,6 @@
-;; Machine description for T-Head vendor extensions
-;; Copyright (C) 2023-2024 Free Software Foundation, Inc.
+;; Machine description for XUANTIE vendor extensions
+;; Copyright (C) 2024 Free Software Foundation, Inc.
+;; Contributed by Alibaba Damo Academy Xuantie Team.
 
 ;; This file is part of GCC.
 

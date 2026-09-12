@@ -1,0 +1,233 @@
+/* Copyright (C) 2024 Free Software Foundation, Inc.
+   Contributed by Alibaba Damo Academy Xuantie Team.
+
+   This file is part of GCC.
+
+   GCC is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   GCC is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with GCC; see the file COPYING3.  If not see
+   <http://www.gnu.org/licenses/>.  */
+
+#ifndef ENTRY
+#define ENTRY(MODE, REQUIREMENT, VLMUL)
+#endif
+
+ENTRY (RVMM1QI, TARGET_XTHEADMATRIX, 1)
+ENTRY (RVMM1HI, TARGET_XTHEADMATRIX, 1)
+ENTRY (RVMM1SI, TARGET_XTHEADMATRIX, 1)
+ENTRY (RVMM1DI, TARGET_XTHEADMATRIX, 1)
+ENTRY (RVMM1HF, TARGET_XTHEADMATRIX, 1)
+ENTRY (RVMM1SF, TARGET_XTHEADMATRIX, 1)
+ENTRY (RVMM1DF, TARGET_XTHEADMATRIX, 1)
+
+ENTRY (RVMM2QI, TARGET_XTHEADMATRIX, 2)
+ENTRY (RVMM2HI, TARGET_XTHEADMATRIX, 2)
+ENTRY (RVMM2SI, TARGET_XTHEADMATRIX, 2)
+ENTRY (RVMM2DI, TARGET_XTHEADMATRIX, 2)
+ENTRY (RVMM2HF, TARGET_XTHEADMATRIX, 2)
+ENTRY (RVMM2SF, TARGET_XTHEADMATRIX, 2)
+ENTRY (RVMM2DF, TARGET_XTHEADMATRIX, 2)
+
+#undef ENTRY
+
+#ifndef DEF_RVM_TYPE
+#define DEF_RVM_TYPE(NAME, NCHARS, ABI_NAME, SCALAR_TYPE, MATRIX_MODE,        \
+		     SUFFIX, SCALAR_SUFFIX)
+#endif
+
+DEF_RVM_TYPE (mint8_t, 12, __rvm_int8_t, int8, RVMM1QI, _i8, _i8)
+DEF_RVM_TYPE (muint8_t, 13, __rvm_uint8_t, uint8, RVMM1QI, _u8, _u8)
+DEF_RVM_TYPE (mint16_t, 13, __rvm_int16_t, int16, RVMM1HI, _i16, _i16)
+DEF_RVM_TYPE (muint16_t, 14, __rvm_uint16_t, uint16, RVMM1HI, _u16, _u16)
+DEF_RVM_TYPE (mint32_t, 13, __rvm_int32_t, int32, RVMM1SI, _i32, _i32)
+DEF_RVM_TYPE (muint32_t, 14, __rvm_uint32_t, uint32, RVMM1SI, _u32, _u32)
+DEF_RVM_TYPE (mint64_t, 13, __rvm_int64_t, int64, RVMM1DI, _i64, _i64)
+DEF_RVM_TYPE (muint64_t, 14, __rvm_uint64_t, uint64, RVMM1DI, _u64, _u64)
+DEF_RVM_TYPE (mfloat16_t, 15, __rvm_float16_t, float16, RVMM1HF, _f16, _f16)
+DEF_RVM_TYPE (mfloat32_t, 15, __rvm_float32_t, float, RVMM1SF, _f32, _f32)
+DEF_RVM_TYPE (mfloat64_t, 15, __rvm_float64_t, double, RVMM1DF, _f64, _f64)
+
+DEF_RVM_TYPE (mint8x2_t, 14, __rvm_int8x2_t, int8, RVMM2QI, _i8x2, _i8)
+DEF_RVM_TYPE (muint8x2_t, 15, __rvm_uint8x2_t, uint8, RVMM2QI, _u8x2, _u8)
+DEF_RVM_TYPE (mint16x2_t, 15, __rvm_int16x2_t, int16, RVMM2HI, _i16x2, _i16)
+DEF_RVM_TYPE (muint16x2_t, 16, __rvm_uint16x2_t, uint16, RVMM2HI, _u16x2, _u16)
+DEF_RVM_TYPE (mint32x2_t, 15, __rvm_int32x2_t, int32, RVMM2SI, _i32x2, _i32)
+DEF_RVM_TYPE (muint32x2_t, 16, __rvm_uint32x2_t, uint32, RVMM2SI, _u32x2, _u32)
+DEF_RVM_TYPE (mint64x2_t, 15, __rvm_int64x2_t, int64, RVMM2DI, _i64x2, _i64)
+DEF_RVM_TYPE (muint64x2_t, 16, __rvm_uint64x2_t, uint64, RVMM2DI, _u64x2, _u64)
+DEF_RVM_TYPE (mfloat16x2_t, 17, __rvm_float16x2_t, float16, RVMM2HF, _f16x2,
+	      _f16)
+DEF_RVM_TYPE (mfloat32x2_t, 17, __rvm_float32x2_t, float, RVMM2SF, _f32x2,
+	      _f32)
+DEF_RVM_TYPE (mfloat64x2_t, 17, __rvm_float64x2_t, double, RVMM2DF, _f64x2,
+	      _f64)
+
+#undef DEF_RVM_TYPE
+
+#ifndef DEF_RVM_FUNCTION
+#define DEF_RVM_FUNCTION(NAME, DEF, OPS_INFO)
+#endif
+
+#define REQUIRED_EXTENSIONS XTHEADMATRIX0P3_EXT
+DEF_RVM_FUNCTION (xmlenb, xmlenb, size_void_ops)
+DEF_RVM_FUNCTION (xrlenb, xrlenb, size_void_ops)
+DEF_RVM_FUNCTION (xmsize, xmsize, size_void_ops)
+DEF_RVM_FUNCTION (mundefined, mundefined, m_void_ops)
+DEF_RVM_FUNCTION (mzero, mzero, m_void_ops)
+DEF_RVM_FUNCTION (mreinterpret, mreinterpret, all_void_ops)
+DEF_RVM_FUNCTION (mld, mld, m_cptr_long_ops)
+DEF_RVM_FUNCTION (msld, msld, m_cptr_long_ops)
+DEF_RVM_FUNCTION (mst, mst, void_cptr_long_m_ops)
+DEF_RVM_FUNCTION (msst, msst, void_cptr_long_m_ops)
+DEF_RVM_FUNCTION (mmov_m_x, mmov, iu_m_m_scalar_size_ops)
+DEF_RVM_FUNCTION (mmov_x_m, mmov, iu_scalar_m_size_ops)
+DEF_RVM_FUNCTION (mrelease, mrelease, void_void_ops)
+DEF_RVM_FUNCTION (mset, mset, allm2_m_m_size_mtrunc_ops)
+DEF_RVM_FUNCTION (mget, mget, allm2_mtrunc_m_size__ops)
+#undef REQUIRED_EXTENSIONS
+
+#define REQUIRED_EXTENSIONS XTHEADMATRIX0P3_EXT
+DEF_RVM_FUNCTION (msetmrow_m, msetmrow_m, size_size_ops)
+DEF_RVM_FUNCTION (msetmrow_n, msetmrow_n, size_size_ops)
+DEF_RVM_FUNCTION (msetmcol, msetmcol, size_size_ops)
+DEF_RVM_FUNCTION (mmov_mv, mmov, all_m1_m_mv_ops)
+DEF_RVM_FUNCTION (mdup_m_x, mdup, iu_m_scalar_ops)
+#undef REQUIRED_EXTENSIONS
+
+#undef DEF_RVM_FUNCTION
+
+#ifndef DEF_RVM_FUNCTION_BY_LIST
+#define DEF_RVM_FUNCTION_BY_LIST(...)
+#endif
+
+#define REQUIRED_EXTENSIONS XTHEADMATRIX0P3_EXT
+DEF_RVM_FUNCTION_BY_LIST (3, pmmaqa, pmmaqa, mint32_t, mint32_t, mint8_t,
+			  mint8_t)
+DEF_RVM_FUNCTION_BY_LIST (3, pmmaqau, pmmaqau, mint32_t, mint32_t, muint8_t,
+			  muint8_t)
+DEF_RVM_FUNCTION_BY_LIST (3, pmmaqaus, pmmaqaus, mint32_t, mint32_t, muint8_t,
+			  mint8_t)
+DEF_RVM_FUNCTION_BY_LIST (3, pmmaqasu, pmmaqasu, mint32_t, mint32_t, mint8_t,
+			  muint8_t)
+#undef REQUIRED_EXTENSIONS
+
+#define REQUIRED_EXTENSIONS XTHEADMATRIX0P3_EXT
+DEF_RVM_FUNCTION_BY_LIST (3, mmacc, mmaqa, mint32_t, mint32_t, mint8_t,
+			  mint8_t)
+DEF_RVM_FUNCTION_BY_LIST (3, mmaccu, mmaqau, mint32_t, mint32_t, muint8_t,
+			  muint8_t)
+DEF_RVM_FUNCTION_BY_LIST (3, mmaccus, mmaqaus, mint32_t, mint32_t, muint8_t,
+			  mint8_t)
+DEF_RVM_FUNCTION_BY_LIST (3, mmaccsu, mmaqasu, mint32_t, mint32_t, mint8_t,
+			  muint8_t)
+#undef REQUIRED_EXTENSIONS
+
+#define REQUIRED_EXTENSIONS XTHEADMATRIX0P3_EXT
+DEF_RVM_FUNCTION_BY_LIST (3, fmmacc, fmmacc, mfloat16_t, mfloat16_t,
+			  mfloat16_t, mfloat16x2_t)
+#undef REQUIRED_EXTENSIONS
+
+#undef DEF_RVM_FUNCTION_BY_LIST
+#undef DEF_RVM_FUNCTION_BY_LIST0
+#undef DEF_RVM_FUNCTION_BY_LIST1
+#undef DEF_RVM_FUNCTION_BY_LIST2
+#undef DEF_RVM_FUNCTION_BY_LIST3
+#undef DEF_RVM_FUNCTION_BY_LIST4
+#undef DEF_RVM_FUNCTION_BY_LIST5
+#undef DEF_RVM_FUNCTION_BY_LIST6
+
+#ifndef DEF_RVM_I_OPS
+#define DEF_RVM_I_OPS(TYPE, REQUIRE)
+#endif
+
+/* Use "DEF_RVM_U_OPS" macro include all unsigned integer which will be
+   iterated and registered as intrinsic functions.  */
+#ifndef DEF_RVM_U_OPS
+#define DEF_RVM_U_OPS(TYPE, REQUIRE)
+#endif
+
+#ifndef DEF_RVM_F_OPS
+#define DEF_RVM_F_OPS(TYPE, REQUIRE)
+#endif
+
+#ifndef DEF_RVM_M2_OPS
+#define DEF_RVM_M2_OPS(TYPE, REQUIRE)
+#endif
+
+#ifndef DEF_RVM_SI_OPS
+#define DEF_RVM_SI_OPS(TYPE, REQUIRE)
+#endif
+
+DEF_RVM_I_OPS (mint8_t, 2)
+DEF_RVM_I_OPS (mint16_t, 2)
+DEF_RVM_I_OPS (mint32_t, 2)
+DEF_RVM_I_OPS (mint64_t, 2)
+
+DEF_RVM_U_OPS (muint8_t, 2)
+DEF_RVM_U_OPS (muint16_t, 2)
+DEF_RVM_U_OPS (muint32_t, 2)
+DEF_RVM_U_OPS (muint64_t, 2)
+
+DEF_RVM_F_OPS (mfloat16_t, 2)
+DEF_RVM_F_OPS (mfloat32_t, 2)
+DEF_RVM_F_OPS (mfloat64_t, 2)
+
+DEF_RVM_SI_OPS (mint32_t, 2)
+
+DEF_RVM_M2_OPS (mint8x2_t, 2)
+DEF_RVM_M2_OPS (mint16x2_t, 2)
+DEF_RVM_M2_OPS (mint32x2_t, 2)
+DEF_RVM_M2_OPS (mint64x2_t, 2)
+DEF_RVM_M2_OPS (muint8x2_t, 2)
+DEF_RVM_M2_OPS (muint16x2_t, 2)
+DEF_RVM_M2_OPS (muint32x2_t, 2)
+DEF_RVM_M2_OPS (muint64x2_t, 2)
+DEF_RVM_M2_OPS (mfloat16x2_t, 2)
+DEF_RVM_M2_OPS (mfloat32x2_t, 2)
+DEF_RVM_M2_OPS (mfloat64x2_t, 2)
+
+#undef DEF_RVM_SI_OPS
+#undef DEF_RVM_I_OPS
+#undef DEF_RVM_U_OPS
+#undef DEF_RVM_F_OPS
+#undef DEF_RVM_M2_OPS
+
+/* Use "DEF_RVM_BASE_TYPE" macro to define RVM base types.
+   The 'NAME' will be concatenated into intrinsic function name.  */
+#ifndef DEF_RVM_BASE_TYPE
+#define DEF_RVM_BASE_TYPE(NAME, TYPE)
+#endif
+
+DEF_RVM_BASE_TYPE (matrix, builtin_types[type_index].matrix)
+DEF_RVM_BASE_TYPE (scalar, builtin_types[type_index].scalar)
+DEF_RVM_BASE_TYPE (scalar_ptr, builtin_types[type_index].scalar_ptr)
+DEF_RVM_BASE_TYPE (scalar_const_ptr,
+		   builtin_types[type_index].scalar_const_ptr)
+DEF_RVM_BASE_TYPE (void, void_type_node)
+DEF_RVM_BASE_TYPE (size_t, size_type_node)
+DEF_RVM_BASE_TYPE (unsigned_matrix, builtin_types[type_index + 1].matrix)
+DEF_RVM_BASE_TYPE (unsigned_scalar, builtin_types[type_index + 1].scalar)
+
+DEF_RVM_BASE_TYPE (mtrunc, builtin_types[type_index - NUM_RVM_TYPE / 2].matrix)
+
+#undef DEF_RVM_BASE_TYPE
+
+#ifndef DEF_RVM_OP_TYPE
+#define DEF_RVM_OP_TYPE(NAME)
+#endif
+
+DEF_RVM_OP_TYPE (mm)
+DEF_RVM_OP_TYPE (mv)
+DEF_RVM_OP_TYPE (m_x)
+DEF_RVM_OP_TYPE (x_m)
+
+#undef DEF_RVM_OP_TYPE

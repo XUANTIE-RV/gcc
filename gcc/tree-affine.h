@@ -24,7 +24,7 @@ along with GCC; see the file COPYING3.  If not see
 #define GCC_TREE_AFFINE_H
 
 
-#define MAX_AFF_ELTS 8
+#define MAX_AFF_ELTS 10
 
 /* Element of an affine combination.  */
 

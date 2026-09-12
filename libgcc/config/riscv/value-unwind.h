@@ -33,7 +33,18 @@ riscv_vlenb (void)
   return vlenb;
 }
 
+static inline long
+riscv_mlenb (void)
+{
+  register long mlenb asm ("a0");
+  /* 0xcc002573 == csrr a0, 0xcc0 */
+  asm (".insn 0xcc002573" : "=r"(mlenb));
+  return mlenb;
+}
+
 /* Lazily provide a value for VLENB, so that we don't try to execute RVV
    instructions unless we know they're needed.  */
 #define DWARF_LAZY_REGISTER_VALUE(REGNO, VALUE) \
-  ((REGNO) == RISCV_DWARF_VLENB && ((*VALUE) = riscv_vlenb (), 1))
+  ((REGNO) == RISCV_DWARF_VLENB ? ((*VALUE) = riscv_vlenb (), 1)      \
+   : (REGNO) == XT_RVM_DWARF_MLENB ? ((*VALUE) = riscv_mlenb (), 1)   \
+   : 0)

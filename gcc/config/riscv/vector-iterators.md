@@ -1742,6 +1742,16 @@
   (UNSPEC_WREDUC_SUM_ORDERED_VL0_SAFE "wredosum") (UNSPEC_WREDUC_SUM_UNORDERED_VL0_SAFE "wredusum")
 ])
 
+(define_int_attr viredl[
+  (UNSPEC_REDUC_SUM "")
+  (UNSPEC_REDUC_SUM_ORDERED "") (UNSPEC_REDUC_SUM_UNORDERED "")
+  (UNSPEC_REDUC_MAXU "") (UNSPEC_REDUC_MAX "")
+  (UNSPEC_REDUC_MINU "") (UNSPEC_REDUC_MIN "")
+  (UNSPEC_REDUC_AND "l") (UNSPEC_REDUC_OR "l") (UNSPEC_REDUC_XOR "l")
+  (UNSPEC_WREDUC_SUM "") (UNSPEC_WREDUC_SUMU "")
+  (UNSPEC_WREDUC_SUM_ORDERED "") (UNSPEC_WREDUC_SUM_UNORDERED "")
+])
+
 (define_code_attr WREDUC_UNSPEC [(zero_extend "UNSPEC_WREDUC_SUMU") (sign_extend "UNSPEC_WREDUC_SUM")])
 (define_code_attr WREDUC_UNSPEC_VL0_SAFE [(zero_extend "UNSPEC_WREDUC_SUMU_VL0_SAFE") (sign_extend "UNSPEC_WREDUC_SUM_VL0_SAFE")])
 
@@ -2526,6 +2536,80 @@
   (RVVM4x2DF "2")
   (RVVM2x2DF "2")
   (RVVM1x2DF "2")
+])
+
+(define_mode_attr width [
+  (RVVM8QI "b") (RVVM4QI "b") (RVVM2QI "b") (RVVM1QI "b") (RVVMF2QI "b") (RVVMF4QI "b") (RVVMF8QI "b")
+
+  (RVVM8HI "h") (RVVM4HI "h") (RVVM2HI "h") (RVVM1HI "h") (RVVMF2HI "h") (RVVMF4HI "h")
+
+  (RVVM8BF "h") (RVVM4BF "h") (RVVM2BF "h") (RVVM1BF "h") (RVVMF2BF "h") (RVVMF4BF "h")
+
+  (RVVM8HF "h") (RVVM4HF "h") (RVVM2HF "h") (RVVM1HF "h") (RVVMF2HF "h") (RVVMF4HF "h")
+
+  (RVVM8SI "w") (RVVM4SI "w") (RVVM2SI "w") (RVVM1SI "w") (RVVMF2SI "w")
+
+  (RVVM8SF "w") (RVVM4SF "w") (RVVM2SF "w") (RVVM1SF "w") (RVVMF2SF "w")
+
+  (RVVM1x8QI "b") (RVVMF2x8QI "b") (RVVMF4x8QI "b") (RVVMF8x8QI "b")
+  (RVVM1x7QI "b") (RVVMF2x7QI "b") (RVVMF4x7QI "b") (RVVMF8x7QI "b")
+  (RVVM1x6QI "b") (RVVMF2x6QI "b") (RVVMF4x6QI "b") (RVVMF8x6QI "b")
+  (RVVM1x5QI "b") (RVVMF2x5QI "b") (RVVMF4x5QI "b") (RVVMF8x5QI "b")
+  (RVVM2x4QI "b") (RVVM1x4QI "b") (RVVMF2x4QI "b") (RVVMF4x4QI "b") (RVVMF8x4QI "b")
+  (RVVM2x3QI "b") (RVVM1x3QI "b") (RVVMF2x3QI "b") (RVVMF4x3QI "b") (RVVMF8x3QI "b")
+  (RVVM4x2QI "b") (RVVM2x2QI "b") (RVVM1x2QI "b") (RVVMF2x2QI "b") (RVVMF4x2QI "b") (RVVMF8x2QI "b")
+
+  (RVVM1x8HI "h") (RVVMF2x8HI "h") (RVVMF4x8HI "h")
+  (RVVM1x7HI "h") (RVVMF2x7HI "h") (RVVMF4x7HI "h")
+  (RVVM1x6HI "h") (RVVMF2x6HI "h") (RVVMF4x6HI "h")
+  (RVVM1x5HI "h") (RVVMF2x5HI "h") (RVVMF4x5HI "h")
+  (RVVM2x4HI "h") (RVVM1x4HI "h") (RVVMF2x4HI "h") (RVVMF4x4HI "h")
+  (RVVM2x3HI "h") (RVVM1x3HI "h") (RVVMF2x3HI "h") (RVVMF4x3HI "h")
+  (RVVM4x2HI "h") (RVVM2x2HI "h") (RVVM1x2HI "h") (RVVMF2x2HI "h") (RVVMF4x2HI "h")
+
+  (RVVM1x8BF "h") (RVVMF2x8BF "h") (RVVMF4x8BF "h")
+  (RVVM1x7BF "h") (RVVMF2x7BF "h") (RVVMF4x7BF "h")
+  (RVVM1x6BF "h") (RVVMF2x6BF "h") (RVVMF4x6BF "h")
+  (RVVM1x5BF "h") (RVVMF2x5BF "h") (RVVMF4x5BF "h")
+  (RVVM2x4BF "h") (RVVM1x4BF "h") (RVVMF2x4BF "h") (RVVMF4x4BF "h")
+  (RVVM2x3BF "h") (RVVM1x3BF "h") (RVVMF2x3BF "h") (RVVMF4x3BF "h")
+  (RVVM4x2BF "h") (RVVM2x2BF "h") (RVVM1x2BF "h") (RVVMF2x2BF "h") (RVVMF4x2BF "h")
+
+  (RVVM1x8HF "h") (RVVMF2x8HF "h") (RVVMF4x8HF "h")
+  (RVVM1x7HF "h") (RVVMF2x7HF "h") (RVVMF4x7HF "h")
+  (RVVM1x6HF "h") (RVVMF2x6HF "h") (RVVMF4x6HF "h")
+  (RVVM1x5HF "h") (RVVMF2x5HF "h") (RVVMF4x5HF "h")
+  (RVVM2x4HF "h") (RVVM1x4HF "h") (RVVMF2x4HF "h") (RVVMF4x4HF "h")
+  (RVVM2x3HF "h") (RVVM1x3HF "h") (RVVMF2x3HF "h") (RVVMF4x3HF "h")
+  (RVVM4x2HF "h") (RVVM2x2HF "h") (RVVM1x2HF "h") (RVVMF2x2HF "h") (RVVMF4x2HF "h")
+
+  (RVVM1x8SI "w") (RVVMF2x8SI "w")
+  (RVVM1x7SI "w") (RVVMF2x7SI "w")
+  (RVVM1x6SI "w") (RVVMF2x6SI "w")
+  (RVVM1x5SI "w") (RVVMF2x5SI "w")
+  (RVVM2x4SI "w") (RVVM1x4SI "w") (RVVMF2x4SI "w")
+  (RVVM2x3SI "w") (RVVM1x3SI "w") (RVVMF2x3SI "w")
+  (RVVM4x2SI "w") (RVVM2x2SI "w") (RVVM1x2SI "w") (RVVMF2x2SI "w")
+
+  (RVVM1x8SF "w") (RVVMF2x8SF "w")
+  (RVVM1x7SF "w") (RVVMF2x7SF "w")
+  (RVVM1x6SF "w") (RVVMF2x6SF "w")
+  (RVVM1x5SF "w") (RVVMF2x5SF "w")
+  (RVVM2x4SF "w") (RVVM1x4SF "w") (RVVMF2x4SF "w")
+  (RVVM2x3SF "w") (RVVM1x3SF "w") (RVVMF2x3SF "w")
+  (RVVM4x2SF "w") (RVVM2x2SF "w") (RVVM1x2SF "w") (RVVMF2x2SF "w")
+
+  ;; VLS modes.
+  (V1QI "b") (V2QI "b") (V4QI "b") (V8QI "b") (V16QI "b") (V32QI "b") (V64QI "b") (V128QI "b") (V256QI "b") (V512QI "b")
+  (V1024QI "b") (V2048QI "b") (V4096QI "b")
+  (V1HI "h") (V2HI "h") (V4HI "h") (V8HI "h") (V16HI "h") (V32HI "h") (V64HI "h") (V128HI "h") (V256HI "h")
+  (V512HI "h") (V1024HI "h") (V2048HI "h")
+  (V1SI "w") (V2SI "w") (V4SI "w") (V8SI "w") (V16SI "w") (V32SI "w") (V64SI "w") (V128SI "w") (V256SI "w")
+  (V512SI "w") (V1024SI "w")
+  (V1HF "h") (V2HF "h") (V4HF "h") (V8HF "h") (V16HF "h") (V32HF "h") (V64HF "h") (V128HF "h") (V256HF "h")
+  (V512HF "h") (V1024HF "h") (V2048HF "h")
+  (V1SF "w") (V2SF "w") (V4SF "w") (V8SF "w") (V16SF "w") (V32SF "w") (V64SF "w") (V128SF "w") (V256SF "w")
+  (V512SF "w") (V1024SF "w")
 ])
 
 (define_mode_attr sew [
@@ -3760,7 +3844,7 @@
 
 (define_int_attr misc_frm_op [(UNSPEC_VFREC7 "rec7")])
 
-(define_int_attr float_insn_type [(UNSPEC_VFRSQRT7 "vfsqrt")])
+(define_int_attr float_insn_type[(UNSPEC_VFRSQRT7 "vfrsqrt")])
 
 (define_int_attr float_frm_insn_type [(UNSPEC_VFREC7 "vfrecp")])
 
@@ -3951,6 +4035,10 @@
 			(plus "walu")
 			(minus "walu")
 			(mult "wmul")])
+
+(define_code_attr widenw_binop_insn_type[
+			(plus "walu")
+			(minus "walu")])
 
 (define_code_attr float_insn_type [
 			(plus "vfalu")

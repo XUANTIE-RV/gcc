@@ -2732,6 +2732,10 @@ static CONSTEXPR const rvv_op_info all_v_vcreate_lmul4_x2_ops
      rvv_arg_type_info (RVV_BASE_vlmul_ext_x2), /* Return type */
      ext_vcreate_args /* Args */};
 
+#define XUANTIE_VECTOR_BUILTINS_CC
+#include "xuantie-vector-builtins.cc"
+#undef XUANTIE_VECTOR_BUILTINS_CC
+
 /* A static operand information for vector_type func (const scalar_type *,
  * size_t) function registration.  */
 static CONSTEXPR const rvv_op_info all_v_scalar_const_ptr_size_ops
@@ -2862,6 +2866,11 @@ static CONSTEXPR const rvv_op_info u_vvvv_crypto_sew64_ops
 /* A list of all RVV base function types.  */
 static CONSTEXPR const function_type_info function_types[] = {
 #define DEF_RVV_TYPE_INDEX(                                                    \
+  XT_MAQA_MASK, XT_MAQA_QUAD_SIGNED_TRUNC, XT_MAQA_QUAD_UNSIGNED_TRUNC,	       \
+  XT_DOUBLE_TRUNC_FLOAT_FP8E4M3, XT_DOUBLE_TRUNC_FLOAT_FP8E5M2,                \
+  XT_QUAD_TRUNC_VECTOR, XT_QUAD_TRUNC_SCALAR,                                  \
+  XT_QUAD_TRUNC_BFLOAT_VECTOR, XT_QUAD_TRUNC_BFLOAT_SCALAR,                    \
+  XT_DOUBLE_EXT_VECTOR, XT_QUAD_EXT_VECTOR,                                    \
   VECTOR, MASK, SIGNED, UNSIGNED, EEW8_INDEX, EEW16_INDEX, EEW32_INDEX,        \
   EEW64_INDEX, SHIFT, DOUBLE_TRUNC, QUAD_TRUNC, OCT_TRUNC,                     \
   DOUBLE_TRUNC_SCALAR, DOUBLE_TRUNC_SIGNED, DOUBLE_TRUNC_UNSIGNED,             \
@@ -2877,6 +2886,18 @@ static CONSTEXPR const function_type_info function_types[] = {
   X2_VLMUL_EXT, X4_VLMUL_EXT, X8_VLMUL_EXT, X16_VLMUL_EXT, X32_VLMUL_EXT,      \
   X64_VLMUL_EXT, TUPLE_SUBPART)                                                \
   {                                                                            \
+    VECTOR_TYPE_##XT_MAQA_MASK,                                                \
+    VECTOR_TYPE_##XT_MAQA_QUAD_SIGNED_TRUNC,                                   \
+    VECTOR_TYPE_##XT_MAQA_QUAD_UNSIGNED_TRUNC,                                 \
+    VECTOR_TYPE_##XT_DOUBLE_TRUNC_FLOAT_FP8E4M3,                               \
+    VECTOR_TYPE_##XT_DOUBLE_TRUNC_FLOAT_FP8E5M2,                               \
+    VECTOR_TYPE_##XT_QUAD_TRUNC_VECTOR,                                        \
+    VECTOR_TYPE_##XT_QUAD_TRUNC_SCALAR,                                        \
+    VECTOR_TYPE_##XT_QUAD_TRUNC_BFLOAT_VECTOR,                                 \
+    VECTOR_TYPE_##XT_QUAD_TRUNC_BFLOAT_SCALAR,                                 \
+    VECTOR_TYPE_##XT_DOUBLE_EXT_VECTOR,                                        \
+    VECTOR_TYPE_##XT_QUAD_EXT_VECTOR,                                          \
+    VECTOR_TYPE_INVALID,                                                       \
     VECTOR_TYPE_##VECTOR,                                                      \
     VECTOR_TYPE_INVALID,                                                       \
     VECTOR_TYPE_##MASK,                                                        \
@@ -3531,11 +3552,11 @@ function_instance::operator== (const function_instance &other) const
 bool
 function_instance::any_type_float_p () const
 {
-  if (FLOAT_MODE_P (TYPE_MODE (get_return_type ())))
+  if (riscv_vector_float_type_p (get_return_type ()))
     return true;
 
   for (int i = 0; op_info->args[i].base_type != NUM_BASE_TYPES; ++i)
-    if (FLOAT_MODE_P (TYPE_MODE (get_arg_type (i))))
+    if (riscv_vector_float_type_p (get_arg_type (i)))
       return true;
 
   return false;
@@ -3679,11 +3700,14 @@ function_builder::apply_predication (const function_instance &instance,
 
   /* These predication types need to apply mask type.  */
   vector_type_index mask_type_index
-    = function_types[instance.type.index].type_indexes[RVV_BASE_mask];
+    = function_types[instance.type.index].type_indexes[instance.base->get_mask_type ()];
   tree mask_type = builtin_types[mask_type_index].vector;
   if (instance.pred == PRED_TYPE_m || instance.pred == PRED_TYPE_tum
       || instance.pred == PRED_TYPE_tumu || instance.pred == PRED_TYPE_mu)
     argument_types.quick_insert (0, mask_type);
+
+  if (instance.base->xt_has_idx_operand_p ())
+    argument_types.quick_insert (0, unsigned_type_node);
 
   /* check if rounding mode parameter need  */
   if (instance.base->has_rounding_mode_operand_p ())
@@ -3829,6 +3853,12 @@ function_builder::add_function (const function_instance &instance,
 		? integer_zero_node
 		: simulate_builtin_function_decl (input_location, name, fntype,
 						  code, NULL, attrs);
+
+  /* If the code of DECL is ERROR_MARK or invalid code, usually "ggc_freed", we
+     use integer_zero_node instead of it. This will be very helpful for the
+     ggc_free.  */
+  if (TREE_CODE (decl) == ERROR_MARK || TREE_CODE (decl) >= MAX_TREE_CODES)
+    decl = integer_zero_node;
 
   registered_function &rfn = *ggc_alloc<registered_function> ();
   rfn.instance = instance;
@@ -4000,10 +4030,10 @@ function_expander::add_mem_operand (machine_mode mode, unsigned argno)
 
 /* Return the machine_mode of the corresponding mask type.  */
 machine_mode
-function_expander::mask_mode (void) const
+function_expander::mask_mode (rvv_base_type mask_type = RVV_BASE_mask) const
 {
   vector_type_index mask_type_index
-    = function_types[type.index].type_indexes[RVV_BASE_mask];
+    = function_types[type.index].type_indexes[mask_type];
   return TYPE_MODE (builtin_types[mask_type_index].vector);
 }
 
@@ -4017,12 +4047,21 @@ function_expander::use_exact_insn (insn_code icode)
   /* Record the offset to get the argument.  */
   int arg_offset = 0;
 
+  int rm_offset = base->apply_vl_p ()
+        ? call_expr_nargs (exp) - 2 : call_expr_nargs (exp) - 1;
+
+  int sat_offset = call_expr_nargs (exp) - (base->apply_vl_p () ? 1 : 0) - 
+                   (base->has_rounding_mode_operand_p () ? 1 : 0) - 1;
+
+  if (base->xt_has_idx_operand_p ())
+    add_input_operand (arg_offset++);
+
   if (base->use_mask_predication_p ())
     {
       if (use_real_mask_p (pred))
 	add_input_operand (arg_offset++);
       else
-	add_all_one_mask_operand (mask_mode ());
+	add_all_one_mask_operand (mask_mode (base->get_mask_type ()));
     }
 
   /* Store operation doesn't have merge operand.  */
@@ -4037,13 +4076,16 @@ function_expander::use_exact_insn (insn_code icode)
   for (int argno = arg_offset; argno < call_expr_nargs (exp); argno++)
     {
       if (base->has_rounding_mode_operand_p ()
-	  && argno == call_expr_nargs (exp) - 2)
+	  && argno == rm_offset)
 	{
 	  /* Since the rounding mode argument position is not consistent with
 	     the instruction pattern, we need to skip rounding mode argument
 	     here.  */
 	  continue;
 	}
+      if (base->may_require_saturation_mode_p () && argno == sat_offset)
+	      continue;
+
       add_input_operand (argno);
     }
 
@@ -4055,13 +4097,23 @@ function_expander::use_exact_insn (insn_code icode)
   if (base->apply_vl_p ())
     add_input_operand (Pmode, get_avl_type_rtx (avl_type::NONVLMAX));
 
+  if (base->may_require_saturation_mode_p ())
+    add_input_operand (sat_offset);
+
   if (base->has_rounding_mode_operand_p ())
-    add_input_operand (call_expr_nargs (exp) - 2);
+    add_input_operand (rm_offset);
 
   /* The RVV floating-point only support dynamic rounding mode in the
      FRM register.  */
   if (opno != insn_data[icode].n_generator_args)
-    add_input_operand (Pmode, gen_int_mode (riscv_vector::FRM_DYN, Pmode));
+    {
+      if (base->may_require_frm_p ())
+	add_input_operand (Pmode, gen_int_mode (riscv_vector::FRM_DYN,
+						Pmode));
+      else
+	add_input_operand (Pmode, gen_int_mode (riscv_vector::VXRM_NONE,
+						Pmode));
+    }
 
   return generate_insn (icode);
 }
@@ -4446,6 +4498,34 @@ function_checker::require_immediate_range_or (unsigned int argno,
   return true;
 }
 
+/* Check whether VLEN * LMUL meet requirement of xuantievreduction inst
+   and report if not.  */
+bool
+function_checker::require_vlen_xuantievreduction (machine_mode mode,
+						  bool is64special_p) const
+{
+  machine_mode inner_mode = GET_MODE_INNER (mode);
+  int sew = GET_MODE_BITSIZE (inner_mode).to_constant ();
+  enum vlmul_type vlmul = get_vlmul (mode);
+  int ratio = calculate_ratio (sew, vlmul);
+  if ((TARGET_MIN_VLEN / ratio) < 32)
+    {
+      error_at (location, "%qE requires larger VLEN,"
+		" with VLEN * LMUL must be an integer multiple of %d bits.",
+		fndecl, sew * 32);
+      return false;
+    }
+  else if (is64special_p && (sew == 32)
+	   && (ratio == 32) && (TARGET_MIN_VLEN == 1024))
+    {
+      error_at (location, "%qE does not support LMUL 1 on current VLEN,"
+		" VLEN * LMUL must be an integer multiple of %d bits.",
+		fndecl, sew * 64);
+      return false;
+    }
+  return true;
+}
+
 /* Perform semantic checks on the call.  Return true if the call is valid,
    otherwise report a suitable error.  */
 bool
@@ -4475,6 +4555,8 @@ registered_function::overloaded_hash () const
   h.add (overload_name, strlen (overload_name));
   for (unsigned int i = 0; i < argument_types.length (); i++)
     {
+      if (instance.base->xt_has_idx_operand_p () && i == 0)
+  continue;
       type = argument_types[i];
       unsigned_p = POINTER_TYPE_P (type) ? TYPE_UNSIGNED (TREE_TYPE (type))
 					 : TYPE_UNSIGNED (type);
@@ -4569,6 +4651,10 @@ verify_type_context (location_t loc, type_context_kind context, const_tree type,
   if (!sizeless_type_p (type))
     return true;
 
+  /* Non-variable length type do not do things.  */
+  if (GET_MODE_SIZE (TYPE_MODE (type)).is_constant ())
+    return true;
+
   switch (context)
     {
     case TCTX_SIZEOF:
@@ -4647,7 +4733,7 @@ verify_type_context (location_t loc, type_context_kind context, const_tree type,
 static void
 register_vxrm ()
 {
-  auto_vec<string_int_pair, 4> values;
+  auto_vec<string_int_pair, 5> values;
 #define DEF_RVV_VXRM_ENUM(NAME, VALUE)                                          \
   values.quick_push (string_int_pair ("__RISCV_VXRM_" #NAME, VALUE));
 #include "riscv-vector-builtins.def"
@@ -4687,6 +4773,7 @@ handle_pragma_vector ()
   /* Define the enums.  */
   register_vxrm ();
   register_frm ();
+  register_utnmode ();
 
   /* Define the functions.  */
   function_table = new hash_table<registered_function_hasher> (1023);

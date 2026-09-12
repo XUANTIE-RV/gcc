@@ -2173,6 +2173,12 @@ can_schedule_ready_p (rtx_insn *insn)
       if (GET_CODE (PATTERN (insn)) != CLOBBER
 	  && !targetm.sched.can_speculate_insn (insn))
 	return false;
+
+#ifdef TARGET_XUANTIE_AGGRESSIVE_SCHED
+      basic_block target = BASIC_BLOCK_FOR_FN (cfun, BB_TO_BLOCK(target_bb));
+      if (!TARGET_XUANTIE_AGGRESSIVE_SCHED && !single_succ_p (target))
+	return false;
+#endif
     }
 
   return true;

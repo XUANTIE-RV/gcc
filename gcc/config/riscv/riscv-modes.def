@@ -436,3 +436,5 @@ VLS_MODES (4096); /* V4096QI V2048HI V1024SI V512DI V2048HF V1024SF V512DF */
 /* Coefficient 1 is multiplied by the number of 64-bit/32-bit chunks in a vector
    minus one.  */
 #define NUM_POLY_INT_COEFFS 2
+
+#include "xuantie-modes.def"

@@ -23,7 +23,13 @@ size_t f3 ()
   return __RISCV_VXRM_ROD;
 }
 
+size_t f4 ()
+{
+  return __RISCV_VXRM_NONE;
+}
+
 /* { dg-final { scan-assembler-times {li\s+[a-x0-9]+,\s*0} 1} } */
 /* { dg-final { scan-assembler-times {li\s+[a-x0-9]+,\s*1} 1} } */
 /* { dg-final { scan-assembler-times {li\s+[a-x0-9]+,\s*2} 1} } */
 /* { dg-final { scan-assembler-times {li\s+[a-x0-9]+,\s*3} 1} } */
+/* { dg-final { scan-assembler-times {li\s+[a-x0-9]+,\s*4} 1} } */

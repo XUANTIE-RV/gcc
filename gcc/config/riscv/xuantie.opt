@@ -1,0 +1,244 @@
+; Options for the RISC-V XuanTie port of the compiler
+;
+; Copyright (C) 2024 Free Software Foundation, Inc.
+; Contributed by Alibaba Damo Academy Xuantie Team.
+;
+; This file is part of GCC.
+;
+; GCC is free software; you can redistribute it and/or modify
+; it under the terms of the GNU General Public License as published by
+; the Free Software Foundation; either version 3, or (at your option)
+; any later version.
+;
+; GCC is distributed in the hope that it will be useful,
+; but WITHOUT ANY WARRANTY; without even the implied warranty of
+; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+; GNU General Public License for more details.
+;
+; You should have received a copy of the GNU General Public License
+; along with GCC; see the file COPYING3.  If not see
+; <http://www.gnu.org/licenses/>.  */
+
+; =============== Compatibility for T-Head =====================
+
+mdelete-vsetvl
+Target
+FIXME: This option is not supported yet.
+
+mdelete-vsetvl2
+Target
+FIXME: This option is not supported yet.
+
+mdelete-vsetvl-globally
+Target
+FIXME: This option is not supported yet.
+
+mdelete-read-vlenb
+Target
+FIXME: This option is not supported yet.
+
+mmove-loop-vsetvl
+Target
+FIXME: This option is not supported yet.
+
+mdelete-vsetvl-zero
+Target
+FIXME: This option is not supported yet.
+
+mdelete-vsetvl-zero-bbs
+Target
+FIXME: This option is not supported yet.
+
+mdelete-vsetvl-v0p7
+Target
+FIXME: This option is not supported yet.
+
+mfwprop-vmov-v0p7
+Target
+FIXME: This option is not supported yet.
+
+mdelete-fsrm
+Target
+FIXME: This option is not supported yet.
+
+mcombine-copy
+Target
+FIXME: This option is not supported yet.
+
+Wbuiltin-const-overflow
+Target
+FIXME: This option is not supported yet.
+
+mdup-loop-header
+Target
+FIXME: This option is not supported yet.
+
+mipa-unhot-inline
+Target Var(riscv_ipa_unhot_inline) Init(0) Undocumented
+Make not big speedup code inline more.
+
+minvariant-as-constant
+Target Var(riscv_invariant_as_constant) Init(1) Undocumented
+Treat invariant as constant when compute the cost of unroll loop.
+
+mrnreg-delete-noop-move
+Target
+FIXME: This option is not supported yet.
+
+mcombine-cse
+Target
+FIXME: This option is not supported yet.
+
+mriscv_fli_value_by_int
+Target
+FIXME: This option is not supported yet.
+
+; =============== Compilation Options for Xuan Tie =====================
+
+m4k-opts
+Target Var(riscv_4k_optimize) Init(0)
+Optimize load instruction generation of loop.
+
+mexpand-split-imm
+Target Bool Var(riscv_expand_split_imm) Init(1) Undocumented
+Enable split immediate operand in expand.
+
+mccrt
+Target Var(riscv_libcc_runtime)
+Use code-size first compiler runtime instead of libgcc, it's only supported in rv32.
+
+munaligned-libcall
+Target Var(riscv_unaligned_libcall) Init(0)
+Enable libcall for unaligned access.
+
+mxor-combine
+Target Var(riscv_combine_xor) Init(1) Undocumented
+Optimize xor combine operation with constant.
+
+mdelete-sext
+Target Var(riscv_insn_dsext1) Init(1) Undocumented
+Optimize code by deleting redundancy sext, insert before ree pass.
+
+mdelete-sext2
+Target Var(riscv_insn_dsext2) Init(1) Undocumented
+Optimize code by deleting redundancy sext, insert after ree pass.
+
+mload-merging
+Target Var(riscv_load_merging) Init(0) Undocumented
+Enable adjacent loads, and then extract for each element.
+
+mfclass
+Target Var(riscv_insn_fclass) Init(1) Undocumented
+Enable fclass instruction.
+
+mlcm-mcfg
+Target Var(riscv_lcm_mcfg) Init(1) Undocumented
+Redundancy elimination optimization for mcfg instructions using the LCM algorithm.
+
+mextend_rtl_ifcvt_cost
+Target Var(riscv_extend_rtl_ifcvt_cost) Init(1) Undocumented
+Consider the set insn cost in test_bb.
+
+mrvv-auto-vectorize
+Target Var(riscv_rvv_auto_vectorize) Init(0) Undocumented
+Support for automatic vectorization for rvv.
+
+maggressive-schedule
+Target Bool Var(riscv_aggressive_schedule) Init(0) Undocumented
+Enable schedule an instruction to predecessor block even if it has more than one successor.
+
+mfwprop2-address-opts
+Target Var(riscv_fwprop2_address_optimize) Init(1) Undocumented
+Optimize the gain of th_mem address for fwprop2.
+
+mloop-dup-header-for-mod-pow2p-opts
+Target Var(riscv_loop_dup_header_for_mod_pow2p_optimize) Init(1) Undocumented
+Optimize loop dup header for mod pow2p.
+
+msignedness-cmpiv
+Target Bool Var(riscv_signedness_comparison_iv) Init(1) Undocumented
+Enable signedness comparison when canonicalize induce varaible.
+
+mthread-jumps1
+Target Bool Var(riscv_thread_jumps1) Init(1)
+Enable first pass of thread jumps optimization.
+
+miv-adjust-addr-cost
+Target Bool Var(riscv_iv_adjust_addr_cost) Init(1)
+Enable address cost adjustment in pass loop-ivopts.
+
+mrvv-v0p10-compatible
+Target Bool Var(riscv_rvv_v0p10_compatible_p) Init(0)
+Enable compatible support for rvv 0.10 version intrinsics.
+
+mexpand-addsi-extend
+Target Bool Var(riscv_expand_addsi_extend) Init(1)
+Enable addsi extend operand in expand.
+
+mvector-fast-mem
+Target Bool Var(xt_vector_fast_memory_p) Init(1) Undocumented
+Enable fast memory schedule for vector load/store on xt cpus.
+
+mscalar-fast-mem
+Target Bool Var(xt_scalar_fast_memory_p) Init(0) Undocumented
+Enable fast memory schedule for scalar load/store on xt cpus.
+
+pthread
+Driver
+
+mcall-arg-no-preload-large-imm
+Target Var(riscv_call_arg_no_preload_large_imm) Init(0) Undocumented
+Avoid preloading large immediate call arguments.
+
+; =============== Mask Options for Xuan Tie =====================
+
+TargetVariable
+int riscv_xt_subext
+
+Mask(XTHEADC)       Var(riscv_xt_subext)
+
+Mask(XTHEADE)       Var(riscv_xt_subext)
+
+Mask(XTHEADFPP)     Var(riscv_xt_subext)
+
+Mask(XTHEADMATRIX)  Var(riscv_xt_subext)
+
+Mask(XTHEADSE)      Var(riscv_xt_subext)
+
+Mask(XTHEADVDOT)    Var(riscv_xt_subext)
+
+Mask(XTHEADVSFA)    Var(riscv_xt_subext)
+
+Mask(XTHEADCBI)    Var(riscv_xt_subext)
+
+Mask(XTHEADCEI)    Var(riscv_xt_subext)
+
+Mask(XTHEADCF)    Var(riscv_xt_subext)
+
+Mask(XTHEADCV)    Var(riscv_xt_subext)
+
+Mask(XTHEADCVWN)    Var(riscv_xt_subext)
+
+Mask(XTHEADVCPML)    Var(riscv_xt_subext)
+
+Mask(XTHEADVCRYPTO) Var(riscv_xt_subext)
+
+Mask(XTHEADVCODER) Var(riscv_xt_subext)
+
+Mask(XTHEADVARITH) Var(riscv_xt_subext)
+
+Mask(XTHEADCBOP) Var(riscv_xt_subext)
+
+Mask(DSP)	    Var(riscv_xt_subext)
+
+Mask(ZPN)	    Var(riscv_xt_subext)
+
+Mask(ZPSFOPERAND)   Var(riscv_xt_subext)
+
+Mask(ZPRVSFEXTRA)   Var(riscv_xt_subext)
+
+Mask(XTHEADVFCVT)     Var(riscv_xt_subext)
+
+Mask(XTHEADVREDUCTION)     Var(riscv_xt_subext)
+
+Mask(XTHEADLPW)     Var(riscv_xt_subext)

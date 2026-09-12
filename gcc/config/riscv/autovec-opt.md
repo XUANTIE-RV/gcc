@@ -752,7 +752,7 @@
   riscv_vector::emit_vlmax_insn (icode, riscv_vector::BINARY_OP_FRM_DYN, operands);
   DONE;
 }
-[(set_attr "type" "vfwalu")])
+[(set_attr "type" "vfwaluw")])
 
 (define_insn_and_split "*single_widen_sub<mode>"
   [(set (match_operand:VWEXTF 0 "register_operand")
@@ -769,7 +769,7 @@
   riscv_vector::emit_vlmax_insn (icode, riscv_vector::BINARY_OP_FRM_DYN, operands);
   DONE;
 }
-[(set_attr "type" "vfwalu")])
+[(set_attr "type" "vfwaluw")])
 
 ;; This combine pattern does not correspond to an single instruction,
 ;; i.e. there is no vfwmul.wv instruction. This is a temporary pattern

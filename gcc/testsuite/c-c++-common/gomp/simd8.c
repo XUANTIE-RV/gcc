@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fopenmp -O3 -fdump-tree-vect-details" } */
+/* { dg-options "-fopenmp -ftree-loop-vectorize -O3 -fdump-tree-vect-details" } */
 /* { dg-final { scan-tree-dump-times "vectorized 0 loops in function" 4 "vect" } } */
 
 int a[1024];

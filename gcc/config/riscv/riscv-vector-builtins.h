@@ -125,8 +125,20 @@ enum required_ext
   ZVKSED_EXT,		/* Crypto vector Zvksed sub-ext */
   ZVKSH_EXT,		/* Crypto vector Zvksh sub-ext */
   XTHEADVECTOR_EXT,	/* XTheadVector extension */
+  XTHEADVECTOR_OR_V_EXT,/* XTheadVector or v extension */
   ZVFBFMIN_EXT,		/* Zvfbfmin externsion */
   ZVFBFWMA_EXT,		/* Zvfbfwma extension */
+  XTHEADCV_EXT,		/* Xxtcv extension */
+  XTHEADCV_NO_VCPML_EXT,	/* Xtheadcv extension without Xtheadvcpml */
+  XTHEADCV_AND_XTHEADVCPML_EXT,	/* Xtheadcv and Xtheadvcpml extensions */
+  XTHEADCVWN_EXT,		/* Xtheadcvwn extension */
+  XTHEADVCPML_EXT,              /* Xtheadvcpml extension */
+  XTHEADVSFA_EXT,		/* Xtheadvsfa extension */
+  XTHEADVCRYPTO_EXT,		/* Xtheadvcrypto extension */
+  XTHEADVCODER_EXT,		/* Xtheadvcoder extension */
+  XTHEADVARITH_EXT,		/* Xtheadvarith extension */
+  XTHEADVFCVT_EXT,		/* Xtheadvfcvt extension */
+  XTHEADVREDUCTION_EXT,		/* Xtheadvreduction extension */
   /* Please update below to isa_name func when add or remove enum type(s).  */
 };
 
@@ -155,11 +167,35 @@ static inline const char * reqired_ext_to_isa_name (enum required_ext required)
     case ZVKSH_EXT:
       return "zvksh";
     case XTHEADVECTOR_EXT:
-      return "xthreadvector";
+      return "xtheadvector";
+    case XTHEADVECTOR_OR_V_EXT:
+      return "xtheadvector or v";
     case ZVFBFMIN_EXT:
       return "zvfbfmin";
     case ZVFBFWMA_EXT:
       return "zvfbfwma";
+    case XTHEADCV_EXT:
+      return "xtheadcv";
+    case XTHEADCV_NO_VCPML_EXT:
+      return "xtheadcv (without xtheadvcpml)";
+    case XTHEADCV_AND_XTHEADVCPML_EXT:
+      return "xtheadcv and xtheadvcpml";
+    case XTHEADCVWN_EXT:
+      return "xtheadcvwn";
+    case XTHEADVCPML_EXT:
+      return "xtheadvcpml";
+    case XTHEADVSFA_EXT:
+      return "xtheadvsfa";
+    case XTHEADVCRYPTO_EXT:
+      return "xtheadvcrypto";
+    case XTHEADVCODER_EXT:
+      return "xtheadvcoder";
+    case XTHEADVARITH_EXT:
+      return "xtheadvarith";
+    case XTHEADVFCVT_EXT:
+      return "xtheadvfcvt";
+    case XTHEADVREDUCTION_EXT:
+      return "xtheadvreduction";
     default:
       gcc_unreachable ();
   }
@@ -172,7 +208,7 @@ static inline bool required_extensions_specified (enum required_ext required)
   switch (required)
   {
     case VECTOR_EXT:
-      return TARGET_VECTOR;;
+      return TARGET_VECTOR && !TARGET_XTHEADVECTOR;
     case ZVBB_EXT:
       return TARGET_ZVBB;
     case ZVBB_OR_ZVKB_EXT:
@@ -193,10 +229,34 @@ static inline bool required_extensions_specified (enum required_ext required)
       return TARGET_ZVKSH;
     case XTHEADVECTOR_EXT:
       return TARGET_XTHEADVECTOR;
+    case XTHEADVECTOR_OR_V_EXT:
+      return TARGET_XTHEADVECTOR || TARGET_VECTOR;
     case ZVFBFMIN_EXT:
       return TARGET_ZVFBFMIN;
     case ZVFBFWMA_EXT:
       return TARGET_ZVFBFWMA;
+    case XTHEADCV_EXT:
+      return TARGET_XTHEADCV;
+    case XTHEADCV_NO_VCPML_EXT:
+      return TARGET_XTHEADCV && !TARGET_XTHEADVCPML;
+    case XTHEADCV_AND_XTHEADVCPML_EXT:
+      return TARGET_XTHEADCV && TARGET_XTHEADVCPML;
+    case XTHEADCVWN_EXT:
+      return TARGET_XTHEADCVWN;
+    case XTHEADVCPML_EXT:
+      return TARGET_XTHEADVCPML;
+    case XTHEADVSFA_EXT:
+      return TARGET_XTHEADVSFA;
+    case XTHEADVCRYPTO_EXT:
+      return TARGET_XTHEADVCRYPTO;
+    case XTHEADVCODER_EXT:
+      return TARGET_XTHEADVCODER;
+    case XTHEADVARITH_EXT:
+      return TARGET_XTHEADVARITH;
+    case XTHEADVFCVT_EXT:
+      return TARGET_XTHEADVFCVT;
+    case XTHEADVREDUCTION_EXT:
+      return TARGET_XTHEADVREDUCTION;
     default:
       gcc_unreachable ();
   }
@@ -312,7 +372,7 @@ struct function_group_info
     switch (ext_value)
     {
       case VECTOR_EXT:
-        return TARGET_VECTOR;
+	return TARGET_VECTOR && !TARGET_XTHEADVECTOR;
       case ZVBB_EXT:
         return TARGET_ZVBB;
       case ZVBB_OR_ZVKB_EXT:
@@ -333,10 +393,34 @@ struct function_group_info
         return TARGET_ZVKSH;
       case XTHEADVECTOR_EXT:
 	return TARGET_XTHEADVECTOR;
+      case XTHEADVECTOR_OR_V_EXT:
+	return TARGET_XTHEADVECTOR || TARGET_VECTOR;
       case ZVFBFMIN_EXT:
 	return TARGET_ZVFBFMIN;
       case ZVFBFWMA_EXT:
 	return TARGET_ZVFBFWMA;
+      case XTHEADCV_EXT:
+  return TARGET_XTHEADCV;
+      case XTHEADCV_NO_VCPML_EXT:
+  return TARGET_XTHEADCV && !TARGET_XTHEADVCPML;
+      case XTHEADCV_AND_XTHEADVCPML_EXT:
+  return TARGET_XTHEADCV && TARGET_XTHEADVCPML;
+      case XTHEADCVWN_EXT:
+  return TARGET_XTHEADCVWN;
+      case XTHEADVCPML_EXT:
+  return TARGET_XTHEADVCPML;
+    case XTHEADVSFA_EXT:
+      return TARGET_XTHEADVSFA;
+    case XTHEADVCRYPTO_EXT:
+      return TARGET_XTHEADVCRYPTO;
+    case XTHEADVCODER_EXT:
+      return TARGET_XTHEADVCODER;
+    case XTHEADVARITH_EXT:
+      return TARGET_XTHEADVARITH;
+      case XTHEADVFCVT_EXT:
+        return TARGET_XTHEADVFCVT;
+      case XTHEADVREDUCTION_EXT:
+        return TARGET_XTHEADVREDUCTION;
       default:
         gcc_unreachable ();
     }
@@ -487,7 +571,7 @@ public:
   machine_mode vector_mode (void) const;
   machine_mode index_mode (void) const;
   machine_mode arg_mode (int) const;
-  machine_mode mask_mode (void) const;
+  machine_mode mask_mode (rvv_base_type) const;
   machine_mode ret_mode (void) const;
 
   rtx use_exact_insn (insn_code);
@@ -527,6 +611,9 @@ public:
   /* Return true if intrinsics should apply vl operand.  */
   virtual bool apply_vl_p () const;
 
+  /* Return the mask type for function.  */
+  virtual rvv_base_type get_mask_type () const;
+
   /* Return true if intrinsics should apply tail policy operand.  */
   virtual bool apply_tail_policy_p () const;
 
@@ -542,6 +629,9 @@ public:
   /* Return true if intrinsics has merge operand.  */
   virtual bool has_merge_operand_p () const;
 
+  /* Return true if intrinsics has Xuantie coprocessor index operand.  */
+  virtual bool xt_has_idx_operand_p () const;
+
   /* Return true if intrinsics has rounding mode operand.  */
   virtual bool has_rounding_mode_operand_p () const;
 
@@ -550,6 +640,15 @@ public:
 
   /* Return true if intrinsics maybe require frm operand.  */
   virtual bool may_require_frm_p () const;
+
+  /* Return true if intrinsics maybe require frm operand.  */
+  virtual bool may_require_saturation_mode_p () const;
+
+  /* Return true if intrinsics are Xuantie vfreduction intrinsics.  */
+  virtual bool xt_is_vred_p () const;
+
+  /* Return true if intrinsics are Xuantie vfreduction 64 intrinsics.  */
+  virtual bool xt_is_vred64_p () const;
 
   /* Try to fold the given gimple call.  Return the new gimple statement
      on success, otherwise return null.  */
@@ -578,6 +677,7 @@ public:
   bool require_immediate (unsigned int, HOST_WIDE_INT, HOST_WIDE_INT) const;
   bool require_immediate_range_or (unsigned int, HOST_WIDE_INT,
 				   HOST_WIDE_INT, HOST_WIDE_INT) const;
+  bool require_vlen_xuantievreduction (machine_mode, bool) const;
 
 private:
   bool require_immediate_range (unsigned int, HOST_WIDE_INT,
@@ -768,6 +868,12 @@ function_base::apply_vl_p () const
   return true;
 }
 
+inline rvv_base_type
+function_base::get_mask_type () const
+{
+  return RVV_BASE_mask;
+}
+
 /* We choose to apply tail policy operand by default since most of the
    intrinsics has tail policy operand.  */
 inline bool
@@ -801,6 +907,14 @@ function_base::has_merge_operand_p () const
 }
 
 /* We choose to return false by default since most of the intrinsics does
+   not have Xuantie coprocessor index operand.  */
+inline bool
+function_base::xt_has_idx_operand_p () const
+{
+  return false;
+}
+
+/* We choose to return false by default since most of the intrinsics does
    not have rounding mode operand.  */
 inline bool
 function_base::has_rounding_mode_operand_p () const
@@ -820,6 +934,30 @@ function_base::may_require_frm_p () const
    not need vxrm operand.  */
 inline bool
 function_base::may_require_vxrm_p () const
+{
+  return false;
+}
+
+/* We choose to return false by default since most of the intrinsics does
+   not need saturation mode operand.  */
+inline bool
+function_base::may_require_saturation_mode_p () const
+{
+  return false;
+}
+
+/* We choose to return false by default since most of the intrinsics are
+   not Xuantie vfreduction intrinsics.  */
+inline bool
+function_base::xt_is_vred_p () const
+{
+  return false;
+}
+
+/* We choose to return false by default since most of the intrinsics are
+   not Xuantie vfreduction 64 intrinsics.  */
+inline bool
+function_base::xt_is_vred64_p () const
 {
   return false;
 }

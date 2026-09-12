@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-O3 -fdump-tree-ifcvt" } */
+/* { dg-options "-O3 -ftree-loop-if-convert -fdump-tree-ifcvt" } */
 
 int foo (unsigned short a[], unsigned int x)
 {

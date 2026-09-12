@@ -5,7 +5,21 @@
 
 #include "xtheadmemidx-helpers.h"
 
+/* TODO: After we adjust address cost for xtheadmemidx and xtheadfmemidx,
+   the memory index load instruction will be generated at fwprop1 pass.
+   Which will prevent zero extension to be combined with the load instruction,
+   due to load destination register is used in the memory index instruction.
+
+   I think the proper solution is to propagate the zero extension to the
+   load instruction at fwprop1 pass before propagating the memory index
+   instruction. However, fwprop1 only compares the cost of the source
+   instruction before and after propagation, but does not consider the
+   benefit of eliminating instructions after propagation. This is a potential
+   optimization point that can be further investigated later. For now,
+   let's comment out the code generation check.
+
 LRU_REG_IMM_UPD(float, 0)
+*/
 #if __riscv_xlen == 64
 LRU_REG_IMM_UPD(double, 2)
 #endif

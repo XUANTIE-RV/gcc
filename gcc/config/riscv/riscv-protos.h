@@ -165,6 +165,7 @@ extern bool riscv_shamt_matches_mask_p (int, HOST_WIDE_INT);
 extern void riscv_subword_address (rtx, rtx *, rtx *, rtx *, rtx *);
 extern void riscv_lshift_subword (machine_mode, rtx, rtx, rtx *);
 extern enum memmodel riscv_union_memmodels (enum memmodel, enum memmodel);
+extern bool riscv_vector_float_type_p (const_tree type);
 extern void generate_reflecting_code_using_brev (rtx *);
 extern void expand_crc_using_clmul (scalar_mode, scalar_mode, rtx *);
 extern void expand_reversed_crc_using_clmul (scalar_mode, scalar_mode, rtx *);
@@ -186,6 +187,12 @@ extern void riscv_parse_arch_string (const char *, struct gcc_options *, locatio
 
 extern bool riscv_hard_regno_rename_ok (unsigned, unsigned);
 
+/* Routines implemented in xuantie-ext-load-merging.cc.  */
+rtl_opt_pass * make_pass_delete_redundancy_sext1 (gcc::context *ctxt);
+rtl_opt_pass * make_pass_delete_redundancy_sext2 (gcc::context *ctxt);
+/* Routines implemented in xuantie-ext-load-merging.cc.  */
+class gimple_opt_pass;
+gimple_opt_pass *make_pass_load_merging (gcc::context *ctxt);
 rtl_opt_pass * make_pass_shorten_memrefs (gcc::context *ctxt);
 rtl_opt_pass * make_pass_avlprop (gcc::context *ctxt);
 rtl_opt_pass * make_pass_vsetvl (gcc::context *ctxt);
@@ -253,6 +260,22 @@ struct common_vector_cost
 
   /* Cost of an unaligned vector store.  */
   const int unalign_store_cost;
+
+  /* Cost of an integer vector reduction.  */
+  const int reduce_i8_cost;
+  const int reduce_i16_cost;
+  const int reduce_i32_cost;
+  const int reduce_i64_cost;
+
+  /* Cost of an unordered float vector reduction.  */
+  const int reduce_f16_cost;
+  const int reduce_f32_cost;
+  const int reduce_f64_cost;
+
+  /* Cost of an ordered float vector reduction.  */
+  const int ordered_reduce_f16_cost;
+  const int ordered_reduce_f32_cost;
+  const int ordered_reduce_f64_cost;
 };
 
 /* scalable vectorization (VLA) specific cost.  */
@@ -685,7 +708,8 @@ enum fixed_point_rounding_mode
   VXRM_RNU,
   VXRM_RNE,
   VXRM_RDN,
-  VXRM_ROD
+  VXRM_ROD,
+  VXRM_NONE
 };
 
 /* Rounding mode bitfield for floating point FRM.  The value of enum comes
@@ -739,10 +763,11 @@ rtx get_fp_rounding_coefficient (machine_mode);
 enum riscv_builtin_class
 {
   RISCV_BUILTIN_GENERAL,
-  RISCV_BUILTIN_VECTOR
+  RISCV_BUILTIN_VECTOR,
+  RISCV_BUILTIN_MATRIX,
 };
 
-const unsigned int RISCV_BUILTIN_SHIFT = 1;
+const unsigned int RISCV_BUILTIN_SHIFT = 2;
 
 /* Mask that selects the riscv_builtin_class part of a function code.  */
 const unsigned int RISCV_BUILTIN_CLASS = (1 << RISCV_BUILTIN_SHIFT) - 1;
@@ -761,8 +786,9 @@ extern void th_mempair_prepare_save_restore_operands (rtx[4], bool,
 						      int, HOST_WIDE_INT);
 extern void th_mempair_save_restore_regs (rtx[4], bool, machine_mode);
 extern unsigned int th_int_get_mask (unsigned int);
-extern unsigned int th_int_get_save_adjustment (void);
+extern unsigned int th_int_get_save_adjustment (unsigned);
 extern rtx th_int_adjust_cfi_prologue (unsigned int);
+#include "xuantie-protos.h"
 extern const char *th_asm_output_opcode (FILE *asm_out_file, const char *p);
 #ifdef RTX_CODE
 extern const char*

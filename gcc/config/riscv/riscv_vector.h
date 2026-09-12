@@ -39,6 +39,10 @@ extern "C" {
    same, and the file is a complete implementation of riscv_vector.h.  */
 #pragma riscv intrinsic "vector"
 
+#if (__riscv_v_intrinsic == 10000 || __riscv_th_v_intrinsic == 10000)
+#include <riscv_vector_v0p10.h>
+#endif
+
 #ifdef __cplusplus
 }
 #endif // __cplusplus

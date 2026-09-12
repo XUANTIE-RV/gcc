@@ -1095,9 +1095,68 @@ costs::adjust_stmt_cost (enum vect_cost_for_stmt kind, loop_vec_info loop,
 		    : costs->regmove->GR2VR);
       break;
     case vec_to_scalar:
-      stmt_cost += (FLOAT_TYPE_P (vectype) ? costs->regmove->VR2FR
-		    : costs->regmove->VR2GR);
-      break;
+      {
+	stmt_cost += (FLOAT_TYPE_P (vectype) ? costs->regmove->VR2FR
+		      : costs->regmove->VR2GR);
+	if (!vect_is_reduction (stmt_info))
+	  break;
+	const common_vector_cost *cost_model =
+	  riscv_v_ext_vector_mode_p (loop->vector_mode)
+	    ? costs->vla : costs->vls;
+	/* FOLD_LEFT_REDUCTION means the reduction must be performed from left
+	   to right. */
+	if (vect_reduc_type (m_vinfo, stmt_info) == FOLD_LEFT_REDUCTION)
+	  {
+	    switch (GET_MODE_INNER (TYPE_MODE (vectype)))
+	      {
+	      case E_HFmode:
+	      case E_BFmode:
+		stmt_cost += cost_model->ordered_reduce_f16_cost;
+		break;
+	      case E_SFmode:
+		stmt_cost += cost_model->ordered_reduce_f32_cost;
+		break;
+	      case E_DFmode:
+		stmt_cost += cost_model->ordered_reduce_f64_cost;
+		break;
+	      default:
+		break;
+	      }
+	  }
+	/* TREE_CODE_REDUCTION means the reduction can be performed in any
+	   order. */
+	else if (vect_reduc_type (m_vinfo, stmt_info) == TREE_CODE_REDUCTION)
+	  {
+	    switch (GET_MODE_INNER (TYPE_MODE (vectype)))
+	      {
+	      case E_QImode:
+		stmt_cost += cost_model->reduce_i8_cost;
+		break;
+	      case E_HImode:
+		stmt_cost += cost_model->reduce_i16_cost;
+		break;
+	      case E_SImode:
+		stmt_cost += cost_model->reduce_i32_cost;
+		break;
+	      case E_DImode:
+		stmt_cost += cost_model->reduce_i64_cost;
+		break;
+	      case E_HFmode:
+	      case E_BFmode:
+		stmt_cost += cost_model->reduce_f16_cost;
+		break;
+	      case E_SFmode:
+		stmt_cost += cost_model->reduce_f32_cost;
+		break;
+	      case E_DFmode:
+		stmt_cost += cost_model->reduce_f64_cost;
+		break;
+	      default:
+		break;
+	      }
+	  }
+	break;
+      }
     case vector_load:
     case vector_store:
 	{

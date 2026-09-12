@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-O3 -fdump-tree-fre4" } */
+/* { dg-options "-O3 -ftree-vectorize -fdump-tree-fre4" } */
 
 extern void foo(void);
 

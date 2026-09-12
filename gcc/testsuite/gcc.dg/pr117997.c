@@ -1,6 +1,6 @@
 /* PR tree-optimization/117997 */
 /* { dg-do run } */
-/* { dg-options "-O2" } */
+/* { dg-options "-O2 -foptimize-crc" } */
 /* { dg-additional-options "-fpie" { target pie } } */
 
 __attribute__((noipa)) unsigned char

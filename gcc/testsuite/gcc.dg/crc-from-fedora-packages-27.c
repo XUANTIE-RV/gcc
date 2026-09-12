@@ -1,5 +1,5 @@
 /* { dg-do compile { target lp64 } } */
-/* { dg-options "-fdump-tree-crc-details -O2" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc-details -O2" } */
 
 // File - CRC-2.i
 #include <stdint.h>

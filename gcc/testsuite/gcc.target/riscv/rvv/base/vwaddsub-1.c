@@ -1,6 +1,6 @@
 /* { dg-do compile { target { ! riscv_abi_e } } } */
 /* { dg-add-options riscv_v } */
-/* { dg-additional-options "-std=gnu99 -O3 -fno-schedule-insns -fno-schedule-insns2" } */
+/* { dg-additional-options "-march=rv64gcv -mabi=lp64d -std=gnu99 -O3 -fno-schedule-insns -fno-schedule-insns2" } */
 
 #include <stdint.h>
 #include <riscv_vector.h>

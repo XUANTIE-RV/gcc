@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-mriscv-attribute" } */
+/* { dg-options "-mriscv-attribute -mtune=rocket" } */
 int foo()
 {
 

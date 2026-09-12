@@ -1,5 +1,5 @@
 /* { dg-do compile } */
-/* { dg-options "-fdump-tree-crc -O2" } */
+/* { dg-options "-foptimize-crc -fdump-tree-crc -O2" } */
 
 typedef unsigned short ee_u16;
 typedef unsigned char ee_u8;

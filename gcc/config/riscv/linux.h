@@ -35,6 +35,10 @@ along with GCC; see the file COPYING3.  If not see
 #undef MUSL_DYNAMIC_LINKER
 #define MUSL_DYNAMIC_LINKER "/lib/ld-musl-riscv" XLEN_SPEC MUSL_ABI_SUFFIX ".so.1"
 
+#undef LIB_SPEC
+#define LIB_SPEC GNU_USER_TARGET_LIB_SPEC  \
+  "%{!nostartfiles:%{!nodefaultlibs:%{!nolibc:%{!nostdlib:%:riscv_multi_lib_check()}}}}"
+
 #define ICACHE_FLUSH_FUNC "__riscv_flush_icache"
 
 #define CPP_SPEC "%{pthread:-D_REENTRANT}"
@@ -61,10 +65,14 @@ along with GCC; see the file COPYING3.  If not see
 	-dynamic-linker " GNU_USER_DYNAMIC_LINKER "}} \
     %{static:-static} %{static-pie:-static -pie --no-dynamic-linker -z text}}"
 
-#define STARTFILE_PREFIX_SPEC 			\
+#define STARTFILE_PREFIX_SPEC				\
+   "/%:xt_get_arch_spec_path(%{march=*} %{mabi=*})"		\
+   "/usr/%:xt_get_arch_spec_path(%{march=*} %{mabi=*})"	\
    "/lib" XLEN_SPEC "/" ABI_SPEC "/ "		\
    "/usr/lib" XLEN_SPEC "/" ABI_SPEC "/ "	\
    "/lib/ "					\
    "/usr/lib/ "
 
-#define RISCV_USE_CUSTOMISED_MULTI_LIB select_by_abi
+#define RISCV_USE_CUSTOMISED_MULTI_LIB select_by_abi_arch_cmodel
+
+#define XT_USE_UPPER_LEVEL_DIR_FOR_MULTI_LIB_OS 1

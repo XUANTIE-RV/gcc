@@ -96,6 +96,13 @@
     *(T*)(rs1 + (rs2 << IMM)) = val;					\
   }
 
+#define SR_REG_IMM_ZERO(T, IMM)						\
+  void									\
+  sr_reg_imm_zero_ ## T ## _ ## IMM (intX_t rs1, intX_t rs2)		\
+  {									\
+    *(T*)(rs1 + (rs2 << IMM)) = 0;						\
+  }
+
 #define LR_REG_IMM_UPD(T, IMM)						\
   intX_t								\
   lr_reg_imm_upd_ ## T ## _ ## IMM (intX_t *rs1, intX_t rs2)		\
@@ -110,6 +117,14 @@
   {									\
     *rs1 = *rs1 + (rs2 << IMM);						\
     *(T*)(*rs1) = val;	 						\
+  }
+
+#define LR_SR_REG_IDX(T)						\
+  void									\
+  lr_sr_reg_idx_ ## T ## _ ## IMM (T *rs1, int32_t idx)			\
+  {									\
+    if (rs1[idx] > 0)							\
+      rs1[idx] = 0;	 						\
   }
 
 #define LRU_REG_IMM(T, IMM)						\
@@ -147,6 +162,13 @@
     intX_t t = rs1 + (rs2_32 << IMM);					\
     *(T*)t = val;							\
     *rs2 = t;								\
+  }
+#define LR_SR_REG_UIDX(T)						\
+  void									\
+  lr_sr_reg_idx_ ## T ## _ ## IMM (T *rs1, uint32_t idx)		\
+  {									\
+    if (rs1[idx] > 0)							\
+      rs1[idx] = 0;	 						\
   }
 
 #endif /* XTHEADMEMIDX_HELPERS_H */

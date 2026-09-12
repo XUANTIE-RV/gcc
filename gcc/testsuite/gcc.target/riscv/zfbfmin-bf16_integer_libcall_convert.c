@@ -6,8 +6,10 @@
  *    qi/hi       -> bf           fcvt.s.w  + fcvt.bf16.s
  *    uqi/uhi     -> bf           fcvt.s.wu + fcvt.bf16.s
  *
- *    si/di/ti    -> bf           __float[s|d|t]ibf
- *    usi/udi/uti -> bf           __floatun[s|d|t]ibf
+ *    si/di       -> bf           fcvt.s.[w|l]  + fcvt.bf16.s
+ *    usi/udi     -> bf           fcvt.s.[w|l]u + fcvt.bf16.s
+ *    ti          -> bf           __floattibf
+ *    uti         -> bf           __floatuntibf
 */
 
 /* 2) BF16        -> Integer
@@ -56,11 +58,14 @@ void bf_to_ti ()  { ti = bf; }  /* { dg-final { scan-assembler-times "call\t__fi
 void bf_to_uti () { uti = bf; } /* { dg-final { scan-assembler-times "call\t__fixunssfti" 1 { target { rv64 } } } } */
 #endif
 
-/* { dg-final { scan-assembler-times "fcvt.bf16.s" 4 } } */
+/* { dg-final { scan-assembler-times "fcvt.bf16.s" 6 { target { rv32 } } } } */
+/* { dg-final { scan-assembler-times "fcvt.bf16.s" 8 { target { rv64 } } } } */
 /* { dg-final { scan-assembler-times "fcvt.s.bf16" 8 { target { rv32 } } } } */
 /* { dg-final { scan-assembler-times "fcvt.s.bf16" 10 { target { rv64 } } } } */
 
-/* { dg-final { scan-assembler-times "call\t__floatsibf" 1  } } */
-/* { dg-final { scan-assembler-times "call\t__floatunsibf" 1  } } */
-/* { dg-final { scan-assembler-times "call\t__floatdibf" 1  } } */
-/* { dg-final { scan-assembler-times "call\t__floatundibf" 1  } } */
+/* { dg-final { scan-assembler-not "call\t__floatsibf" } } */
+/* { dg-final { scan-assembler-not "call\t__floatunsibf" } } */
+/* { dg-final { scan-assembler-times "call\t__floatdibf" 1 { target { rv32 } } } } */
+/* { dg-final { scan-assembler-times "call\t__floatundibf" 1 { target { rv32 } } } } */
+/* { dg-final { scan-assembler-not "call\t__floatdibf" { target { rv64 } } } } */
+/* { dg-final { scan-assembler-not "call\t__floatundibf" { target { rv64 } } } } */

@@ -343,7 +343,7 @@
   [(set_attr "type" "v<rev>")
    (set_attr "mode" "<MODE>")])
 
-;; vclz.v vctz.v
+;; vclz.v vctz.v vcpop.v
 (define_insn "@pred_v<bitmanip_optab><mode>"
   [(set (match_operand:VI 0  "register_operand"           "=vd, vr")
      (clz_ctz_pcnt:VI
@@ -463,7 +463,7 @@
 ;; zvknh[ab] and zvkg instructions patterns.
 ;; vsha2ms.vv vsha2ch.vv vsha2cl.vv vghsh.vv
 (define_insn "@pred_v<vv_ins1_name><mode>"
-  [(set (match_operand:VQEXTI 0 "register_operand"     "=vr")
+  [(set (match_operand:VQEXTI 0 "register_operand"     "=&vr")
      (if_then_else:VQEXTI
        (unspec:<VM>
          [(match_operand 4 "vector_length_operand"     "rK")
@@ -537,7 +537,7 @@
   "TARGET_ZVKNED || TARGET_ZVKSED"
   "v<vv_ins_name>.<ins_type>\t%0,%2"
   [(set_attr "type" "v<vv_ins_name>")
-   (set_attr "mode" "<MODE>")])
+   (set_attr "mode" "<VSIX2>")])
 
 (define_insn "@pred_crypto_vv<vv_ins_name><ins_type>x4<mode>_scalar"
  [(set (match_operand:<VSIX4> 0 "register_operand"      "=&vr")
@@ -555,7 +555,7 @@
  "TARGET_ZVKNED || TARGET_ZVKSED"
  "v<vv_ins_name>.<ins_type>\t%0,%2"
  [(set_attr "type" "v<vv_ins_name>")
-  (set_attr "mode" "<MODE>")])
+  (set_attr "mode" "<VSIX4>")])
 
 (define_insn "@pred_crypto_vv<vv_ins_name><ins_type>x8<mode>_scalar"
  [(set (match_operand:<VSIX8> 0 "register_operand"      "=&vr")
@@ -573,7 +573,7 @@
  "TARGET_ZVKNED || TARGET_ZVKSED"
  "v<vv_ins_name>.<ins_type>\t%0,%2"
  [(set_attr "type" "v<vv_ins_name>")
-  (set_attr "mode" "<MODE>")])
+  (set_attr "mode" "<VSIX8>")])
 
 (define_insn "@pred_crypto_vv<vv_ins_name><ins_type>x16<mode>_scalar"
  [(set (match_operand:<VSIX16> 0 "register_operand"      "=&vr")
@@ -591,7 +591,7 @@
  "TARGET_ZVKNED || TARGET_ZVKSED"
  "v<vv_ins_name>.<ins_type>\t%0,%2"
  [(set_attr "type" "v<vv_ins_name>")
-  (set_attr "mode" "<MODE>")])
+  (set_attr "mode" "<VSIX16>")])
 
 ;; vaeskf1.vi vsm4k.vi
 (define_insn "@pred_crypto_vi<vi_ins_name><mode>_scalar"
@@ -614,7 +614,7 @@
 
 ;; vaeskf2.vi vsm3c.vi
 (define_insn "@pred_vi<vi_ins1_name><mode>_nomaskedoff_scalar"
-  [(set (match_operand:VSI 0 "register_operand"       "=vr")
+  [(set (match_operand:VSI 0 "register_operand"       "=&vr")
      (if_then_else:VSI
        (unspec:<VM>
          [(match_operand 4 "vector_length_operand"    "rK")
@@ -635,7 +635,7 @@
 ;; zvksh instructions patterns.
 ;; vsm3me.vv
 (define_insn "@pred_vsm3me<mode>"
-  [(set (match_operand:VSI 0 "register_operand"    "=vr, vr")
+  [(set (match_operand:VSI 0 "register_operand"    "=&vr, vr")
      (if_then_else:VSI
        (unspec:<VM>
          [(match_operand 4 "vector_length_operand" " rK, rK")

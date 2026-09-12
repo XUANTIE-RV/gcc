@@ -20,6 +20,8 @@ along with GCC; see the file COPYING3.  If not see
 <http://www.gnu.org/licenses/>.  */
 
 #define IN_TARGET_CODE 1
+#define INCLUDE_ALGORITHM
+#define INCLUDE_FUNCTIONAL
 
 #define INCLUDE_STRING
 #include "config.h"
@@ -101,15 +103,20 @@ along with GCC; see the file COPYING3.  If not see
 /* True the mode switching has static frm, or false.  */
 #define STATIC_FRM_P(c) ((c)->machine->mode_sw_info.static_frm_p)
 
-/* True if we can use the instructions in the XTheadInt extension
-   to handle interrupts, or false.  */
-#define TH_INT_INTERRUPT(c)						\
+/* Helper for TH_INT_INTERRUPT(c).  */
+#define TH_INT_INTERRUPT_HELPER(c)					\
   (TARGET_XTHEADINT							\
    /* The XTheadInt extension only supports rv32.  */			\
    && !TARGET_64BIT							\
    && (c)->machine->interrupt_handler_p					\
    /* The XTheadInt instructions can only be executed in M-mode.  */	\
    && (c)->machine->interrupt_mode == MACHINE_MODE)
+
+/* True if we can use the instructions in the XTheadInt extension
+   to handle interrupts, or false.  */
+#define TH_INT_INTERRUPT(c)						\
+  (TH_INT_INTERRUPT_HELPER (c)						\
+   && !xt_emit_interrupt_csr_p ())
 
 /* Information about a function's frame layout.  */
 struct GTY(())  riscv_frame_info {
@@ -178,6 +185,13 @@ struct GTY(()) mode_switching_info {
 };
 
 struct GTY(())  machine_function {
+  /* Machine function for XUANTIE.  */
+  struct {
+    /* True if an XUANTIE CLIC preemptible interrupt function.  */
+    bool clic_preemptible_p : 1;
+    unsigned int mask;
+  } GTY ((skip)) xt_machine_function;
+
   /* The number of extra stack bytes taken up by register varargs.
      This area is allocated by the callee at the very top of the frame.  */
   int varargs_size;
@@ -291,6 +305,15 @@ struct riscv_tune_param
   bool use_divmod_expansion;
   unsigned int fusible_ops;
   const struct cpu_vector_cost *vec_costs;
+
+  const char *function_align = NULL;
+  const char *jump_align = NULL;
+  const char *loop_align = NULL;
+  enum riscv_autoprefetch_model
+  {
+    AUTOPREFETCHER_OFF,
+    AUTOPREFETCHER_WEAK
+  } autoprefetcher_model = AUTOPREFETCHER_OFF;
 };
 
 
@@ -353,8 +376,8 @@ const enum reg_class riscv_regno_to_class[FIRST_PSEUDO_REGISTER] = {
   NO_REGS,	NO_REGS,	NO_REGS,	NO_REGS,
   NO_REGS,	NO_REGS,	NO_REGS,	NO_REGS,
   NO_REGS,	NO_REGS,	NO_REGS,	NO_REGS,
-  NO_REGS,	NO_REGS,	NO_REGS,	NO_REGS,
-  NO_REGS,	NO_REGS,	NO_REGS,	NO_REGS,
+  MATRIX_REGS,	MATRIX_REGS,	MATRIX_REGS,	MATRIX_REGS,
+  MATRIX_REGS,	MATRIX_REGS,	MATRIX_REGS,	MATRIX_REGS,
   VM_REGS,	VD_REGS,	VD_REGS,	VD_REGS,
   VD_REGS,	VD_REGS,	VD_REGS,	VD_REGS,
   VD_REGS,	VD_REGS,	VD_REGS,	VD_REGS,
@@ -385,6 +408,16 @@ static const common_vector_cost rvv_vls_vector_cost = {
   1, /* align_store_cost  */
   2, /* unalign_load_cost  */
   2, /* unalign_store_cost  */
+  0, /* reduce_i8_cost  */
+  0, /* reduce_i16_cost  */
+  0, /* reduce_i32_cost  */
+  0, /* reduce_i64_cost  */
+  0, /* reduce_f16_cost  */
+  0, /* reduce_f32_cost  */
+  0, /* reduce_f64_cost  */
+  0, /* ordered_reduce_f16_cost  */
+  0, /* ordered_reduce_f32_cost  */
+  0, /* ordered_reduce_f64_cost  */
 };
 
 /* RVV costs for VLA vector operations.  */
@@ -408,6 +441,16 @@ static const scalable_vector_cost rvv_vla_vector_cost = {
     1, /* align_store_cost  */
     2, /* unalign_load_cost  */
     2, /* unalign_store_cost  */
+    0, /* reduce_i8_cost  */
+    0, /* reduce_i16_cost  */
+    0, /* reduce_i32_cost  */
+    0, /* reduce_i64_cost  */
+    0, /* reduce_f16_cost  */
+    0, /* reduce_f32_cost  */
+    0, /* reduce_f64_cost  */
+    0, /* ordered_reduce_f16_cost  */
+    0, /* ordered_reduce_f32_cost  */
+    0, /* ordered_reduce_f64_cost  */
   },
 };
 
@@ -862,7 +905,7 @@ riscv_build_integer_1 (struct riscv_integer_op codes[RISCV_MAX_INTEGER_OPS],
       if (!LUI_OPERAND (x)
 	  && TARGET_64BIT
 	  && TARGET_ZBA
-	  && LUI_OPERAND (x & ~HOST_WIDE_INT_C (0x80000000UL)))
+	  && LUI_OPERAND (x & ~HOST_WIDE_INT_UC (0x80000000)))
 	{
 	  x = sext_hwi (x, 32);
 	  use_uw = true;
@@ -946,9 +989,9 @@ riscv_build_integer_1 (struct riscv_integer_op codes[RISCV_MAX_INTEGER_OPS],
 	    {
 	      HOST_WIDE_INT bit = ctz_hwi (value);
 	      alt_codes[i].code = (i == 0 ? UNKNOWN : IOR);
-	      alt_codes[i].value = 1UL << bit;
+	      alt_codes[i].value = HOST_WIDE_INT_1U << bit;
 	      alt_codes[i].use_uw = false;
-	      value &= ~(1ULL << bit);
+	      value &= ~(HOST_WIDE_INT_1U << bit);
 	      i++;
 	    }
 
@@ -1735,6 +1778,8 @@ riscv_classify_address (struct riscv_address_info *info, rtx x,
       /* RVV load/store disallow any offset.  */
       if (riscv_v_ext_mode_p (mode))
 	return false;
+      if (xt_rvm_mode_p (mode))
+	return false;
 
       info->type = ADDRESS_REG;
       info->reg = XEXP (x, 0);
@@ -1745,6 +1790,8 @@ riscv_classify_address (struct riscv_address_info *info, rtx x,
     case LO_SUM:
       /* RVV load/store disallow LO_SUM.  */
       if (riscv_v_ext_mode_p (mode))
+	return false;
+      if (xt_rvm_mode_p (mode))
 	return false;
 
       info->type = ADDRESS_LO_SUM;
@@ -1781,6 +1828,8 @@ riscv_classify_address (struct riscv_address_info *info, rtx x,
 	 This behavior will benefit the underlying RVV auto vectorization.  */
       if (riscv_v_ext_mode_p (mode))
 	return x == const0_rtx;
+      if (xt_rvm_mode_p (mode))
+	return x == const0_rtx;
 
       /* Small-integer addresses don't occur very often, but they
 	 are legitimate if x0 is a valid base register.  */
@@ -1801,6 +1850,8 @@ riscv_legitimate_address_p (machine_mode mode, rtx x, bool strict_p,
   /* Disallow RVV modes base address.
      E.g. (mem:SI (subreg:DI (reg:V1DI 155) 0).  */
   if (SUBREG_P (x) && riscv_v_ext_mode_p (GET_MODE (SUBREG_REG (x))))
+    return false;
+  if (SUBREG_P (x) && xt_rvm_mode_p (GET_MODE (SUBREG_REG (x))))
     return false;
   struct riscv_address_info addr;
 
@@ -1873,7 +1924,8 @@ riscv_address_insns (rtx x, machine_mode mode, bool might_split_p)
 
   /* BLKmode is used for single unaligned loads and stores and should
      not count as a multiword mode. */
-  if (!riscv_v_ext_vector_mode_p (mode) && mode != BLKmode && might_split_p)
+  if (!xt_rvm_mode_p (mode)
+    && !riscv_v_ext_vector_mode_p (mode) && mode != BLKmode && might_split_p)
     n += (GET_MODE_SIZE (mode).to_constant () + UNITS_PER_WORD - 1) / UNITS_PER_WORD;
 
   if (addr.type == ADDRESS_LO_SUM)
@@ -2290,6 +2342,9 @@ riscv_split_symbol (rtx temp, rtx addr, machine_mode mode, rtx *low_out)
 static rtx
 riscv_add_offset (rtx temp, rtx reg, HOST_WIDE_INT offset)
 {
+  if (TARGET_XUANTIE)
+    return xt_add_offset (temp, reg, offset);
+
   if (!SMALL_OPERAND (offset))
     {
       rtx high;
@@ -2826,6 +2881,7 @@ riscv_legitimize_poly_move (machine_mode mode, rtx dest, rtx tmp, rtx src)
      for e.g. (const_poly_int:DI [549755813888, 549755813888]).  */
   HOST_WIDE_INT offset = value.coeffs[0];
   HOST_WIDE_INT factor = value.coeffs[1];
+  HOST_WIDE_INT factor2 = value.coeffs[2];
   int vlenb = BYTES_PER_RISCV_VECTOR.coeffs[1];
   int div_factor = 0;
   /* Calculate (const_poly_int:MODE [m, n]) using scalar instructions.
@@ -2851,8 +2907,8 @@ riscv_legitimize_poly_move (machine_mode mode, rtx dest, rtx tmp, rtx src)
 
   if (BYTES_PER_RISCV_VECTOR.is_constant ())
     {
-      gcc_assert (value.is_constant ());
-      riscv_emit_move (dest, GEN_INT (value.to_constant ()));
+      riscv_emit_move (dest, GEN_INT (offset));
+      xt_rvm_legitimize_poly_move (mode, dest, tmp, src);
       return;
     }
   else
@@ -2876,7 +2932,9 @@ riscv_legitimize_poly_move (machine_mode mode, rtx dest, rtx tmp, rtx src)
 
   riscv_expand_mult_with_const_int (mode, dest, tmp,
 				    factor / (vlenb / div_factor));
-  HOST_WIDE_INT constant = offset - factor;
+
+  xt_rvm_legitimize_poly_move (mode, dest, tmp, src);
+  HOST_WIDE_INT constant = offset - factor - factor2;
 
   if (constant == 0)
     return;
@@ -2974,6 +3032,9 @@ riscv_legitimize_subreg_const_poly_move (machine_mode mode, rtx dest, rtx src)
 bool
 riscv_legitimize_move (machine_mode mode, rtx dest, rtx src)
 {
+  if (xt_legitimize_move (mode, dest, src))
+    return true;
+
   if (CONST_POLY_INT_P (src))
     {
       /*
@@ -2989,13 +3050,16 @@ riscv_legitimize_move (machine_mode mode, rtx dest, rtx src)
 	  return true;
 	}
       poly_int64 value = rtx_to_poly_int64 (src);
-      if (!value.is_constant () && !TARGET_VECTOR)
+      if (!value.is_constant () && !(TARGET_VECTOR || TARGET_XTHEADMATRIX))
 	{
 	  riscv_report_v_required ();
 	  return false;
 	}
 
       if (satisfies_constraint_vp (src) && GET_MODE (src) == Pmode)
+	return false;
+
+      if (satisfies_constraint_xp (src) && GET_MODE (src) == Pmode)
 	return false;
 
       if (GET_MODE_SIZE (mode).to_constant () < GET_MODE_SIZE (Pmode))
@@ -3175,7 +3239,7 @@ riscv_legitimize_move (machine_mode mode, rtx dest, rtx src)
      */
 
  if (TARGET_HARD_FLOAT
-     && !TARGET_ZFHMIN && mode == HFmode
+     && !TARGET_ZFHMIN && (mode == HFmode || mode == BFmode)
      && REG_P (dest) && FP_REG_P (REGNO (dest))
      && REG_P (src) && !FP_REG_P (REGNO (src))
      && can_create_pseudo_p ())
@@ -3189,9 +3253,8 @@ riscv_legitimize_move (machine_mode mode, rtx dest, rtx src)
        emit_insn (gen_iorsi3 (temp, mask, temp));
      else
        emit_insn (gen_iordi3 (temp, mask, temp));
-
-     riscv_emit_move (dest, gen_rtx_UNSPEC (HFmode, gen_rtvec (1, temp),
-					    UNSPEC_FMV_SFP16_X));
+     riscv_emit_move (dest, gen_rtx_UNSPEC (mode, gen_rtvec (1, temp),
+			     UNSPEC_FMV_SFP16BF16_X));
 
      return true;
    }
@@ -3308,6 +3371,9 @@ riscv_extend_cost (rtx op, bool unsigned_p)
   if (MEM_P (op))
     return 0;
 
+  if (TARGET_XTHEADBB)
+    return COSTS_N_INSNS (1);
+
   if (unsigned_p && GET_MODE (op) == QImode)
     /* We can use ANDI.  */
     return COSTS_N_INSNS (1);
@@ -3353,6 +3419,9 @@ riscv_rtx_costs (rtx x, machine_mode mode, int outer_code, int opno ATTRIBUTE_UN
   bool float_mode_p = FLOAT_MODE_P (mode);
   int cost;
 
+  if (xt_rtx_costs (x, mode, outer_code, opno, total, speed))
+    return true;
+
   switch (GET_CODE (x))
     {
     case SET:
@@ -3361,6 +3430,12 @@ riscv_rtx_costs (rtx x, machine_mode mode, int outer_code, int opno ATTRIBUTE_UN
       if (outer_code == INSN
 	  && register_operand (SET_DEST (x), GET_MODE (SET_DEST (x))))
 	{
+	  if (REG_P (SET_SRC (x)) && TARGET_DOUBLE_FLOAT && mode == DFmode)
+	    {
+	      *total = COSTS_N_INSNS (1);
+	      return true;
+	    }
+
 	  /* Register move for XLEN * 2.  */
 	  if (TARGET_ZILSD
 	      && register_operand (SET_SRC (x), GET_MODE (SET_SRC (x)))
@@ -3550,9 +3625,9 @@ riscv_rtx_costs (rtx x, machine_mode mode, int outer_code, int opno ATTRIBUTE_UN
 	  && ((GET_CODE (XEXP (x, 0)) == ASHIFT
 	      && CONST_INT_P (XEXP (XEXP (x, 0), 0)))
 	      || single_bit_mask_operand (XEXP (x, 1), VOIDmode)))
-	{
-	  *total = COSTS_N_INSNS (1);
-	  return true;
+	    {
+	       *total = COSTS_N_INSNS (1);
+	       return true;
 	}
 
       /* Double-word operations use two single-word operations.  */
@@ -3610,7 +3685,8 @@ riscv_rtx_costs (rtx x, machine_mode mode, int outer_code, int opno ATTRIBUTE_UN
       return false;
 
     case LO_SUM:
-      *total = set_src_cost (XEXP (x, 0), mode, speed);
+	*total = (set_src_cost (XEXP (x, 0), mode, speed)
+		+ set_src_cost (XEXP (x, 1), mode, speed));
       return true;
 
     case LT:
@@ -3876,7 +3952,8 @@ riscv_address_cost (rtx addr, machine_mode mode,
    * expensive so that compressible 32-bit addresses are preferred.  */
   if ((TARGET_RVC || TARGET_ZCA)
       && !speed && riscv_mshorten_memrefs && mode == SImode
-      && !riscv_compressed_lw_address_p (addr))
+      && !riscv_compressed_lw_address_p (addr)
+      && !th_classify_address (NULL, addr, mode, reload_completed))
     return riscv_address_insns (addr, mode, false) + 1;
   return riscv_address_insns (addr, mode, false);
 }
@@ -4176,6 +4253,9 @@ riscv_output_move (rtx dest, rtx src)
 	      && SINGLE_BIT_MASK_OPERAND (INTVAL (src)))
 	    return "bseti\t%0,zero,%S1";
 
+	  if (!TARGET_XUANTIE_EXPAND_SPLIT_IMM)
+	    return "li\t%0,%1";
+
 	  /* Should never reach here.  */
 	  abort ();
 	}
@@ -4281,8 +4361,10 @@ riscv_output_move (rtx dest, rtx src)
   if (dest_code == REG && GP_REG_P (REGNO (dest)) && src_code == CONST_POLY_INT)
     {
       /* We only want a single full vector register VLEN read after reload. */
-      gcc_assert (known_eq (rtx_to_poly_int64 (src), BYTES_PER_RISCV_VECTOR));
-      return "csrr\t%0,vlenb";
+      if (satisfies_constraint_vp (src))
+	return "csrr\t%0,vlenb";
+      else if (satisfies_constraint_xp (src))
+	return "csrr\t%0,xmlenb";
     }
   gcc_unreachable ();
 }
@@ -4938,7 +5020,10 @@ riscv_expand_conditional_move (rtx dest, rtx op, rtx cons, rtx alt)
 	{
 	  if (((code == EQ && rtx_equal_p (cons, op0))
 	       || (code == NE && rtx_equal_p (alt, op0)))
-	      && op1 == CONST0_RTX (mode))
+	       /* Condition is only reg and zero, and other conditions need
+		  to be converted.  */
+	       && ((const_0_operand (op0, mode0) && register_operand (op1, mode1))
+		   || (register_operand (op0, mode0) && const_0_operand (op1, mode1))))
 	    {
 	      rtx cond = gen_rtx_fmt_ee (code, GET_MODE (op0), op0, op1);
 	      alt = force_reg (mode, alt);
@@ -5119,7 +5204,7 @@ riscv_flatten_aggregate_field (const_tree type,
       if (n < 2
 	  && ((SCALAR_FLOAT_TYPE_P (type)
 	       && GET_MODE_SIZE (TYPE_MODE (type)).to_constant () <= UNITS_PER_FP_ARG)
-	      || (INTEGRAL_TYPE_P (type)
+	      || ((INTEGRAL_TYPE_P (type) || xt_dsp_mode_p (TYPE_MODE (type)))
 		  && GET_MODE_SIZE (TYPE_MODE (type)).to_constant () <= UNITS_PER_WORD)))
 	{
 	  fields[n].type = type;
@@ -5199,7 +5284,7 @@ riscv_pass_aggregate_in_fpr_and_gpr_p (const_tree type,
   for (int i = 0; i < n_old; i++)
     {
       num_float_old += SCALAR_FLOAT_TYPE_P (fields[i].type);
-      num_int_old += INTEGRAL_TYPE_P (fields[i].type);
+      num_int_old += (INTEGRAL_TYPE_P (fields[i].type) || xt_dsp_mode_p (TYPE_MODE (fields[i].type)));
     }
 
   /* This is the new ABI, which is the same for C++ and C.  */
@@ -5208,7 +5293,7 @@ riscv_pass_aggregate_in_fpr_and_gpr_p (const_tree type,
   for (int i = 0; i < n_new; i++)
     {
       num_float_new += SCALAR_FLOAT_TYPE_P (fields[i].type);
-      num_int_new += INTEGRAL_TYPE_P (fields[i].type);
+      num_int_new += (INTEGRAL_TYPE_P (fields[i].type) || xt_dsp_mode_p (TYPE_MODE (fields[i].type)));
     }
 
   if (((num_int_old == 1 && num_float_old == 1
@@ -5740,9 +5825,12 @@ riscv_vector_int_type_p (const_tree type)
   return strstr (name, "int") != NULL || strstr (name, "uint") != NULL;
 }
 
-static bool
+bool
 riscv_vector_float_type_p (const_tree type)
 {
+  if (!riscv_vector_type_p (type))
+    return false;
+
   machine_mode mode = TYPE_MODE (type);
 
   if (VECTOR_MODE_P (mode))
@@ -6017,10 +6105,12 @@ riscv_handle_type_attribute (tree *node ATTRIBUTE_UNUSED, tree name, tree args,
 
 	  string = TREE_STRING_POINTER (cst);
 	  if (strcmp (string, "user") && strcmp (string, "supervisor")
+	      && strcmp (string, "THead-interrupt-nesting")
 	      && strcmp (string, "machine"))
 	    {
 	      warning (OPT_Wattributes,
 		       "argument to %qE attribute is not %<\"user\"%>, %<\"supervisor\"%>, "
+		       "%<\"THead-interrupt-nesting\"%>, "
 		       "or %<\"machine\"%>", name);
 	      *no_add_attrs = true;
 	    }
@@ -6319,7 +6409,7 @@ riscv_asm_output_opcode (FILE *asm_out_file, const char *p)
 	  any outermost HIGH.
    'R'	Print the low-part relocation associated with OP.
    'C'	Print the integer branch condition for comparison OP.
-   'N'	Print the inverse of the integer branch condition for comparison OP.
+   'Z'	Print the inverse of the integer branch condition for comparison OP.
    'A'	Print the atomic operation suffix for memory model OP.
    'I'	Print the LR suffix for memory model OP.
    'J'	Print the SC suffix for memory model OP.
@@ -6329,6 +6419,7 @@ riscv_asm_output_opcode (FILE *asm_out_file, const char *p)
    'S'	Print shift-index of single-bit mask OP.
    'T'	Print shift-index of inverted single-bit mask OP.
    '~'	Print w if TARGET_64BIT is true; otherwise not print anything.
+   'H'  Print the name of the next register for integer.
 
    Note please keep this list and the list in riscv.md in sync.  */
 
@@ -6477,7 +6568,7 @@ riscv_print_operand (FILE *file, rtx op, int letter)
       fputs (GET_RTX_NAME (code), file);
       break;
 
-    case 'N':
+    case 'Z':
       /* The RTL names match the instruction names. */
       fputs (GET_RTX_NAME (reverse_condition (code)), file);
       break;
@@ -6551,27 +6642,6 @@ riscv_print_operand (FILE *file, rtx op, int letter)
       break;
       }
 
-    case 'L':
-      {
-	const char *ntl_hint = NULL;
-	switch (INTVAL (op))
-	  {
-	  case 0:
-	    ntl_hint = "ntl.all";
-	    break;
-	  case 1:
-	    ntl_hint = "ntl.pall";
-	    break;
-	  case 2:
-	    ntl_hint = "ntl.p1";
-	    break;
-	  }
-
-      if (ntl_hint)
-	asm_fprintf (file, "%s\n\t", ntl_hint);
-      break;
-      }
-
     case 'i':
       if (code != REG)
         fputs ("i", file);
@@ -6618,6 +6688,27 @@ riscv_print_operand (FILE *file, rtx op, int letter)
 	  gcc_assert (imm <= 63);
 	  rtx newop = GEN_INT (imm);
 	  output_addr_const (file, newop);
+	break;
+      }
+    case 'H':
+      {
+	if (!REG_P (op))
+	  {
+	    output_operand_lossage ("modifier 'H' require register operand");
+	    break;
+	  }
+	if (REGNO (op) > 31)
+	  {
+	    output_operand_lossage ("modifier 'H' is for integer registers only");
+	    break;
+	  }
+	if (REGNO (op) == 31)
+	  {
+	    output_operand_lossage ("modifier 'H' cannot be applied to R31");
+	    break;
+	  }
+
+	fputs (reg_names[REGNO (op) + 1], file);
 	}
       break;
     default:
@@ -7158,6 +7249,7 @@ riscv_compute_frame_info (void)
     {
       HOST_WIDE_INT step1 = riscv_first_stack_step (frame, frame->total_size);
       if (! POLY_SMALL_OPERAND_P ((frame->total_size - step1))
+	  || xt_emit_interrupt_csr_p ()
 	  || (TARGET_HARD_FLOAT || TARGET_ZFINX))
 	interrupt_save_prologue_temp = true;
     }
@@ -7223,16 +7315,20 @@ riscv_compute_frame_info (void)
 	}
     }
 
+  cfun->machine->xt_machine_function.mask = frame->mask;
   /* In an interrupt function, we need extra space for the initial saves of CSRs.  */
-  if (cfun->machine->interrupt_handler_p
-      && ((TARGET_HARD_FLOAT && frame->fmask)
-	  || (TARGET_ZFINX
-	      /* Except for RISCV_PROLOGUE_TEMP_REGNUM.  */
-	      && (frame->mask & ~(1 << RISCV_PROLOGUE_TEMP_REGNUM)))))
+  if (XT_INTERRUPT_FLOAT_P (cfun))
     /* Save and restore FCSR.  */
-    /* TODO: When P or V extensions support interrupts, some of their CSRs
+    /* TODO: When V extensions support interrupts, some of their CSRs
        may also need to be saved and restored.  */
     x_save_size += riscv_stack_align (1 * UNITS_PER_WORD);
+
+  if (XT_INTERRUPT_DSP_P (cfun))
+    x_save_size += riscv_stack_align (1 * UNITS_PER_WORD);
+
+  if (xt_emit_interrupt_csr_p ())
+    /* Save and restore MCAUSE, MEPC, MSTATUS.  */
+    x_save_size += riscv_stack_align (3 * UNITS_PER_WORD);
 
   /* At the bottom of the frame are any outgoing stack arguments. */
   offset = riscv_stack_align (crtl->outgoing_args_size);
@@ -7301,11 +7397,9 @@ riscv_can_inline_p (tree caller, tree callee)
   struct cl_target_option *callee_opts = TREE_TARGET_OPTION (callee_tree);
   struct cl_target_option *caller_opts = TREE_TARGET_OPTION (caller_tree);
 
-  int isa_flag_mask = riscv_x_target_flags_isa_mask ();
-
-  /* Callee and caller should have the same target options except for ISA.  */
-  int callee_target_flags = callee_opts->x_target_flags & ~isa_flag_mask;
-  int caller_target_flags = caller_opts->x_target_flags & ~isa_flag_mask;
+  /* Callee and caller should have the same target options.  */
+  int callee_target_flags = callee_opts->x_target_flags;
+  int caller_target_flags = caller_opts->x_target_flags;
 
   if (callee_target_flags != caller_target_flags)
     return false;
@@ -7338,7 +7432,6 @@ riscv_can_inline_p (tree caller, tree callee)
 
   return true;
 }
-
 /* Make sure that we're not trying to eliminate to the wrong hard frame
    pointer.  */
 
@@ -7496,6 +7589,12 @@ riscv_is_eh_return_data_register (unsigned int regno)
   return false;
 }
 
+static bool
+handle_interrupt_csr (HOST_WIDE_INT *, unsigned int, riscv_save_restore_fn, bool);
+
+static int
+riscv_utnmode_mode_after (rtx_insn *, int);
+
 /* Call FN for each register that is saved by the current function.
    SP_OFFSET is the offset of the current stack pointer from the start
    of the frame.  */
@@ -7530,32 +7629,11 @@ riscv_for_each_saved_reg (poly_int64 sp_offset, riscv_save_restore_fn fn,
 
       /* In an interrupt function, save and restore some necessary CSRs in the stack
 	 to avoid changes in CSRs.  */
-      if (regno == RISCV_PROLOGUE_TEMP_REGNUM
-	  && cfun->machine->interrupt_handler_p
-	  && ((TARGET_HARD_FLOAT  && cfun->machine->frame.fmask)
-	      || (TARGET_ZFINX
-		  && (cfun->machine->frame.mask & ~(1 << RISCV_PROLOGUE_TEMP_REGNUM)))))
+      if (regno == RISCV_PROLOGUE_TEMP_REGNUM)
 	{
-	  /* Always assume FCSR occupy UNITS_PER_WORD to prevent stack
-	     offset misaligned later.  */
-	  unsigned int fcsr_size = UNITS_PER_WORD;
-	  if (!epilogue)
-	    {
-	      riscv_save_restore_reg (word_mode, regno, offset, fn);
-	      offset -= fcsr_size;
-	      emit_insn (gen_riscv_frcsr (RISCV_PROLOGUE_TEMP (SImode)));
-	      riscv_save_restore_reg (SImode, RISCV_PROLOGUE_TEMP_REGNUM,
-				      offset, riscv_save_reg);
-	    }
-	  else
-	    {
-	      riscv_save_restore_reg (SImode, RISCV_PROLOGUE_TEMP_REGNUM,
-				      offset - fcsr_size, riscv_restore_reg);
-	      emit_insn (gen_riscv_fscsr (RISCV_PROLOGUE_TEMP (SImode)));
-	      riscv_save_restore_reg (word_mode, regno, offset, fn);
-	      offset -= fcsr_size;
-	    }
-	  continue;
+	  bool save_t0_p = handle_interrupt_csr (&offset, regno, fn, epilogue);
+	  if (save_t0_p)
+	    continue;
 	}
 
       if (TARGET_XTHEADMEMPAIR)
@@ -7703,7 +7781,8 @@ riscv_first_stack_step (struct riscv_frame_info *frame, poly_int64 remaining_siz
   if (!remaining_size.is_constant ())
     remaining_const_size
       = riscv_stack_align (remaining_size.coeffs[0])
-	- riscv_stack_align (remaining_size.coeffs[1]);
+	- riscv_stack_align (remaining_size.coeffs[1])
+	- riscv_stack_align (remaining_size.coeffs[2]);
   else
     remaining_const_size = remaining_size.to_constant ();
 
@@ -7977,7 +8056,7 @@ riscv_expand_prologue (void)
 	  || (TARGET_ZFINX && frame->mask))
 	frame->mask |= (1 << RISCV_PROLOGUE_TEMP_REGNUM);
 
-      unsigned save_adjustment = th_int_get_save_adjustment ();
+      unsigned save_adjustment = th_int_get_save_adjustment (th_int_mask);
       frame->gp_sp_offset -= save_adjustment;
       remaining_size -= save_adjustment;
 
@@ -8031,7 +8110,7 @@ riscv_expand_prologue (void)
 	{
 	  /* First for scalable frame.  */
 	  poly_int64 scalable_frame = remaining_size;
-	  scalable_frame.coeffs[0] = remaining_size.coeffs[1];
+	  scalable_frame.coeffs[0] = remaining_size.coeffs[1] + remaining_size.coeffs[2];
 	  riscv_v_adjust_scalable_frame (stack_pointer_rtx, scalable_frame, false);
 	  remaining_size -= scalable_frame;
 	}
@@ -8046,6 +8125,10 @@ riscv_expand_prologue (void)
 	     into the frame.  */
 	  if (frame_pointer_needed)
 	    riscv_emit_stack_tie ();
+
+	  /* Enable interrupts.  */
+	  if (xt_emit_interrupt_csr_p ())
+	    emit_insn (gen_xt_csr_set_bits (GEN_INT (XT_MSTATUS_REGNUM), GEN_INT (XT_MSTATUS_MIE_BIT)));
 	  return;
 	}
 
@@ -8075,6 +8158,10 @@ riscv_expand_prologue (void)
       if (frame_pointer_needed)
 	riscv_emit_stack_tie ();
     }
+
+  /* Enable interrupts.  */
+  if (xt_emit_interrupt_csr_p ())
+    emit_insn (gen_xt_csr_set_bits (GEN_INT (XT_MSTATUS_REGNUM), GEN_INT (XT_MSTATUS_MIE_BIT)));
 }
 
 static rtx
@@ -8202,6 +8289,10 @@ riscv_expand_epilogue (int style)
       return;
     }
 
+  if (xt_emit_interrupt_csr_p ())
+    /* Disable interrupts.  */
+    emit_insn (gen_xt_csr_clear_bits (GEN_INT (XT_MSTATUS_REGNUM), GEN_INT (XT_MSTATUS_MIE_BIT)));
+
   /* Reset the epilogue cfa info before starting to emit the epilogue.  */
   epilogue_cfa_sp_offset = 0;
 
@@ -8291,7 +8382,7 @@ riscv_expand_epilogue (int style)
       if (!step1.is_constant ())
 	{
 	  poly_int64 scalable_frame = step1;
-	  scalable_frame.coeffs[0] = step1.coeffs[1];
+	  scalable_frame.coeffs[0] = step1.coeffs[1] + step1.coeffs[2];
 	  riscv_v_adjust_scalable_frame (stack_pointer_rtx, scalable_frame,
 					 true);
 	  step1 -= scalable_frame;
@@ -8365,7 +8456,7 @@ riscv_expand_epilogue (int style)
   if (th_int_mask && TH_INT_INTERRUPT (cfun))
     {
       frame->mask = mask; /* Undo the above fib.  */
-      unsigned save_adjustment = th_int_get_save_adjustment ();
+      unsigned save_adjustment = th_int_get_save_adjustment (th_int_mask);
       gcc_assert (step2.to_constant () >= save_adjustment);
       step2 -= save_adjustment;
     }
@@ -8759,6 +8850,9 @@ static bool
 riscv_secondary_memory_needed (machine_mode mode, reg_class_t class1,
 			       reg_class_t class2)
 {
+  if (xt_rvm_mode_p (mode))
+    return false;
+
   bool class1_is_fpr = class1 == FP_REGS || class1 == RVC_FP_REGS;
   bool class2_is_fpr = class2 == FP_REGS || class2 == RVC_FP_REGS;
   return (!riscv_v_ext_mode_p (mode)
@@ -8781,6 +8875,12 @@ riscv_register_move_cost (machine_mode mode,
   if ((from_is_fpr && to_is_gpr) || (from_is_gpr && to_is_fpr))
     return tune_param->fmv_cost;
 
+  /* There is no easy way to move fp16 and bf16 value between FPR without ZFHMIN
+     and ZFBFMIN extension, it require an extra temp GPR to move that.  */
+  if (((!TARGET_ZFHMIN && mode == HFmode) || (!TARGET_ZFBFMIN && mode == BFmode))
+      && from == FP_REGS && to == FP_REGS)
+    return 6;
+
   return riscv_secondary_memory_needed (mode, from, to) ? 8 : 2;
 }
 
@@ -8789,57 +8889,67 @@ riscv_register_move_cost (machine_mode mode,
 static unsigned int
 riscv_hard_regno_nregs (unsigned int regno, machine_mode mode)
 {
-  if (riscv_v_ext_vector_mode_p (mode))
-    {
-      /* Handle fractional LMUL, it only occupy part of vector register but
-	 still need one vector register to hold.  */
-      if (maybe_lt (GET_MODE_SIZE (mode), UNITS_PER_V_REG))
-	return 1;
-
-      return exact_div (GET_MODE_SIZE (mode), UNITS_PER_V_REG).to_constant ();
-    }
-
-  /* For tuple modes, the number of register = NF * LMUL.  */
-  if (riscv_v_ext_tuple_mode_p (mode))
-    {
-      unsigned int nf = riscv_vector::get_nf (mode);
-      machine_mode subpart_mode = riscv_vector::get_subpart_mode (mode);
-      poly_int64 size = GET_MODE_SIZE (subpart_mode);
-      gcc_assert (known_eq (size * nf, GET_MODE_SIZE (mode)));
-      if (maybe_lt (size, UNITS_PER_V_REG))
-	return nf;
-      else
-	{
-	  unsigned int lmul = exact_div (size, UNITS_PER_V_REG).to_constant ();
-	  return nf * lmul;
-	}
-    }
-
-  /* For VLS modes, we allocate registers according to TARGET_MIN_VLEN.  */
-  if (riscv_v_ext_vls_mode_p (mode))
-    {
-      int size = GET_MODE_BITSIZE (mode).to_constant ();
-      if (size < TARGET_MIN_VLEN)
-	return 1;
-      else
-	return size / TARGET_MIN_VLEN;
-    }
-
+  if (GP_REG_P (regno))
+    return CEIL (GET_MODE_SIZE (mode).to_constant (), UNITS_PER_WORD);
+  if (FP_REG_P (regno))
+    return CEIL (GET_MODE_SIZE (mode).to_constant (), UNITS_PER_FP_REG);
   /* mode for VL or VTYPE are just a marker, not holding value,
      so it always consume one register.  */
-  if (VTYPE_REG_P (regno) || VL_REG_P (regno) || VXRM_REG_P (regno)
-      || FRM_REG_P (regno))
+  else if (VTYPE_REG_P (regno) || VL_REG_P (regno) || VXRM_REG_P (regno)
+	   || FRM_REG_P (regno) || UTNMODE_REG_P(regno))
     return 1;
+  else if (V_REG_P (regno))
+    {
+      if (riscv_v_ext_vector_mode_p (mode))
+	{
+	  /* Handle fractional LMUL, it only occupy part of vector register but
+	     still need one vector register to hold.  */
+	  if (maybe_lt (GET_MODE_SIZE (mode), UNITS_PER_V_REG))
+	    return 1;
 
-  /* Assume every valid non-vector mode fits in one vector register.  */
-  if (V_REG_P (regno))
-    return 1;
-
-  if (FP_REG_P (regno))
-    return (GET_MODE_SIZE (mode).to_constant () + UNITS_PER_FP_REG - 1) / UNITS_PER_FP_REG;
+	  return exact_div (GET_MODE_SIZE (mode), UNITS_PER_V_REG).to_constant ();
+	}
+      /* For tuple modes, the number of register = NF * LMUL.  */
+      else if (riscv_v_ext_tuple_mode_p (mode))
+	{
+	  unsigned int nf = riscv_vector::get_nf (mode);
+	  machine_mode subpart_mode = riscv_vector::get_subpart_mode (mode);
+	  poly_int64 size = GET_MODE_SIZE (subpart_mode);
+	  gcc_assert (known_eq (size * nf, GET_MODE_SIZE (mode)));
+	  if (maybe_lt (size, UNITS_PER_V_REG))
+	    return nf;
+	  else
+	    {
+	      unsigned int lmul = exact_div (size, UNITS_PER_V_REG).to_constant ();
+	      return nf * lmul;
+	    }
+	}
+      /* For VLS modes, we allocate registers according to TARGET_MIN_VLEN.  */
+      else if (riscv_v_ext_vls_mode_p (mode))
+	{
+	  int size = GET_MODE_BITSIZE (mode).to_constant ();
+	  if (size < TARGET_MIN_VLEN)
+	    return 1;
+	  else
+	    return size / TARGET_MIN_VLEN;
+	}
+      else
+	return 1;
+    }
+  else if (XT_RVM_MSIZE_REG_P (regno))
+    {
+	return 1;
+    }
+  else if (XT_RVM_MATRIX_REG_P (regno))
+    {
+      if (xt_rvm_mode_p (mode))
+	return xt_rvm_get_lmul (mode);
+      else
+	return 1;
+    }
 
   /* All other registers are word-sized.  */
-  return (GET_MODE_SIZE (mode).to_constant () + UNITS_PER_WORD - 1) / UNITS_PER_WORD;
+  return CEIL (GET_MODE_SIZE (mode).to_constant (), UNITS_PER_WORD);
 }
 
 /* Implement TARGET_HARD_REGNO_MODE_OK.  */
@@ -8854,6 +8964,9 @@ riscv_hard_regno_mode_ok (unsigned int regno, machine_mode mode)
       if (riscv_v_ext_mode_p (mode))
 	return false;
 
+      if (xt_rvm_mode_p (mode))
+	return false;
+
       /* Zilsd require load/store with even-odd reg pair.  */
       if (TARGET_ZILSD
 	  && (GET_MODE_UNIT_SIZE (mode) == (UNITS_PER_WORD * 2))
@@ -8862,10 +8975,20 @@ riscv_hard_regno_mode_ok (unsigned int regno, machine_mode mode)
 
       if (!GP_REG_P (regno + nregs - 1))
 	return false;
+
+      if ((TARGET_XUANTIE_ZPN || TARGET_XUANTIE_ZPSFOPERAND)
+	  && !TARGET_64BIT && nregs == 2 && regno % 2 !=0)
+	return false;
     }
   else if (FP_REG_P (regno))
     {
       if (riscv_v_ext_mode_p (mode))
+	return false;
+
+      if (xt_dsp_mode_p (mode))
+	return false;
+
+      if (xt_rvm_mode_p (mode))
 	return false;
 
       if (!FP_REG_P (regno + nregs - 1))
@@ -8895,8 +9018,23 @@ riscv_hard_regno_mode_ok (unsigned int regno, machine_mode mode)
 	return ((regno % regno_alignment) == 0);
     }
   else if (VTYPE_REG_P (regno) || VL_REG_P (regno) || VXRM_REG_P (regno)
-	   || FRM_REG_P (regno))
+	   || FRM_REG_P (regno) || UTNMODE_REG_P (regno))
     return true;
+  else if (XT_RVM_MSIZE_REG_P (regno))
+    {
+      if (!(GET_MODE_CLASS (mode) == MODE_INT))
+	return false;
+    }
+  else if (XT_RVM_MATRIX_REG_P (regno))
+    {
+      if (!xt_rvm_mode_p (mode))
+	return false;
+
+      unsigned mlmul = xt_rvm_get_lmul (mode);
+      /* Check alignment requirement for matrix mode.  */
+      if ((regno & (mlmul - 1)) != 0)
+	return false;
+    }
   else
     return false;
 
@@ -8947,6 +9085,9 @@ riscv_class_max_nregs (reg_class_t rclass, machine_mode mode)
 
   if (reg_class_subset_p (rclass, V_REGS))
     return riscv_hard_regno_nregs (V_REG_FIRST, mode);
+
+  if (reg_class_subset_p (rclass, MATRIX_REGS))
+    return riscv_hard_regno_nregs (XT_RVM_MATRIX_REG_FIRST, mode);
 
   return 0;
 }
@@ -9274,7 +9415,7 @@ riscv_macro_fusion_pair_p (rtx_insn *prev, rtx_insn *curr)
    we currently only perform the adjustment when -madjust-lmul-cost is given.
    */
 static int
-riscv_sched_adjust_cost (rtx_insn *, int, rtx_insn *insn, int cost,
+riscv_sched_adjust_cost (rtx_insn *insn, int, rtx_insn *, int cost,
 			 unsigned int)
 {
   /* Only do adjustments for the generic out-of-order scheduling model.  */
@@ -9286,7 +9427,7 @@ riscv_sched_adjust_cost (rtx_insn *, int, rtx_insn *insn, int cost,
 
   enum attr_type type = get_attr_type (insn);
 
-  if (type == TYPE_VFREDO || type == TYPE_VFWREDO)
+  if (type == TYPE_VFREDO || type == TYPE_VFWREDO || type == TYPE_VFREDOSUM)
     {
       /* TODO: For ordered reductions scale the base cost relative to the
 	 number of units.  */
@@ -9645,7 +9786,7 @@ riscv_convert_vector_chunks (struct gcc_options *opts)
       switch (opts->x_rvv_vector_bits)
 	{
 	case RVV_VECTOR_BITS_SCALABLE:
-	  return poly_uint16 (chunk_num, chunk_num);
+	  return poly_uint16 (chunk_num, chunk_num, 0);
 	case RVV_VECTOR_BITS_ZVL:
 	  return (int) min_vlen / (riscv_bytes_per_vector_chunk * 8);
 	default:
@@ -9698,7 +9839,6 @@ riscv_override_options_internal (struct gcc_options *opts)
   riscv_slow_unaligned_access_p = (cpu->tune_param->slow_unaligned_access
 				   || TARGET_STRICT_ALIGN);
 
-  /* Make a note if user explicity passed -mstrict-align for later
   /* By default, when -mno-vector-strict-align is not specified, do not allow
      unaligned vector memory accesses except if -mtune's setting explicitly
      allows it.  */
@@ -9914,6 +10054,8 @@ riscv_option_override (void)
      while processing functions with potential target attributes.  */
   target_option_default_node = target_option_current_node
     = build_target_option_node (&global_options, &global_options_set);
+
+  xt_option_override (tune_param, &global_options, &global_options_set);
 }
 
 /* Restore or save the TREE_TARGET_GLOBALS from or to NEW_TREE.
@@ -9984,7 +10126,11 @@ riscv_conditional_register_usage (void)
       fixed_regs[VL_REGNUM] = call_used_regs[VL_REGNUM] = 1;
       fixed_regs[VXRM_REGNUM] = call_used_regs[VXRM_REGNUM] = 1;
       fixed_regs[FRM_REGNUM] = call_used_regs[FRM_REGNUM] = 1;
+      if (!TARGET_XTHEADVFCVT && !TARGET_XTHEADVREDUCTION)
+	fixed_regs[XT_UTNMODE_REGNUM] = call_used_regs[XT_UTNMODE_REGNUM] = 1;
     }
+
+  xt_conditional_register_usage ();
 }
 
 /* Return a register priority for hard reg REGNO.  */
@@ -10251,6 +10397,10 @@ riscv_get_interrupt_type (tree decl)
     = TREE_VALUE (lookup_attribute ("interrupt",
 				    TYPE_ATTRIBUTES (TREE_TYPE (decl))));
 
+  /* If XTheadInt is used, CLIC is supported by default.  */
+  if (cfun && TARGET_XTHEADINT)
+    XT_CLIC_PREEMPTIBLE_P (cfun) = true;
+
   if (attr_args && TREE_CODE (TREE_VALUE (attr_args)) != VOID_TYPE)
     {
       const char *string = TREE_STRING_POINTER (TREE_VALUE (attr_args));
@@ -10259,6 +10409,11 @@ riscv_get_interrupt_type (tree decl)
 	return USER_MODE;
       else if (!strcmp (string, "supervisor"))
 	return SUPERVISOR_MODE;
+      else if (!strcmp (string, "THead-interrupt-nesting") && cfun)
+	{
+	  XT_CLIC_PREEMPTIBLE_P (cfun) = true;
+	  return MACHINE_MODE;
+	}
       else /* Must be "machine".  */
 	return MACHINE_MODE;
     }
@@ -10393,6 +10548,9 @@ static bool
 riscv_can_change_mode_class (machine_mode from, machine_mode to,
 			     reg_class_t rclass)
 {
+  if ((TARGET_XUANTIE_ZPSFOPERAND || TARGET_XUANTIE_ZPN)
+      && reg_class_subset_p (rclass, GR_REGS))
+    return true;
   /* We have RVV VLS modes and VLA modes sharing same REG_CLASS.
      In 'cprop_hardreg' stage, we will try to do hard reg copy propagation
      between wider mode (FROM) and narrow mode (TO).
@@ -10581,11 +10739,10 @@ riscv_gpr_save_operation_p (rtx op)
 	  /* Two CLOBBER and USEs, must check the order.  */
 	  unsigned expect_code = i < 3 ? CLOBBER : USE;
 	  if (GET_CODE (elt) != expect_code
-	      || !REG_P (XEXP (elt, 1))
-	      || (REGNO (XEXP (elt, 1)) != gpr_save_reg_order[i]))
+	      || !REG_P (XEXP (elt, 0))
+	      || (REGNO (XEXP (elt, 0)) != gpr_save_reg_order[i]))
 	    return false;
 	}
-	break;
     }
   return true;
 }
@@ -10628,6 +10785,9 @@ riscv_mangle_type (const_tree type)
       if (res)
 	return res;
     }
+
+  if (TARGET_XTHEADMATRIX && xt_rvm_mode_p (TYPE_MODE (type)))
+    return xt_rvm_mangle_builtin_type (type);
 
   /* Use the default mangling.  */
   return NULL;
@@ -10762,8 +10922,14 @@ riscv_reinit (void)
 static bool
 riscv_vector_mode_supported_p (machine_mode mode)
 {
-  if (TARGET_VECTOR)
-    return riscv_v_ext_mode_p (mode);
+  if (TARGET_VECTOR && riscv_v_ext_mode_p (mode))
+    return true;
+
+  if (TARGET_XUANTIE_DSP && xt_dsp_mode_p (mode))
+    return true;
+
+  if (TARGET_XTHEADMATRIX && xt_rvm_mode_p (mode))
+    return true;
 
   return false;
 }
@@ -10830,6 +10996,11 @@ riscv_regmode_natural_size (machine_mode mode)
 	   register size.  */
 	return MIN (size.to_constant (), UNITS_PER_WORD);
     }
+
+  if (TARGET_XTHEADMATRIX && xt_rvm_mode_p (mode)
+      && !GET_MODE_SIZE (mode).is_constant ())
+    return XT_RVM_BYTES_PER_MATRIX;
+
   return UNITS_PER_WORD;
 }
 
@@ -10839,12 +11010,19 @@ static unsigned int
 riscv_dwarf_poly_indeterminate_value (unsigned int i, unsigned int *factor,
 				      int *offset)
 {
+  if (i == 2)
+    {
+      *factor = 8;
+      *offset = 1;
+      return XT_RVM_DWARF_MLENB;
+    }
+
   /* Polynomial invariant 1 == (VLENB / BYTES_PER_RISCV_VECTOR) - 1.
      1. TARGET_MIN_VLEN == 32, polynomial invariant 1 == (VLENB / 4) - 1.
      2. TARGET_MIN_VLEN > 32, polynomial invariant 1 == (VLENB / 8) - 1.
   */
   gcc_assert (i == 1);
-  *factor = BYTES_PER_RISCV_VECTOR.coeffs[1];
+  *factor = BYTES_PER_RISCV_VECTOR.coeffs[1] * 2;
   *offset = 1;
   return RISCV_DWARF_VLENB;
 }
@@ -11050,6 +11228,9 @@ riscv_preferred_simd_mode (scalar_mode mode)
   if (TARGET_VECTOR && !TARGET_XTHEADVECTOR)
     return riscv_vector::preferred_simd_mode (mode);
 
+  if (TARGET_XUANTIE_DSP && !TARGET_VECTOR)
+    return xt_dsp_preferred_simd_mode (mode);
+
   return word_mode;
 }
 
@@ -11130,6 +11311,10 @@ riscv_emit_mode_set (int entity, int mode, int prev_mode,
       break;
     case RISCV_FRM:
       riscv_emit_frm_mode_set (mode, prev_mode);
+      break;
+    case RISCV_UTNMODE:
+      if (mode != UTNMODE_MODE_NONE && mode != prev_mode)
+        emit_insn (gen_utnmodesi (gen_int_mode (mode, SImode)));
       break;
     default:
       gcc_unreachable ();
@@ -11245,6 +11430,8 @@ riscv_mode_needed (int entity, rtx_insn *insn, HARD_REG_SET)
       return code >= 0 ? get_attr_vxrm_mode (insn) : VXRM_MODE_NONE;
     case RISCV_FRM:
       return riscv_frm_mode_needed (insn, code);
+    case RISCV_UTNMODE:
+      return code >= 0 ? get_attr_utnmode_mode (insn) : UTNMODE_MODE_NONE;
     default:
       gcc_unreachable ();
     }
@@ -11333,6 +11520,7 @@ riscv_frm_mode_after (rtx_insn *insn, int mode)
     return mode;
 }
 
+
 /* Return the mode that an insn results in.  */
 
 static int
@@ -11344,6 +11532,8 @@ riscv_mode_after (int entity, int mode, rtx_insn *insn, HARD_REG_SET)
       return riscv_vxrm_mode_after (insn, mode);
     case RISCV_FRM:
       return riscv_frm_mode_after (insn, mode);
+    case RISCV_UTNMODE:
+      return riscv_utnmode_mode_after (insn, mode);
     default:
       gcc_unreachable ();
     }
@@ -11366,6 +11556,8 @@ riscv_mode_entry (int entity)
 	     similar places.  */
 	return riscv_vector::FRM_DYN;
       }
+    case RISCV_UTNMODE:
+      return (TARGET_XTHEADVFCVT || TARGET_XTHEADVREDUCTION) ? UTNMODE_MODE_ON : UTNMODE_MODE_NONE;
     default:
       gcc_unreachable ();
     }
@@ -11383,6 +11575,8 @@ riscv_mode_exit (int entity)
       return VXRM_MODE_NONE;
     case RISCV_FRM:
       return riscv_vector::FRM_DYN_EXIT;
+    case RISCV_UTNMODE:
+      return (TARGET_XTHEADVFCVT || TARGET_XTHEADVREDUCTION) ? UTNMODE_MODE_ON : UTNMODE_MODE_NONE;
     default:
       gcc_unreachable ();
     }
@@ -11412,6 +11606,8 @@ riscv_vectorize_related_mode (machine_mode vector_mode, scalar_mode element_mode
   if (TARGET_VECTOR)
     return riscv_vector::vectorize_related_mode (vector_mode, element_mode,
 						 nunits);
+  if (TARGET_XUANTIE_DSP && !TARGET_VECTOR)
+    return xt_dsp_vectorize_related_mode (vector_mode, element_mode, nunits);
   return default_vectorize_related_mode (vector_mode, element_mode, nunits);
 }
 
@@ -11500,11 +11696,25 @@ riscv_builtin_vectorization_cost (enum vect_cost_for_stmt type_of_cost,
     case unaligned_load:
       return common_costs->unalign_load_cost;
     case vector_gather_load:
+      if (RISCV_TUNE_C950_P)
+	{
+	  unsigned int elt_bytes = GET_MODE_UNIT_SIZE (TYPE_MODE (vectype));
+	  if (elt_bytes == 1)
+	    return common_costs->gather_load_cost;
+	  return common_costs->gather_load_cost / elt_bytes + 2;
+	}
+
       return common_costs->gather_load_cost;
 
     case unaligned_store:
       return common_costs->unalign_store_cost;
     case vector_scatter_store:
+      if (RISCV_TUNE_C950_P)
+	{
+	  unsigned int elt_bytes = GET_MODE_UNIT_SIZE (TYPE_MODE (vectype));
+	  return common_costs->scatter_store_cost / elt_bytes;
+	}
+
       return common_costs->scatter_store_cost;
 
     case cond_branch_taken:
@@ -11599,11 +11809,15 @@ extract_base_offset_in_addr (rtx mem, rtx *base, rtx *offset)
 /* Implements target hook vector_mode_supported_any_target_p.  */
 
 static bool
-riscv_vector_mode_supported_any_target_p (machine_mode)
+riscv_vector_mode_supported_any_target_p (machine_mode mode)
 {
-  if (TARGET_XTHEADVECTOR)
-    return false;
-  return true;
+  if (TARGET_VECTOR)
+    return riscv_rvv_auto_vectorize;
+
+  if (TARGET_XUANTIE_DSP && xt_dsp_mode_p (mode))
+    return true;
+
+  return false;
 }
 
 /* Implements hook TARGET_FUNCTION_VALUE_REGNO_P.  */
@@ -11633,6 +11847,9 @@ riscv_get_raw_result_mode (int regno)
 
   return default_get_reg_raw_mode (regno);
 }
+
+/* Implement additional functionality for thead extensions.  */
+#include "xuantie-ext.cc"
 
 /* Generate instruction sequence
    which reflects the value of the OP using bswap and brev8 instructions.
